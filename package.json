@@ -1,0 +1,15 @@
+{
+  "name": "silkflylauncher",
+  "version": "1.0.0",
+  "description": "A launcher and manager for silksong bepinex mods written in javascript",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "GabiZar",
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "electron": "^39.2.7"
+  }
+}

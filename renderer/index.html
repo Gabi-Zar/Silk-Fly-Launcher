@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Silk Fly Launcher</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <video autoplay muted loop id="menu_wallpaper" class="background_video">
+      <source src="assets/background.mp4" type="video/mp4">
+    </video>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo" onclick="navigate('home')">
+        <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo_img"/>
+        <h5 class="logo_title">Silk Fly Launcher</h1>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-section">
+          <span class="nav-title">Execute Silksong</span>
+          <button onclick="launch('vanilla')">
+            <img src="vanilla_launch_icon.png" class="button_icon"/>
+            Run Vanilla
+          </button>
+          <button onclick="launch('modded')">
+            <img src="modded_launch_icon.png" class="button_icon"/>
+            Run Modded
+          </button>
+        </div>
+        <div
+
+        <div class="nav-section">
+          <span class="nav-title">Mods</span>
+          <button onclick="navigate('mods-installed')">
+            <img src="installed_mods_icon.png" class="button_icon"/>
+            Installed
+          </button>
+          <button onclick="navigate('mods-online')">
+            <img src="online_mods_icon.png" class="button_icon"/>
+            Online
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <h1 id="title">Home</h1>
+      <img src="assets/hornetUITop.png" class="separator_image"/>
+      <div id="view" class="view">
+        <p>Welcome to the Silk Fly Launcher.</p>
+      </div>
+      <img src="assets/needleUIBottom.png" class="separator_image"/>
+    </main>
+
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

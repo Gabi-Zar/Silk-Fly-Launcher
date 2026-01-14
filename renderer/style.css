@@ -1,0 +1,128 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+  cursor: url("assets/cursor.png") 0 0, auto !important;
+}
+
+body {
+  background: black;
+  color: #eee;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.background_video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.8);
+}
+
+.sidebar {
+  width: 280px;
+  background: rgba(0, 0, 0, 0.8);
+  border-right: 1px solid rgba(255, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 72, 0, 0.2);
+  transition: background 0.2s;
+}
+
+.logo:hover {
+  background: rgba(255, 0, 0, 0.08);
+}
+
+.logo_img {
+  height: 50px;
+  width: auto;
+}
+
+.nav {
+  padding: 20px;
+}
+
+.nav-section {
+  margin-bottom: 30px;
+}
+
+.nav-title {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  margin-bottom: 10px;
+
+  padding: 0 4px 4px;
+  border-bottom: 1px solid #ff6b6b;  
+}
+
+.nav button {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: transparent;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: #eee;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.nav button:hover {
+  background: rgba(255, 72, 0, 0.2);
+  border-color: rgba(255, 25, 0, 0.3);
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+}
+
+.content h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.view {
+  background: rgba(0, 0, 0, 0.4);
+  border: 0px;
+  border-radius: 8px;
+  padding: 40px;
+  min-height: 450px;
+
+  margin-top: -5.5%;
+  margin-bottom: -6.5%;
+  z-index: -1; 
+  position: relative;
+
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+}
+
+.separator_image {
+  width: 50%;
+  margin: 20px auto;
+  display: block;
+}
