@@ -26,7 +26,7 @@ body {
   height: 100%;
   object-fit: cover;
   z-index: -1;
-  filter: brightness(0.8);
+  filter: brightness(1);
 }
 
 .sidebar {
@@ -107,22 +107,22 @@ body {
 }
 
 .view {
-  background: rgba(0, 0, 0, 0.4);
-  border: 0px;
-  border-radius: 8px;
+  width: clamp(600px, 70vw, 900px);
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
   padding: 40px;
-  min-height: 450px;
-
-  margin-top: -5.5%;
-  margin-bottom: -6.5%;
-  z-index: -1; 
   position: relative;
-
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+  z-index: -1;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+  overflow: auto;
+  height: 420px; 
 }
 
-.separator_image {
-  width: 50%;
-  margin: 20px auto;
-  display: block;
+.slider-container {
+  margin-top: 20px;
+  width: clamp(600px, 70vw, 900px);
+}
+
+input[type="range"] {
+  width: 100%;
 }

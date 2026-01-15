@@ -1,5 +1,14 @@
 const title = document.getElementById("title");
 const view = document.getElementById("view");
+const slider = document.getElementById("heightSlider");
+const viewDiv = document.getElementById("viewDiv");
+const heightValue = document.getElementById("heightValue");
+
+slider.addEventListener("input", () => {
+  const height = slider.value + "px";
+  viewDiv.style.height = height;
+  heightValue.textContent = height;
+});
 
 function navigate(page) {
   switch (page) {
