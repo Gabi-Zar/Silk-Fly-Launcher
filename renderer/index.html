@@ -26,11 +26,9 @@
           <button onclick="launch('vanilla')">
             <img src="vanilla_launch_icon.png" class="button_icon"/>
             Run Vanilla
-          </button>
           <button onclick="launch('modded')">
             <img src="modded_launch_icon.png" class="button_icon"/>
             Run Modded
-          </button>
         </div>
 
         <div class="nav-section">
@@ -38,10 +36,16 @@
           <button onclick="navigate('mods-installed')">
             <img src="installed_mods_icon.png" class="button_icon"/>
             Installed
-          </button>
           <button onclick="navigate('mods-online')">
             <img src="online_mods_icon.png" class="button_icon"/>
             Online
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-title">Settings</span>
+          <button onclick="navigate('general-settings')">
+            <img src="general_settings_icon.png" class="button_icon"/>
+            General
         </div>
       </nav>
     </aside>
@@ -49,46 +53,38 @@
     <!-- Main content -->
     <main class="content">
       <h1 id="title">Home</h1>
-        <div class="view" id="viewDiv">
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
-          <p>Welcome to the Silk Fly Launcher.</p>
+        <div class="view" id="view">
+
         </div>
       </div>
 
       <div class="slider-container">
-        <label for="heightSlider">Hauteur :</label>
-        <input type="range" id="heightSlider" min="200" max="1000" value="420">
-        <span id="heightValue">420px</span>
+        <label for="heightSlider">Height :</label>
+        <input type="range" id="heightSlider">
       </div>
 
   </div>
 
+  <!-- Template -->
+  <template id="home-template">
+    <h2>Silk Fly Launcher</h2>
+    <h3> Debugging data</h3>
+    <p id="version-text"></p>
+  </template>
+
+  <template id="installed-mods-template">
+    <p>List of installed mods.</p>
+  </template>
+
+  <template id="online-mods-template">
+    <p>Browse Nexus mods.</p>
+  </template>
+
+  <template id="settings-template">
+    <p>General settings</p>
+  </template>
+
   <script src="renderer.js"></script>
+
 </body>
 </html>

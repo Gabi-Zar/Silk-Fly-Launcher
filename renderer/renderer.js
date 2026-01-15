@@ -1,37 +1,41 @@
 const title = document.getElementById("title");
 const view = document.getElementById("view");
-const slider = document.getElementById("heightSlider");
-const viewDiv = document.getElementById("viewDiv");
-const heightValue = document.getElementById("heightValue");
 
-slider.addEventListener("input", () => {
-  const height = slider.value + "px";
-  viewDiv.style.height = height;
-  heightValue.textContent = height;
-});
+const HomeTemplate = document.getElementById("home-template");
+const installedModsTemplate = document.getElementById("installed-mods-template");
+const onlineModsTemplate = document.getElementById("online-mods-template");
+const settingsTemplate = document.getElementById("settings-template");
+
+const versionText = HomeTemplate.content.getElementById("version-text")
+
+navigate("home")
 
 function navigate(page) {
+  view.replaceChildren()
   switch (page) {
     case "home":
       title.innerText = "Home";
-      view.innerHTML = `
-        <p>Welcome to the Silk Fly Launcher.</p>
-      `;
+      const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
+      const versionText = HomeTemplateCopy.querySelector("#version-text")
+      versionText.innerText =
+        `Chrome version: (v${versions.chrome()}), ` +
+        `Node.js version: (v${versions.node()}), Electron version: (v${versions.electron()})`
+      view.appendChild(HomeTemplateCopy)
       break;
 
     case "mods-installed":
-      title.innerText = "Installed Mods";
-      view.innerHTML = `
-        <p>List of installed mods.</p>
-      `;
+      const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
+      view.appendChild(installedModsTemplateCopy)
       break;
 
     case "mods-online":
-      title.innerText = "Online mods";
-      view.innerHTML = `
-        <p>Browse Nexus mods.</p>
-      `;
+      const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
+      view.appendChild(onlineModsTemplateCopy)
       break;
+
+    case "general-settings":
+      const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
+      view.appendChild(settingsTemplateCopy)
   }
 }
 
