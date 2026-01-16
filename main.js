@@ -4,6 +4,7 @@ const Store = require('electron-store').default;
 const fs = require('fs/promises');
 
 const store = new Store();
+const userSavePath = app.getPath('userData')
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -52,4 +53,8 @@ async function fileExists(filePath) {
 
 ipcMain.handle('file-exists', async (_, filePath) => {
   return await fileExists(filePath);
+});
+
+ipcMain.handle('get-userSavePath', () => {
+  return userSavePath
 });
