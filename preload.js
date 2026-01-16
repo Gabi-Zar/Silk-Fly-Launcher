@@ -12,3 +12,7 @@ contextBridge.exposeInMainWorld('save', {
   loadSilksongPath: () =>
     ipcRenderer.invoke('load-path')
 })
+
+contextBridge.exposeInMainWorld('files', {
+  fileExists: (path) => ipcRenderer.invoke('file-exists', path)
+});

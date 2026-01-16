@@ -9,6 +9,7 @@ const settingsTemplate = document.getElementById("settings-template");
 const versionText = HomeTemplate.content.getElementById("version-text")
 
 navigate("home")
+autoDetectGamePath()
 
 async function navigate(page) {
   view.replaceChildren()
@@ -37,13 +38,11 @@ async function navigate(page) {
       const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
       const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
 
-      silksongPathInput.value = await window.save.loadSilksongPath()
+      silksongPathInput.value = await save.loadSilksongPath()
 
       silksongPathInput.addEventListener('input', async function(event) {
         let silksongPath = silksongPathInput.value
-        console.log(silksongPath)
-        await window.save.saveSilksongPath(silksongPath)
-        console.log(await window.save.loadSilksongPath())
+        await save.saveSilksongPath(silksongPath)
       });
 
       view.appendChild(settingsTemplateCopy)
@@ -52,4 +51,11 @@ async function navigate(page) {
 
 function launch(mode) {
   alert(`Launching the game in ${mode} mode.`);
+}
+
+async function autoDetectGamePath() {
+  const defaultSilksongPath = "C:/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong/Hollow Knight Silksong.exe"
+  if (files.fileExists(defaultSilksongPath)) {
+    await save.saveSilksongPath(defaultSilksongPath)
+  }
 }

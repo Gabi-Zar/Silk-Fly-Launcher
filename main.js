@@ -1,6 +1,7 @@
 const { app, BrowserWindow , ipcMain} = require('electron/main');
 const path = require('node:path');
 const Store = require('electron-store').default;
+const fs = require('fs/promises');
 
 const store = new Store();
 
@@ -38,4 +39,17 @@ ipcMain.handle('save-path', (event, path) => {
 
 ipcMain.handle('load-path', () => {
   return store.get('silksong-path');
+});
+
+async function fileExists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+ipcMain.handle('file-exists', async (_, filePath) => {
+  return await fileExists(filePath);
 });
