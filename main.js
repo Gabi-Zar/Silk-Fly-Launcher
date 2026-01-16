@@ -1,5 +1,8 @@
-const { app, BrowserWindow } = require('electron/main')
-const path = require('node:path')
+const { app, BrowserWindow , ipcMain} = require('electron/main');
+const path = require('node:path');
+const Store = require('electron-store').default;
+
+const store = new Store();
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -28,3 +31,11 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+ipcMain.handle('save-path', (event, path) => {
+  store.set('silksong-path', path);
+});
+
+ipcMain.handle('load-path', () => {
+  return store.get('silksong-path');
+});

@@ -106,6 +106,14 @@ body {
   color: #ffffff;
 }
 
+.content h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #ffffff;
+  padding: 0 4px 4px;
+  border-bottom: 1px solid #ff6b6b; 
+}
+
 .view {
   width: 100%;
   background: rgba(0, 0, 0, 0.8);

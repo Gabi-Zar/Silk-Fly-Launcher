@@ -10,13 +10,13 @@ const versionText = HomeTemplate.content.getElementById("version-text")
 
 navigate("home")
 
-function navigate(page) {
+async function navigate(page) {
   view.replaceChildren()
   switch (page) {
     case "home":
       title.innerText = "Home";
       const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
-      const versionText = HomeTemplateCopy.querySelector("#version-text")
+      const versionText = HomeTemplateCopy.getElementById("version-text")
       versionText.innerText =
         `Chrome version: (v${versions.chrome()}), ` +
         `Node.js version: (v${versions.node()}), Electron version: (v${versions.electron()})`
@@ -35,6 +35,17 @@ function navigate(page) {
 
     case "general-settings":
       const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
+      const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
+
+      silksongPathInput.value = await window.save.loadSilksongPath()
+
+      silksongPathInput.addEventListener('input', async function(event) {
+        let silksongPath = silksongPathInput.value
+        console.log(silksongPath)
+        await window.save.saveSilksongPath(silksongPath)
+        console.log(await window.save.loadSilksongPath())
+      });
+
       view.appendChild(settingsTemplateCopy)
   }
 }
