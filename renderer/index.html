@@ -82,10 +82,17 @@
 
   <template id="settings-template">
     <h2>General settings</h2>
-    <div class="silksong-path-div">
+    <div class="horizontal-div">
       <label for="silksong-path-label">Enter Silksong path: </label>
       <input type="text" class="silksong-path-input" id="silksong-path-input" name="silksong-path-input">
-      <button class="default-button" onclick="autoDetectGamePath()">Auto Dectect</button>
+      <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
+    </div>
+    <br>
+    <h2>Import/Export</h2>
+    <div class="horizontal-div">
+      <button class="default-button" onclick="importData()">Import Data</button>
+      <button class="default-button" onclick="exportData()">Export Data</button>
+      <button class="important-button" onclick="deleteData()">Delete All Data</button>
     </div>
   </template>
 

@@ -1,4 +1,4 @@
-const { app, BrowserWindow , ipcMain} = require('electron/main');
+const { app, BrowserWindow , ipcMain, dialog} = require('electron/main');
 const path = require('node:path');
 const Store = require('electron-store').default;
 const fs = require('fs/promises');
@@ -58,3 +58,23 @@ ipcMain.handle('file-exists', async (_, filePath) => {
 ipcMain.handle('get-userSavePath', () => {
   return userSavePath
 });
+
+ipcMain.handle('delete-data', async (event, path) => {
+  await fs.unlink(path)
+});
+
+ipcMain.handle('export-data', async () => {
+  const dataPath = `${userSavePath}\\config.json`
+
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: 'Export Data',
+    defaultPath: 'config.json',
+    filters: [
+      { name: 'JSON', extensions: ['json'] }
+    ]
+  })
+
+  if (canceled || !filePath) return
+
+  await fs.copyFile(dataPath, filePath)
+})

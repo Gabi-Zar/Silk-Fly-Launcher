@@ -15,5 +15,8 @@ contextBridge.exposeInMainWorld('save', {
 
 contextBridge.exposeInMainWorld('files', {
   fileExists: (path) => ipcRenderer.invoke('file-exists', path),
-  userSavePath: () => ipcRenderer.invoke('get-userSavePath')
+  userSavePath: () => ipcRenderer.invoke('get-userSavePath'),
+  delete: (path) => ipcRenderer.invoke('delete-data', path),
+  export: () => ipcRenderer.invoke('export-data'),
+  import: (data) => ipcRenderer.invoke('import-data', data)
 });

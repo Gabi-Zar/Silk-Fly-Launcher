@@ -10,9 +10,10 @@ const versionText = HomeTemplate.content.getElementById("version-text")
 
 navigate("home")
 
+let savePath
 files.userSavePath().then(path => {
-  path = `${path}\\config.json`
-  files.fileExists(path).then(result => {
+  savePath = `${path}\\config.json`
+  files.fileExists(savePath).then(result => {
     if(!result) {
       autoDetectGamePath()
     }
@@ -69,4 +70,12 @@ async function autoDetectGamePath() {
       document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
     }
   }
+}
+
+async function deleteData() {
+  await files.delete(savePath)
+}
+
+async function exportData() {
+  await files.export()
 }
