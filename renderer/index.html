@@ -82,8 +82,11 @@
 
   <template id="settings-template">
     <h2>General settings</h2>
-    <label for="silksong-path-label">Enter Silksong path: </label>
-    <input type="text" id="silksong-path-input" name="silksong-path-input"> <button class="default-button">Auto Dectect</button>
+    <div class="silksong-path-div">
+      <label for="silksong-path-label">Enter Silksong path: </label>
+      <input type="text" class="silksong-path-input" id="silksong-path-input" name="silksong-path-input">
+      <button class="default-button" onclick="autoDetectGamePath()">Auto Dectect</button>
+    </div>
   </template>
 
   <script src="renderer.js"></script>

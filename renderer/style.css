@@ -135,10 +135,50 @@ input[type="range"] {
   width: 100%;
 }
 
+.silksong-path-div {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.silksong-path-input {
+  flex: 1;
+  height: 30px;
+  padding: 0 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ff6b6b;
+  border-radius: 4px;
+  color: #eee;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.silksong-path-input:hover {
+  background: rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 25, 0, 0.3);
+}
+
+.silksong-path-input:focus {
+  background: rgba(0, 0, 0, 0.65);
+  border-color: rgba(255, 25, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(255, 25, 0, 0.2);
+}
+
 .default-button {
-  
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ff6b6b;
+  border-radius: 4px;
+  color: #eee;
+  cursor: pointer;
+  text-align: left;
+  font-size: 10px;
+  transition: all 0.2s ease;
 }
 
 .default-button:hover {
-  
+  background: rgba(255, 72, 0, 0.2);
+  border-color: rgba(255, 25, 0, 0.3);
 }
