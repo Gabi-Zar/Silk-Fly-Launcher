@@ -63,11 +63,20 @@ function launch(mode) {
 }
 
 async function autoDetectGamePath() {
-    const defaultSilksongPath = "C:/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong/Hollow Knight Silksong.exe"
-    if (await files.fileExists(defaultSilksongPath)) {
-        await save.saveSilksongPath(defaultSilksongPath)
-        if (document.getElementById("silksong-path-input")) {
-            document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+    const defaultsSilksongPaths = [
+        ":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong",
+        ":/SteamLibrary/steamapps/common/Hollow Knight Silksong"
+    ]
+    for (const path of defaultsSilksongPaths) {
+        for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
+            const fullPath = `${String.fromCharCode(i)}${path}`
+            if (await files.fileExists(fullPath)) {
+                await save.saveSilksongPath(fullPath)
+                if (document.getElementById("silksong-path-input")) {
+                    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+                }
+                return
+            }
         }
     }
 }
