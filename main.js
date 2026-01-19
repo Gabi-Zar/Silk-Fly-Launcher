@@ -90,6 +90,8 @@ ipcMain.handle('import-data', async () => {
 
     if (canceled || !filePaths) return
 
-    await fs.unlink(dataPath)
+    if(await fileExists(dataPath)) {
+        await fs.unlink(dataPath)
+    }
     await fs.copyFile(filePaths[0], dataPath,fs.constants.COPYFILE_EXCL)
 })
