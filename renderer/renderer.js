@@ -12,70 +12,76 @@ navigate("home")
 
 let savePath
 files.userSavePath().then(path => {
-  savePath = `${path}\\config.json`
-  files.fileExists(savePath).then(result => {
-    if(!result) {
-      autoDetectGamePath()
-    }
-  });
+    savePath = `${path}\\config.json`
+    files.fileExists(savePath).then(result => {
+        if(!result) {
+            autoDetectGamePath()
+        }
+    });
 });
 
 async function navigate(page) {
-  view.replaceChildren()
-  switch (page) {
-    case "home":
-      title.innerText = "Home";
-      const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
-      const versionText = HomeTemplateCopy.getElementById("version-text")
-      versionText.innerText =
-        `Chrome version: (v${versions.chrome()}), ` +
-        `Node.js version: (v${versions.node()}), Electron version: (v${versions.electron()})`
-      view.appendChild(HomeTemplateCopy)
-      break;
+    view.replaceChildren()
+    switch (page) {
+        case "home":
+            title.innerText = "Home";
+            const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
+            const versionText = HomeTemplateCopy.getElementById("version-text")
+            versionText.innerText =
+                `Chrome version: (v${versions.chrome()}), ` +
+                `Node.js version: (v${versions.node()}), Electron version: (v${versions.electron()})`
+            view.appendChild(HomeTemplateCopy)
+            break;
 
-    case "mods-installed":
-      const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
-      view.appendChild(installedModsTemplateCopy)
-      break;
+        case "mods-installed":
+            const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
+            view.appendChild(installedModsTemplateCopy)
+            break;
 
-    case "mods-online":
-      const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
-      view.appendChild(onlineModsTemplateCopy)
-      break;
+        case "mods-online":
+            const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
+            view.appendChild(onlineModsTemplateCopy)
+            break;
 
-    case "general-settings":
-      const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
-      const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
+        case "general-settings":
+            const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
+            const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
 
-      silksongPathInput.value = await save.loadSilksongPath()
+            silksongPathInput.value = await save.loadSilksongPath()
 
-      silksongPathInput.addEventListener('input', async function(event) {
-        let silksongPath = silksongPathInput.value
-        await save.saveSilksongPath(silksongPath)
-      });
+            silksongPathInput.addEventListener('input', async function(event) {
+                let silksongPath = silksongPathInput.value
+                await save.saveSilksongPath(silksongPath)
+            });
 
-      view.appendChild(settingsTemplateCopy)
-  }
+            view.appendChild(settingsTemplateCopy)
+    }
 }
 
 function launch(mode) {
-  alert(`Launching the game in ${mode} mode.`);
+    alert(`Launching the game in ${mode} mode.`);
 }
 
 async function autoDetectGamePath() {
-  const defaultSilksongPath = "C:/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong/Hollow Knight Silksong.exe"
-  if (await files.fileExists(defaultSilksongPath)) {
-    await save.saveSilksongPath(defaultSilksongPath)
-    if (document.getElementById("silksong-path-input")) {
-      document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+    const defaultSilksongPath = "C:/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong/Hollow Knight Silksong.exe"
+    if (await files.fileExists(defaultSilksongPath)) {
+        await save.saveSilksongPath(defaultSilksongPath)
+        if (document.getElementById("silksong-path-input")) {
+            document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+        }
     }
-  }
 }
 
 async function deleteData() {
-  await files.delete(savePath)
+    await files.delete(savePath)
+    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
 }
 
 async function exportData() {
-  await files.export()
+    await files.export()
+}
+
+async function importData() {
+    await files.import()
+    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
 }

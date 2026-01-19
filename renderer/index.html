@@ -1,102 +1,102 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Silk Fly Launcher</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <title>Silk Fly Launcher</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="app">
+    <div class="app">
 
-    <video autoplay muted loop id="menu_wallpaper" class="background_video">
-      <source src="assets/background.mp4" type="video/mp4">
-    </video>
+        <video autoplay muted loop id="menu_wallpaper" class="background_video">
+            <source src="assets/background.mp4" type="video/mp4">
+        </video>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo" onclick="navigate('home')">
-        <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo_img"/>
-        <h5 class="logo_title">Silk Fly Launcher</h1>
-      </div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo" onclick="navigate('home')">
+                <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo_img"/>
+                <h5 class="logo_title">Silk Fly Launcher</h1>
+            </div>
 
-      <nav class="nav">
-        <div class="nav-section">
-          <span class="nav-title">Execute Silksong</span>
-          <button onclick="launch('vanilla')">
-            <img src="vanilla_launch_icon.png" class="button_icon"/>
-            Run Vanilla
-          <button onclick="launch('modded')">
-            <img src="modded_launch_icon.png" class="button_icon"/>
-            Run Modded
-        </div>
+            <nav class="nav">
+                <div class="nav-section">
+                    <span class="nav-title">Execute Silksong</span>
+                    <button onclick="launch('vanilla')">
+                        <img src="vanilla_launch_icon.png" class="button_icon"/>
+                        Run Vanilla
+                    <button onclick="launch('modded')">
+                        <img src="modded_launch_icon.png" class="button_icon"/>
+                        Run Modded
+                </div>
 
-        <div class="nav-section">
-          <span class="nav-title">Mods</span>
-          <button onclick="navigate('mods-installed')">
-            <img src="installed_mods_icon.png" class="button_icon"/>
-            Installed
-          <button onclick="navigate('mods-online')">
-            <img src="online_mods_icon.png" class="button_icon"/>
-            Online
-        </div>
+                <div class="nav-section">
+                    <span class="nav-title">Mods</span>
+                    <button onclick="navigate('mods-installed')">
+                        <img src="installed_mods_icon.png" class="button_icon"/>
+                        Installed
+                    <button onclick="navigate('mods-online')">
+                        <img src="online_mods_icon.png" class="button_icon"/>
+                        Online
+                </div>
 
-        <div class="nav-section">
-          <span class="nav-title">Settings</span>
-          <button onclick="navigate('general-settings')">
-            <img src="general_settings_icon.png" class="button_icon"/>
-            General
-        </div>
-      </nav>
-    </aside>
+                <div class="nav-section">
+                    <span class="nav-title">Settings</span>
+                    <button onclick="navigate('general-settings')">
+                        <img src="general_settings_icon.png" class="button_icon"/>
+                        General
+                </div>
+            </nav>
+        </aside>
 
-    <!-- Main content -->
-    <main class="content">
-      <h1 id="title">Home</h1>
-        <div class="view" id="view">
+        <!-- Main content -->
+        <main class="content">
+            <h1 id="title">Home</h1>
+                <div class="view" id="view">
 
-        </div>
-      </div>
+                </div>
+            </div>
 
-      <div class="slider-container">
-        <label for="heightSlider">Height :</label>
-        <input type="range" id="heightSlider">
-      </div>
+            <div class="slider-container">
+                <label for="heightSlider">Height :</label>
+                <input type="range" id="heightSlider">
+            </div>
 
-  </div>
-
-  <!-- Template -->
-  <template id="home-template">
-    <h2>Silk Fly Launcher</h2>
-    <h3> Debugging data</h3>
-    <p id="version-text"></p>
-  </template>
-
-  <template id="installed-mods-template">
-    <p>List of installed mods.</p>
-  </template>
-
-  <template id="online-mods-template">
-    <p>Browse Nexus mods.</p>
-  </template>
-
-  <template id="settings-template">
-    <h2>General settings</h2>
-    <div class="horizontal-div">
-      <label for="silksong-path-label">Enter Silksong path: </label>
-      <input type="text" class="silksong-path-input" id="silksong-path-input" name="silksong-path-input">
-      <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
     </div>
-    <br>
-    <h2>Import/Export</h2>
-    <div class="horizontal-div">
-      <button class="default-button" onclick="importData()">Import Data</button>
-      <button class="default-button" onclick="exportData()">Export Data</button>
-      <button class="important-button" onclick="deleteData()">Delete All Data</button>
-    </div>
-  </template>
 
-  <script src="renderer.js"></script>
+    <!-- Template -->
+    <template id="home-template">
+        <h2>Silk Fly Launcher</h2>
+        <h3> Debugging data</h3>
+        <p id="version-text"></p>
+    </template>
+
+    <template id="installed-mods-template">
+        <p>List of installed mods.</p>
+    </template>
+
+    <template id="online-mods-template">
+        <p>Browse Nexus mods.</p>
+    </template>
+
+    <template id="settings-template">
+        <h2>General settings</h2>
+        <div class="horizontal-div">
+            <label for="silksong-path-label">Enter Silksong path: </label>
+            <input type="text" class="silksong-path-input" id="silksong-path-input" name="silksong-path-input">
+            <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
+        </div>
+        <br>
+        <h2>Import/Export</h2>
+        <div class="horizontal-div">
+            <button class="default-button" onclick="importData()">Import Data</button>
+            <button class="default-button" onclick="exportData()">Export Data</button>
+            <button class="important-button" onclick="deleteData()">Delete All Data</button>
+        </div>
+    </template>
+
+    <script src="renderer.js"></script>
 
 </body>
 </html>
