@@ -261,38 +261,38 @@ body {
 }
 
 .mod-text {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .mod-actions {
-  margin-top: 12px;
-  display: flex;
-  gap: 20px;
+    margin-top: 12px;
+    display: flex;
+    gap: 20px;
 }
 
 .mod-icon {
-  width: 128px;
-  height: 128px;
-  object-fit: contain;
-  opacity: 0.9;
+    width: 128px;
+    height: 128px;
+    object-fit: contain;
+    opacity: 0.9;
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #101010;
+    background: #101010;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(120, 25, 0);
-  border-radius: 7px;
+    background: rgb(120, 25, 0);
+    border-radius: 7px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(170, 25, 0);
+    background: rgb(170, 25, 0);
 }
 
 .transparent-text {
