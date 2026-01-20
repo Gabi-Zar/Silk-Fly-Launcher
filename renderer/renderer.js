@@ -5,8 +5,9 @@ const HomeTemplate = document.getElementById("home-template");
 const installedModsTemplate = document.getElementById("installed-mods-template");
 const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
+const modTemplate = document.getElementById("mod-template");
 
-const versionText = HomeTemplate.content.getElementById("version-text")
+const versionText = HomeTemplate.content.getElementById("version-text");
 
 navigate("home")
 
@@ -34,16 +35,25 @@ async function navigate(page) {
             break;
 
         case "mods-installed":
+            title.innerText = "Installed Mods";
             const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
             view.appendChild(installedModsTemplateCopy)
             break;
 
         case "mods-online":
+            title.innerText = "Online Mods";
             const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
+            const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container")
             view.appendChild(onlineModsTemplateCopy)
+
+            for(let i = 0; i <= 10; i++) {
+                const modTemplateCopy = modTemplate.content.cloneNode(true)
+                ModsContainer.appendChild(modTemplateCopy)
+            }
             break;
 
         case "general-settings":
+            title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
 

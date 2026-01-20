@@ -53,16 +53,8 @@
         <!-- Main content -->
         <main class="content">
             <h1 id="title">Home</h1>
-                <div class="view" id="view">
-
-                </div>
+            <div class="view" id="view">
             </div>
-
-            <div class="slider-container">
-                <label for="heightSlider">Height :</label>
-                <input type="range" id="heightSlider">
-            </div>
-
     </div>
 
     <!-- Template -->
@@ -77,7 +69,20 @@
     </template>
 
     <template id="online-mods-template">
-        <p>Browse Nexus mods.</p>
+        <h2>List Of Mods</h2>
+        <div class="search-container">
+            <input type="text" placeholder="Search For Mods...">
+            <button class="search-button">🔍</button>
+        </div>
+        <div class="mods-container" id="mods-container">
+        </div>
+    </template>
+
+    <template id="mod-template">
+        <div class="mod-container">
+            <h3 id="mod-title"> Mod Title </h3>
+            <p id="mod-description"> description </p>
+        </div>
     </template>
 
     <template id="settings-template">

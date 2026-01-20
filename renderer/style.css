@@ -126,15 +126,6 @@ body {
     height: 90%; 
 }
 
-.slider-container {
-    margin-top: 20px;
-    width: clamp(600px, 70vw, 900px);
-}
-
-input[type="range"] {
-    width: 100%;
-}
-
 .horizontal-div {
     display: flex;
     align-items: center;
@@ -205,4 +196,77 @@ input[type="range"] {
 .important-button:hover {
     background: rgba(255, 0, 0, 0.4);
     border-color: rgba(255, 25, 0, 0.8);
+}
+
+.search-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.search-container input {
+    width: 700px;
+    height: 30px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    outline: none;
+    transition: background 0.3s, width 0.3s;
+}
+
+.search-container input:focus {
+    background-color: rgba(255, 255, 255, 0.25);
+    width: 800px;
+}
+
+.search-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.mods-container {
+    width: 100%;
+    height: 80%;
+    transform: translateY(50px);
+    background: rgba(30, 30, 30, 0.8);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(30, 30, 30, 0.15);
+    overflow: auto;
+}
+
+.mod-container {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(200, 25, 0);
+    border-radius: 12px;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101010;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(120, 25, 0);
+  border-radius: 7px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(170, 25, 0);
 }
