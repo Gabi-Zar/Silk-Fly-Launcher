@@ -249,9 +249,33 @@ body {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(200, 25, 0);
-    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.mod-container:not(:last-child) {
+    border-bottom: 1px solid rgba(150, 25, 0, 0.5);
+
+}
+
+.mod-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.mod-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 20px;
+}
+
+.mod-icon {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  opacity: 0.9;
 }
 
 ::-webkit-scrollbar {
@@ -269,4 +293,8 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(170, 25, 0);
+}
+
+.transparent-text {
+    color: rgba(255, 255, 255, 0.7);
 }

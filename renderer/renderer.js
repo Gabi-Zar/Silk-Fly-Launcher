@@ -48,6 +48,14 @@ async function navigate(page) {
 
             for(let i = 0; i <= 10; i++) {
                 const modTemplateCopy = modTemplate.content.cloneNode(true)
+
+                const modLinkButton = modTemplateCopy.getElementById("external-link")
+                modLinkButton.addEventListener('click', function(event) {
+                    event.preventDefault()
+                    const modLink = modLinkButton.href
+                    electronAPI.openExternalLink(modLink)
+                })
+
                 ModsContainer.appendChild(modTemplateCopy)
             }
             break;
@@ -103,4 +111,8 @@ async function exportData() {
 async function importData() {
     await files.import()
     document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+}
+
+async function downloadMod() {
+    console.log("WIP")
 }

@@ -1,4 +1,4 @@
-const { app, BrowserWindow , ipcMain, dialog} = require('electron/main');
+const { app, BrowserWindow , ipcMain, dialog, shell} = require('electron/main');
 const path = require('node:path');
 const Store = require('electron-store').default;
 const fs = require('fs/promises');
@@ -94,4 +94,8 @@ ipcMain.handle('import-data', async () => {
         await fs.unlink(dataPath)
     }
     await fs.copyFile(filePaths[0], dataPath,fs.constants.COPYFILE_EXCL)
+})
+
+ipcMain.handle('open-link', async (event, link) => {
+    await shell.openExternal(link)
 })

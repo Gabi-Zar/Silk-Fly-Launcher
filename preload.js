@@ -18,3 +18,7 @@ contextBridge.exposeInMainWorld('files', {
     export: () => ipcRenderer.invoke('export-data'),
     import: () => ipcRenderer.invoke('import-data')
 });
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  openExternalLink: (url) => ipcRenderer.invoke('open-link', url)
+});
