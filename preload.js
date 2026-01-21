@@ -20,5 +20,9 @@ contextBridge.exposeInMainWorld('files', {
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  openExternalLink: (url) => ipcRenderer.invoke('open-link', url)
+    openExternalLink: (url) => ipcRenderer.invoke('open-link', url)
 });
+
+contextBridge.exposeInMainWorld('bepinex', {
+    install: () => ipcRenderer.invoke('install-bepinex')
+})

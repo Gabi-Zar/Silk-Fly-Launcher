@@ -116,3 +116,11 @@ async function importData() {
 async function downloadMod() {
     console.log("WIP")
 }
+
+async function installBepinex() {
+    bepinex.install()
+}
+
+async function uninstallBepinex() {
+    console.log("WIP")
+}

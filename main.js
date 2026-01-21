@@ -2,9 +2,13 @@ const { app, BrowserWindow , ipcMain, dialog, shell} = require('electron/main');
 const path = require('node:path');
 const Store = require('electron-store').default;
 const fs = require('fs/promises');
+const { createWriteStream } = require('fs');
+const { pipeline } = require('stream/promises');
+const extract = require("extract-zip");
 
 const store = new Store();
 const userSavePath = app.getPath('userData')
+let silksongPath = store.get('silksong-path')
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -35,11 +39,13 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.handle('save-path', (event, path) => {
+    silksongPath = path;
     store.set('silksong-path', path);
 });
 
 ipcMain.handle('load-path', () => {
-    return store.get('silksong-path');
+    silksongPath = store.get('silksong-path');
+    return silksongPath;
 });
 
 async function fileExists(filePath) {
@@ -98,4 +104,40 @@ ipcMain.handle('import-data', async () => {
 
 ipcMain.handle('open-link', async (event, link) => {
     await shell.openExternal(link)
+})
+
+ipcMain.handle('install-bepinex', async () => {
+    const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest"
+
+    const res = await fetch(GITHUB_URL, {
+        headers: {
+            "User-Agent": "SilkFlyLauncher/1.0.0",
+            "Accept": "application/vnd.github+json",
+        }
+    })
+
+    if (!res.ok) {
+        throw new Error(`GitHub API error: ${res.status}`)
+    }
+
+    const release = await res.json();
+
+    const asset = release.assets.find(
+        a => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64")
+    );
+
+    const download = await fetch(asset.browser_download_url)
+    if (!download.ok) {
+        throw new Error("Download error");
+    }
+    const filePath = `${userSavePath}\\bepinex.zip`
+    console.log(filePath)
+
+    await pipeline(
+        download.body,
+        createWriteStream(filePath)
+    )
+
+    await extract(filePath, { dir: silksongPath})
+    await fs.unlink(filePath)
 })
