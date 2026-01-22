@@ -8,6 +8,7 @@ const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
 const versionText = HomeTemplate.content.getElementById("version-text");
+let bepinexVersion
 
 navigate("home")
 
@@ -118,9 +119,21 @@ async function downloadMod() {
 }
 
 async function installBepinex() {
-    bepinex.install()
+    bepinexVersion = await bepinex.install()
+    setBepinexVersion()
 }
 
 async function uninstallBepinex() {
-    console.log("WIP")
+    bepinexVersion = await bepinex.uninstall()
+    setBepinexVersion()
+}
+
+async function setBepinexVersion() {
+    const bepinexVersionText = document.getElementById("bepinex-version-text")
+    if(await bepinexVersion == undefined) {
+        bepinexVersionText.innerText = "BepInEx is not installed"
+    }
+    else {
+        bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`
+    }
 }

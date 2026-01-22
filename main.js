@@ -9,6 +9,7 @@ const extract = require("extract-zip");
 const store = new Store();
 const userSavePath = app.getPath('userData')
 let silksongPath = store.get('silksong-path')
+let bepinexVersion
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -121,6 +122,7 @@ ipcMain.handle('install-bepinex', async () => {
     }
 
     const release = await res.json();
+    bepinexVersion = release.tag_name;
 
     const asset = release.assets.find(
         a => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64")
@@ -140,4 +142,29 @@ ipcMain.handle('install-bepinex', async () => {
 
     await extract(filePath, { dir: silksongPath})
     await fs.unlink(filePath)
+
+    return bepinexVersion
+})
+
+ipcMain.handle('uninstall-bepinex', async () => {
+    const folderPath = `${silksongPath}\\BepInEx`
+    if (await fileExists(folderPath)) {
+        await fs.rm(folderPath, { recursive: true })
+    }
+
+    const bepinexFiles = [
+        ".doorstop_version",
+        "changelog.txt",
+        "doorstop_config.ini",
+        "winhttp.dll"
+    ]
+
+    for (const file of bepinexFiles) {
+        const filePath = `${silksongPath}\\${file}`
+        if (await fileExists(filePath)) {
+            await fs.unlink(filePath)
+        }
+    }
+    bepinexVersion = undefined
+    return bepinexVersion
 })

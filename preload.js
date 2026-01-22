@@ -24,5 +24,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 });
 
 contextBridge.exposeInMainWorld('bepinex', {
-    install: () => ipcRenderer.invoke('install-bepinex')
+    install: () => ipcRenderer.invoke('install-bepinex'),
+    uninstall: () => ipcRenderer.invoke('uninstall-bepinex')
 })
