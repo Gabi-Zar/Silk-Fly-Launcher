@@ -8,7 +8,6 @@ const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
 const versionText = HomeTemplate.content.getElementById("version-text");
-let bepinexVersion
 
 navigate("home")
 
@@ -66,14 +65,15 @@ async function navigate(page) {
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
 
-            silksongPathInput.value = await save.loadSilksongPath()
+            silksongPathInput.value = await files.loadSilksongPath()
 
             silksongPathInput.addEventListener('input', async function(event) {
                 let silksongPath = silksongPathInput.value
-                await save.saveSilksongPath(silksongPath)
+                await files.saveSilksongPath(silksongPath)
             });
 
             view.appendChild(settingsTemplateCopy)
+            setBepinexVersion()
     }
 }
 
@@ -90,9 +90,9 @@ async function autoDetectGamePath() {
         for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
             const fullPath = `${String.fromCharCode(i)}${path}`
             if (await files.fileExists(fullPath)) {
-                await save.saveSilksongPath(fullPath)
+                await files.saveSilksongPath(fullPath)
                 if (document.getElementById("silksong-path-input")) {
-                    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+                    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
                 }
                 return
             }
@@ -102,7 +102,7 @@ async function autoDetectGamePath() {
 
 async function deleteData() {
     await files.delete(savePath)
-    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
 }
 
 async function exportData() {
@@ -111,7 +111,7 @@ async function exportData() {
 
 async function importData() {
     await files.import()
-    document.getElementById("silksong-path-input").value = await save.loadSilksongPath()
+    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
 }
 
 async function downloadMod() {
@@ -119,18 +119,19 @@ async function downloadMod() {
 }
 
 async function installBepinex() {
-    bepinexVersion = await bepinex.install()
+    await bepinex.install()
     setBepinexVersion()
 }
 
 async function uninstallBepinex() {
-    bepinexVersion = await bepinex.uninstall()
+    await bepinex.uninstall()
     setBepinexVersion()
 }
 
 async function setBepinexVersion() {
+    const bepinexVersion = await files.loadBepinexVersion()
     const bepinexVersionText = document.getElementById("bepinex-version-text")
-    if(await bepinexVersion == undefined) {
+    if(bepinexVersion == undefined) {
         bepinexVersionText.innerText = "BepInEx is not installed"
     }
     else {

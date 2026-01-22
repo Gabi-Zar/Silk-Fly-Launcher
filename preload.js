@@ -6,17 +6,17 @@ contextBridge.exposeInMainWorld('versions', {
     electron: () => process.versions.electron
 });
 
-contextBridge.exposeInMainWorld('save', {
-    saveSilksongPath: (path) => ipcRenderer.invoke('save-path', path),
-    loadSilksongPath: () => ipcRenderer.invoke('load-path')
-});
-
 contextBridge.exposeInMainWorld('files', {
     fileExists: (path) => ipcRenderer.invoke('file-exists', path),
     userSavePath: () => ipcRenderer.invoke('get-userSavePath'),
     delete: (path) => ipcRenderer.invoke('delete-data', path),
     export: () => ipcRenderer.invoke('export-data'),
-    import: () => ipcRenderer.invoke('import-data')
+    import: () => ipcRenderer.invoke('import-data'),
+
+    saveSilksongPath: (path) => ipcRenderer.invoke('save-path', path),
+    loadSilksongPath: () => ipcRenderer.invoke('load-path'),
+    saveBepinexVersion: (version) => ipcRenderer.invoke('save-bepinex-version', version),
+    loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version')
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {

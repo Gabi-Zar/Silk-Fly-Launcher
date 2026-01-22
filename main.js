@@ -41,12 +41,29 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('save-path', (event, path) => {
     silksongPath = path;
-    store.set('silksong-path', path);
+    store.set('silksong-path', silksongPath);
 });
 
 ipcMain.handle('load-path', () => {
     silksongPath = store.get('silksong-path');
+    if (silksongPath == undefined)  {
+        return "";
+    }
     return silksongPath;
+});
+
+function saveBepinexVersion(version) {
+    bepinexVersion = version;
+    if (bepinexVersion == undefined) {
+        store.delete('bepinex-version');
+        return;
+    }
+    store.set('bepinex-version', version);
+};
+
+ipcMain.handle('load-bepinex-version', () => {
+    bepinexVersion = store.get('bepinex-version');
+    return bepinexVersion;
 });
 
 async function fileExists(filePath) {
@@ -133,7 +150,6 @@ ipcMain.handle('install-bepinex', async () => {
         throw new Error("Download error");
     }
     const filePath = `${userSavePath}\\bepinex.zip`
-    console.log(filePath)
 
     await pipeline(
         download.body,
@@ -143,7 +159,7 @@ ipcMain.handle('install-bepinex', async () => {
     await extract(filePath, { dir: silksongPath})
     await fs.unlink(filePath)
 
-    return bepinexVersion
+    saveBepinexVersion(bepinexVersion)
 })
 
 ipcMain.handle('uninstall-bepinex', async () => {
@@ -166,5 +182,5 @@ ipcMain.handle('uninstall-bepinex', async () => {
         }
     }
     bepinexVersion = undefined
-    return bepinexVersion
+    saveBepinexVersion(bepinexVersion)
 })
