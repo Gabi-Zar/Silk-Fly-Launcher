@@ -77,8 +77,10 @@ async function navigate(page) {
     }
 }
 
-function launch(mode) {
+async function launch(mode) {
     alert(`Launching the game in ${mode} mode.`);
+    await electronAPI.launchGame(mode);
+    setBepinexVersion()
 }
 
 async function autoDetectGamePath() {
@@ -128,11 +130,31 @@ async function uninstallBepinex() {
     setBepinexVersion()
 }
 
+async function backupBepinex() {
+    await bepinex.backup()
+    setBepinexVersion()
+}
+
+async function deleteBepinexBackup() {
+    await bepinex.deleteBackup()
+    setBepinexVersion()
+}
+
 async function setBepinexVersion() {
-    const bepinexVersion = await files.loadBepinexVersion()
     const bepinexVersionText = document.getElementById("bepinex-version-text")
+    if (bepinexVersionText == undefined) {
+        return
+    }
+    
+    const bepinexVersion = await files.loadBepinexVersion()
+    const bepinexBackupVersion = await files.loadBepinexBackupVersion()
     if(bepinexVersion == undefined) {
+        if(bepinexBackupVersion == undefined) {
         bepinexVersionText.innerText = "BepInEx is not installed"
+        }
+        else {
+            bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backuped`
+        }
     }
     else {
         bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`

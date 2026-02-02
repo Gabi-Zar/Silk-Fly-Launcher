@@ -16,14 +16,18 @@ contextBridge.exposeInMainWorld('files', {
     saveSilksongPath: (path) => ipcRenderer.invoke('save-path', path),
     loadSilksongPath: () => ipcRenderer.invoke('load-path'),
     saveBepinexVersion: (version) => ipcRenderer.invoke('save-bepinex-version', version),
-    loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version')
+    loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version'),
+    loadBepinexBackupVersion: () => ipcRenderer.invoke('load-bepinex-backup-version')
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    openExternalLink: (url) => ipcRenderer.invoke('open-link', url)
+    openExternalLink: (url) => ipcRenderer.invoke('open-link', url),
+    launchGame: (mode) => ipcRenderer.invoke('launch-game', mode)
 });
 
 contextBridge.exposeInMainWorld('bepinex', {
     install: () => ipcRenderer.invoke('install-bepinex'),
-    uninstall: () => ipcRenderer.invoke('uninstall-bepinex')
+    uninstall: () => ipcRenderer.invoke('uninstall-bepinex'),
+    backup: () => ipcRenderer.invoke('backup-bepinex'),
+    deleteBackup: () => ipcRenderer.invoke('delete-bepinex-backup')
 })

@@ -9,7 +9,18 @@ const extract = require("extract-zip");
 const store = new Store();
 const userSavePath = app.getPath('userData')
 let silksongPath = store.get('silksong-path')
+
+let bepinexFolderPath = `${silksongPath}/BepInEx`
+let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
+const bepinexFiles = [
+        ".doorstop_version",
+        "changelog.txt",
+        "doorstop_config.ini",
+        "winhttp.dll"
+    ]
+
 let bepinexVersion
+let bepinexBackupVersion
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -41,6 +52,8 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('save-path', (event, path) => {
     silksongPath = path;
+    bepinexFolderPath = `${silksongPath}/BepInEx`
+    bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
     store.set('silksong-path', silksongPath);
 });
 
@@ -61,9 +74,23 @@ function saveBepinexVersion(version) {
     store.set('bepinex-version', version);
 };
 
+function saveBepinexBackupVersion(version) {
+    bepinexBackupVersion = version;
+    if (bepinexBackupVersion == undefined) {
+        store.delete('bepinex-backup-version');
+        return;
+    }
+    store.set('bepinex-backup-version', version);
+};
+
 ipcMain.handle('load-bepinex-version', () => {
     bepinexVersion = store.get('bepinex-version');
     return bepinexVersion;
+});
+
+ipcMain.handle('load-bepinex-backup-version', () => {
+    bepinexBackupVersion = store.get('bepinex-backup-version');
+    return bepinexBackupVersion;
 });
 
 async function fileExists(filePath) {
@@ -124,63 +151,133 @@ ipcMain.handle('open-link', async (event, link) => {
     await shell.openExternal(link)
 })
 
-ipcMain.handle('install-bepinex', async () => {
-    const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest"
-
-    const res = await fetch(GITHUB_URL, {
-        headers: {
-            "User-Agent": "SilkFlyLauncher/1.0.0",
-            "Accept": "application/vnd.github+json",
+ipcMain.handle('launch-game', async (event, mode) => {
+    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`
+    if (mode === "modded"){
+        if (await fileExists(bepinexFolderPath)) {
+            await shell.openExternal(silksongExecutablePath)
         }
-    })
-
-    if (!res.ok) {
-        throw new Error(`GitHub API error: ${res.status}`)
+        else {
+            await installBepinex()
+            await shell.openExternal(silksongExecutablePath)
+        }
     }
-
-    const release = await res.json();
-    bepinexVersion = release.tag_name;
-
-    const asset = release.assets.find(
-        a => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64")
-    );
-
-    const download = await fetch(asset.browser_download_url)
-    if (!download.ok) {
-        throw new Error("Download error");
+    if (mode === "vanilla"){
+        if (await fileExists(bepinexFolderPath)) {
+            await backupBepinex()
+            await shell.openExternal(silksongExecutablePath)
+        }
+        else {
+            await shell.openExternal(silksongExecutablePath)
+        }
     }
-    const filePath = `${userSavePath}\\bepinex.zip`
-
-    await pipeline(
-        download.body,
-        createWriteStream(filePath)
-    )
-
-    await extract(filePath, { dir: silksongPath})
-    await fs.unlink(filePath)
-
-    saveBepinexVersion(bepinexVersion)
 })
 
-ipcMain.handle('uninstall-bepinex', async () => {
-    const folderPath = `${silksongPath}\\BepInEx`
-    if (await fileExists(folderPath)) {
-        await fs.rm(folderPath, { recursive: true })
+async function installBepinex() {
+    if (await fileExists(bepinexBackupPath)) {
+        if (await fileExists(`${bepinexBackupPath}/BepInEx`)) {
+            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, { recursive: true })
+        }
+
+        for (const file of bepinexFiles) {
+            const filePath = `${silksongPath}/${file}`
+            if (await fileExists(`${bepinexBackupPath}/${file}`)) {
+                await fs.copyFile(`${bepinexBackupPath}/${file}`, filePath)
+            }
+        }
+        await fs.rm(bepinexBackupPath, { recursive: true })
+
+        bepinexBackupVersion = store.get('bepinex-backup-version')
+        saveBepinexVersion(bepinexBackupVersion)
+        saveBepinexBackupVersion(undefined)
+    }
+    else {
+        const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest"
+
+        const res = await fetch(GITHUB_URL, {
+            headers: {
+                "User-Agent": "SilkFlyLauncher/1.0.0",
+                "Accept": "application/vnd.github+json",
+            }
+        })
+
+        if (!res.ok) {
+            throw new Error(`GitHub API error: ${res.status}`)
+        }
+
+        const release = await res.json();
+
+        const asset = release.assets.find(
+            a => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64")
+        );
+
+        const download = await fetch(asset.browser_download_url)
+        if (!download.ok) {
+            throw new Error("Download error");
+        }
+        const filePath = `${userSavePath}\\bepinex.zip`
+
+        await pipeline(
+            download.body,
+            createWriteStream(filePath)
+        )
+
+        await extract(filePath, { dir: silksongPath})
+        await fs.unlink(filePath)
+
+        saveBepinexVersion(release.tag_name)
+    }
+}
+
+ipcMain.handle('install-bepinex', async () => {
+    await installBepinex()
+})
+
+async function uninstallBepinex() {
+    if (await fileExists(bepinexFolderPath)) {
+        await fs.rm(bepinexFolderPath, { recursive: true })
     }
 
-    const bepinexFiles = [
-        ".doorstop_version",
-        "changelog.txt",
-        "doorstop_config.ini",
-        "winhttp.dll"
-    ]
-
     for (const file of bepinexFiles) {
-        const filePath = `${silksongPath}\\${file}`
+        const filePath = `${silksongPath}/${file}`
         if (await fileExists(filePath)) {
             await fs.unlink(filePath)
         }
     }
-    bepinexVersion = undefined
-    saveBepinexVersion(bepinexVersion)
+    saveBepinexVersion(undefined)
+}
+
+ipcMain.handle('uninstall-bepinex', async () => {
+    await uninstallBepinex()
+})
+
+async function backupBepinex() {
+    if (await fileExists(bepinexBackupPath) == false) {
+        await fs.mkdir(bepinexBackupPath)
+    }
+
+    if (await fileExists(bepinexFolderPath)) {
+        await fs.cp(bepinexFolderPath, `${bepinexBackupPath}/BepInEx`, { recursive: true })
+    }
+
+    for (const file of bepinexFiles) {
+        const filePath = `${silksongPath}/${file}`
+        if (await fileExists(filePath)) {
+            await fs.copyFile(filePath, `${bepinexBackupPath}/${file}`)
+        }
+    }
+
+    saveBepinexBackupVersion(bepinexVersion)
+    await uninstallBepinex()
+}
+
+ipcMain.handle('backup-bepinex', async () => {
+    await backupBepinex()
+})
+
+ipcMain.handle('delete-bepinex-backup', async () => {
+    if (await fileExists(bepinexBackupPath)) {
+        await fs.rm(bepinexBackupPath, { recursive: true })
+        saveBepinexBackupVersion(undefined)
+    }
 })
