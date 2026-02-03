@@ -15,9 +15,10 @@ contextBridge.exposeInMainWorld('files', {
 
     saveSilksongPath: (path) => ipcRenderer.invoke('save-path', path),
     loadSilksongPath: () => ipcRenderer.invoke('load-path'),
-    saveBepinexVersion: (version) => ipcRenderer.invoke('save-bepinex-version', version),
     loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version'),
-    loadBepinexBackupVersion: () => ipcRenderer.invoke('load-bepinex-backup-version')
+    loadBepinexBackupVersion: () => ipcRenderer.invoke('load-bepinex-backup-version'),
+    saveNexusAPI: (api) => ipcRenderer.invoke('save-nexus-api', api),
+    loadNexusAPI: () => ipcRenderer.invoke('load-nexus-api')
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -30,4 +31,8 @@ contextBridge.exposeInMainWorld('bepinex', {
     uninstall: () => ipcRenderer.invoke('uninstall-bepinex'),
     backup: () => ipcRenderer.invoke('backup-bepinex'),
     deleteBackup: () => ipcRenderer.invoke('delete-bepinex-backup')
+})
+
+contextBridge.exposeInMainWorld('nexus', {
+    verifyAPI: () => ipcRenderer.invoke('verify-nexus-api')
 })

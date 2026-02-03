@@ -99,7 +99,7 @@
         <h2>General settings</h2>
         <div class="horizontal-div">
             <label for="silksong-path-label">Enter Silksong path: </label>
-            <input type="text" class="silksong-path-input" id="silksong-path-input" name="silksong-path-input">
+            <input type="text" class="input" id="silksong-path-input" name="silksong-path-input">
             <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
         </div>
         <br>
@@ -110,6 +110,15 @@
             <button class="important-button" onclick="uninstallBepinex()">Uninstall</button>
             <button class="default-button" onclick="backupBepinex()">Backup</button>
             <button class="important-button" onclick="deleteBepinexBackup()">Delete Backup</button>
+        </div>
+        <br>
+        <h2>Nexus</h2>
+        <p class="transparent-text" id="bepinex-version-text"></p>
+        <div class="horizontal-div">
+            <label for="nexus-api-label">Enter your nexus api: </label>
+            <input type="text" class="input" id="nexus-api-input" name="nexus-api-input">
+            <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg">
+            <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
         </div>
         <br>
         <h2>Import/Export</h2>

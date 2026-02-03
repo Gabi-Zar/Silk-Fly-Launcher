@@ -133,7 +133,7 @@ body {
     margin-top: 8px;
 }
 
-.silksong-path-input {
+.input {
     flex: 1;
     height: 30px;
     padding: 0 12px;
@@ -146,12 +146,12 @@ body {
     transition: all 0.2s ease;
 }
 
-.silksong-path-input:hover {
+.input:hover {
     background: rgba(0, 0, 0, 0.55);
     border-color: rgba(255, 25, 0, 0.3);
 }
 
-.silksong-path-input:focus {
+.input:focus {
     background: rgba(0, 0, 0, 0.65);
     border-color: rgba(255, 25, 0, 0.3);
     box-shadow: 0 0 0 1px rgba(255, 25, 0, 0.2);
@@ -298,4 +298,10 @@ body {
 
 .transparent-text {
     color: rgba(255, 255, 255, 0.7);
+}
+
+.nexus-check-image {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
 }

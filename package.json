@@ -13,6 +13,7 @@
     "electron": "^39.2.7"
   },
   "dependencies": {
+    "@nexusmods/nexus-api": "^1.1.5",
     "electron-store": "^11.0.2",
     "extract-zip": "^2.0.1"
   }

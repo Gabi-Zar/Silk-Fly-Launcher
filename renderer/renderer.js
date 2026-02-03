@@ -64,16 +64,23 @@ async function navigate(page) {
             title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
+            const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input")
 
             silksongPathInput.value = await files.loadSilksongPath()
-
             silksongPathInput.addEventListener('input', async function(event) {
                 let silksongPath = silksongPathInput.value
                 await files.saveSilksongPath(silksongPath)
             });
 
+            nexusAPIInput.value = await files.loadNexusAPI()
+            nexusAPIInput.addEventListener('input', async function(event) {
+                let nexusAPI = nexusAPIInput.value
+                await files.saveNexusAPI(nexusAPI)
+            });
+
             view.appendChild(settingsTemplateCopy)
             setBepinexVersion()
+            verifyNexusAPI()
     }
 }
 
@@ -153,10 +160,26 @@ async function setBepinexVersion() {
         bepinexVersionText.innerText = "BepInEx is not installed"
         }
         else {
-            bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backuped`
+            bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backed up`
         }
     }
     else {
         bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`
+    }
+}
+
+async function verifyNexusAPI() {
+    response = await nexus.verifyAPI()
+
+    const nexusCheckImage = document.getElementById("nexus-check-image")
+    if (nexusCheckImage == undefined) {
+        return
+    }
+
+    if (response) {
+        nexusCheckImage.src = "assets/check.svg"
+    }
+    else {
+        nexusCheckImage.src = "assets/cross.svg"
     }
 }

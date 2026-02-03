@@ -4,11 +4,16 @@ const Store = require('electron-store').default;
 const fs = require('fs/promises');
 const { createWriteStream } = require('fs');
 const { pipeline } = require('stream/promises');
-const extract = require("extract-zip");
+const extract = require('extract-zip');
+const Nexus = require('@nexusmods/nexus-api').default;
 
 const store = new Store();
 const userSavePath = app.getPath('userData')
 let silksongPath = store.get('silksong-path')
+let nexusAPI = store.get('nexus-api')
+let nexus = undefined
+
+createNexus()
 
 let bepinexFolderPath = `${silksongPath}/BepInEx`
 let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
@@ -63,6 +68,20 @@ ipcMain.handle('load-path', () => {
         return "";
     }
     return silksongPath;
+});
+
+ipcMain.handle('load-nexus-api', () => {
+    nexusAPI = store.get('nexus-api');
+    if (nexusAPI == undefined)  {
+        return "";
+    }
+    return nexusAPI;
+});
+
+ipcMain.handle('save-nexus-api', (event, api) => {
+    nexusAPI = api;
+    createNexus()
+    store.set('nexus-api', nexusAPI);
 });
 
 function saveBepinexVersion(version) {
@@ -281,3 +300,33 @@ ipcMain.handle('delete-bepinex-backup', async () => {
         saveBepinexBackupVersion(undefined)
     }
 })
+
+async function createNexus() {
+    if (nexusAPI == undefined) {
+        return
+    }
+
+    try {
+        nexus = await Nexus.create(
+            nexusAPI,
+            'silk-fly-launcher',
+            '1.0.0',
+            'hollowknightsilksong'
+        );
+    } catch (error) {
+        nexus = undefined
+    }
+}
+
+ipcMain.handle('verify-nexus-api', async () => {
+    return await verifyNexusAPI()
+})
+
+async function verifyNexusAPI() {
+    if (nexus == undefined) {
+        return false
+    }
+    if (await nexus.getValidationResult()) {
+        return true
+    }
+}
