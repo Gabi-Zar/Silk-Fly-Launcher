@@ -81,17 +81,21 @@
     <template id="mod-template">
         <div class="mod-container">
             <div class="mod-text">
-                <h3 id="mod-title">Mod Title</h3>
-                <p id="mod-description">description</p>
-                <p class="transparent-text">V1.0.0 last update on 01/01/2026</p>
+                <div class="horizontal-div" >
+                    <h3 id="mod-title">Unknown Title</h3>
+                    <p id="mod-author">Unknown author</p>
+                    <p id="mod-endorsements-number">? likes</p>
+                </div>
+                <p id="mod-description">No description provided</p>
+                <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
 
                 <div class="mod-actions">
-                    <button class="default-button" onclick="downloadMod()">Download</button>
+                    <a href="https://google.com" class="default-button" id="download-mod-button">Download</a>
                     <a href="https://google.com" class="default-button" id="external-link">Website</a>
                 </div>
             </div>
 
-            <img class="mod-icon" src="assets/placeholder_icon.png" alt="mod icon">
+            <img class="mod-icon" src="assets/placeholder_icon.png" alt="mod icon" id="mod-icon">
         </div>
     </template>
 

@@ -34,5 +34,7 @@ contextBridge.exposeInMainWorld('bepinex', {
 })
 
 contextBridge.exposeInMainWorld('nexus', {
-    verifyAPI: () => ipcRenderer.invoke('verify-nexus-api')
+    verifyAPI: () => ipcRenderer.invoke('verify-nexus-api'),
+    getLatestMods: () => ipcRenderer.invoke('get-latest-mods'),
+    download: (link) => ipcRenderer.invoke('download-mod', link)
 })

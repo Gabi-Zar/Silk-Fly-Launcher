@@ -27,8 +27,10 @@ const bepinexFiles = [
 let bepinexVersion
 let bepinexBackupVersion
 
+let mainWindow
+
 const createWindow = () => {
-    const win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
         webPreferences: {
@@ -36,7 +38,7 @@ const createWindow = () => {
         }
     })
 
-    win.loadFile('renderer/index.html')
+    mainWindow.loadFile('renderer/index.html')
 }
 
 app.whenReady().then(() => {
@@ -330,3 +332,31 @@ async function verifyNexusAPI() {
         return true
     }
 }
+
+ipcMain.handle('get-latest-mods', async () => {
+    if (nexus == undefined) {
+        return
+    }
+
+    mods = await nexus.getLatestAdded()
+    return mods
+})
+
+ipcMain.handle('download-mod', async (event, link) => {
+    if (nexus == undefined) {
+        return
+    }
+
+    const nexusWindow = new BrowserWindow({
+        width: 1080,
+        height: 720,
+        modal: true,
+        parent: mainWindow,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    })
+
+    nexusWindow.loadURL(link)
+})

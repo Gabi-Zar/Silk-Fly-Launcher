@@ -46,14 +46,60 @@ async function navigate(page) {
             const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container")
             view.appendChild(onlineModsTemplateCopy)
 
-            for(let i = 0; i <= 10; i++) {
+            mods = await nexus.getLatestMods()
+            if (mods == undefined) {
+                break;
+            }
+            for(const mod of mods) {
+                if (mod.name == undefined) {
+                    continue
+                }
                 const modTemplateCopy = modTemplate.content.cloneNode(true)
+                if (mod.name) {
+                    const modTitleText = modTemplateCopy.getElementById("mod-title")
+                    modTitleText.innerText = mod.name
+                }
+                if (mod.author) {
+                    const modAuthorText = modTemplateCopy.getElementById("mod-author")
+                    modAuthorText.innerText = `by ${mod.author}`
+                }
+                if (mod.endorsement_count) {
+                    const modEndorsementsNumber = modTemplateCopy.getElementById("mod-endorsements-number")
+                    if (mod.endorsement_count > 1) {
+                        modEndorsementsNumber.innerText = `${mod.endorsement_count} likes`
+                    }
+                    else {
+                        modEndorsementsNumber.innerText = `${mod.endorsement_count} like`
+                    }
+                }
+                if (mod.summary) {
+                    const modDescriptionText = modTemplateCopy.getElementById("mod-description")
+                    modDescriptionText.innerText = mod.summary
+                }
+                if (mod.picture_url) {
+                    const modPicture = modTemplateCopy.getElementById("mod-icon")
+                    modPicture.src = mod.picture_url
+                }
+                if (mod.version && mod.updated_timestamp) {
+                    const modVersionText = modTemplateCopy.getElementById("mod-version")
+                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updated_time.slice(0, 10)}`
+                }
+
+                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${mod.mod_id}`
 
                 const modLinkButton = modTemplateCopy.getElementById("external-link")
+                modLinkButton.href = modUrl
                 modLinkButton.addEventListener('click', function(event) {
                     event.preventDefault()
                     const modLink = modLinkButton.href
                     electronAPI.openExternalLink(modLink)
+                })
+
+                modDownloadButton = modTemplateCopy.getElementById("download-mod-button")
+                modDownloadButton.addEventListener('click', function(event) {
+                    event.preventDefault()
+                    const modDownloadLink = `${modUrl}?tab=files`
+                    nexus.download(modDownloadLink)
                 })
 
                 ModsContainer.appendChild(modTemplateCopy)
@@ -81,6 +127,7 @@ async function navigate(page) {
             view.appendChild(settingsTemplateCopy)
             setBepinexVersion()
             verifyNexusAPI()
+            break;
     }
 }
 
@@ -121,10 +168,6 @@ async function exportData() {
 async function importData() {
     await files.import()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
-}
-
-async function downloadMod() {
-    console.log("WIP")
 }
 
 async function installBepinex() {
