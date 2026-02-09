@@ -104,6 +104,8 @@ body {
     font-size: 28px;
     margin-bottom: 20px;
     color: #ffffff;
+    display: flex;
+    justify-content: center;
 }
 
 .content h2 {
@@ -197,6 +199,13 @@ body {
 .important-button:hover {
     background: rgba(255, 0, 0, 0.4);
     border-color: rgba(255, 25, 0, 0.8);
+}
+
+.bigger-button {
+    width: 240px;
+    height: 80px;
+    border-radius: 8px;
+    font-size: 32px;
 }
 
 .search-container {
@@ -304,4 +313,13 @@ body {
     width: 32px;
     height: 32px;
     object-fit: cover;
+}
+
+.link {
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.link:hover {
+    color: #ff6b6b;
 }

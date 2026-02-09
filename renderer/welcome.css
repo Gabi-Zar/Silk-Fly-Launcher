@@ -1,0 +1,25 @@
+.welcome-div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+    padding: 0 60px;
+}
+
+.title {
+    display: flex;
+    flex: 1;
+    font-size: 60px;
+    margin-bottom: 60px;
+    color: #ffffff;
+    justify-content: center;
+}
+
+.button-div {
+    display: flex;
+    flex: 2;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    gap: 40px;
+}

@@ -11,16 +11,6 @@ const versionText = HomeTemplate.content.getElementById("version-text");
 
 navigate("home")
 
-let savePath
-files.userSavePath().then(path => {
-    savePath = `${path}\\config.json`
-    files.fileExists(savePath).then(result => {
-        if(!result) {
-            autoDetectGamePath()
-        }
-    });
-});
-
 async function navigate(page) {
     view.replaceChildren()
     switch (page) {
@@ -138,27 +128,16 @@ async function launch(mode) {
 }
 
 async function autoDetectGamePath() {
-    const defaultsSilksongPaths = [
-        ":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong",
-        ":/SteamLibrary/steamapps/common/Hollow Knight Silksong"
-    ]
-    for (const path of defaultsSilksongPaths) {
-        for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
-            const fullPath = `${String.fromCharCode(i)}${path}`
-            if (await files.fileExists(fullPath)) {
-                await files.saveSilksongPath(fullPath)
-                if (document.getElementById("silksong-path-input")) {
-                    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
-                }
-                return
-            }
-        }
+    await files.autoDetectGamePath()
+    if (document.getElementById("silksong-path-input")) {
+        document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
     }
 }
 
 async function deleteData() {
-    await files.delete(savePath)
+    await files.delete()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
 }
 
 async function exportData() {
@@ -168,6 +147,7 @@ async function exportData() {
 async function importData() {
     await files.import()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
 }
 
 async function installBepinex() {

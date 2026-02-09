@@ -9,6 +9,7 @@ const Nexus = require('@nexusmods/nexus-api').default;
 
 const store = new Store();
 const userSavePath = app.getPath('userData')
+const dataPath = `${userSavePath}\\config.json`
 let silksongPath = store.get('silksong-path')
 let nexusAPI = store.get('nexus-api')
 let nexus = undefined
@@ -29,7 +30,7 @@ let bepinexBackupVersion
 
 let mainWindow
 
-const createWindow = () => {
+async function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -38,7 +39,14 @@ const createWindow = () => {
         }
     })
 
-    mainWindow.loadFile('renderer/index.html')
+    if(await fileExists(dataPath)) {
+        htmlFile = "renderer/index.html"
+    }
+    else {
+        htmlFile = "renderer/welcome.html"
+    }
+
+    mainWindow.loadFile(htmlFile)
 }
 
 app.whenReady().then(() => {
@@ -58,11 +66,15 @@ app.on('window-all-closed', () => {
 })
 
 ipcMain.handle('save-path', (event, path) => {
+    saveSilksongPath(path)
+});
+
+function saveSilksongPath(path) {
     silksongPath = path;
     bepinexFolderPath = `${silksongPath}/BepInEx`
     bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
     store.set('silksong-path', silksongPath);
-});
+}
 
 ipcMain.handle('load-path', () => {
     silksongPath = store.get('silksong-path');
@@ -127,17 +139,11 @@ ipcMain.handle('file-exists', async (_, filePath) => {
     return await fileExists(filePath);
 });
 
-ipcMain.handle('get-userSavePath', () => {
-    return userSavePath
-});
-
-ipcMain.handle('delete-data', async (event, path) => {
-    await fs.unlink(path)
+ipcMain.handle('delete-data', async () => {
+    await fs.unlink(dataPath)
 });
 
 ipcMain.handle('export-data', async () => {
-    const dataPath = `${userSavePath}\\config.json`
-
     const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'Export Data',
         defaultPath: 'config.json',
@@ -152,20 +158,19 @@ ipcMain.handle('export-data', async () => {
 })
 
 ipcMain.handle('import-data', async () => {
-    const dataPath = `${userSavePath}\\config.json`
-
     const { canceled, filePaths } = await dialog.showOpenDialog({
         title: 'Import Data',
         properties: ['openFile'],
         filters: [{ name: 'JSON', extensions: ['json'] }]
     })
 
-    if (canceled || !filePaths) return
+    if (canceled || !filePaths) return false
 
     if(await fileExists(dataPath)) {
         await fs.unlink(dataPath)
     }
     await fs.copyFile(filePaths[0], dataPath,fs.constants.COPYFILE_EXCL)
+    return true
 })
 
 ipcMain.handle('open-link', async (event, link) => {
@@ -359,4 +364,24 @@ ipcMain.handle('download-mod', async (event, link) => {
     })
 
     nexusWindow.loadURL(link)
+})
+
+ipcMain.handle('auto-detect-game-path', async () => {
+    const defaultsSilksongPaths = [
+        ":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong",
+        ":/SteamLibrary/steamapps/common/Hollow Knight Silksong"
+    ]
+    for (const path of defaultsSilksongPaths) {
+        for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
+            const fullPath = `${String.fromCharCode(i)}${path}`
+            if (await fileExists(fullPath)) {
+                saveSilksongPath(fullPath)
+                return
+            }
+        }
+    }
+})
+
+ipcMain.handle('load-main-page', () => {
+    mainWindow.loadFile("renderer/index.html")
 })

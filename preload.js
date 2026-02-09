@@ -8,11 +8,11 @@ contextBridge.exposeInMainWorld('versions', {
 
 contextBridge.exposeInMainWorld('files', {
     fileExists: (path) => ipcRenderer.invoke('file-exists', path),
-    userSavePath: () => ipcRenderer.invoke('get-userSavePath'),
-    delete: (path) => ipcRenderer.invoke('delete-data', path),
+    delete: () => ipcRenderer.invoke('delete-data'),
     export: () => ipcRenderer.invoke('export-data'),
     import: () => ipcRenderer.invoke('import-data'),
 
+    autoDetectGamePath: () => ipcRenderer.invoke('auto-detect-game-path'),
     saveSilksongPath: (path) => ipcRenderer.invoke('save-path', path),
     loadSilksongPath: () => ipcRenderer.invoke('load-path'),
     loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version'),
@@ -23,7 +23,8 @@ contextBridge.exposeInMainWorld('files', {
 
 contextBridge.exposeInMainWorld('electronAPI', {
     openExternalLink: (url) => ipcRenderer.invoke('open-link', url),
-    launchGame: (mode) => ipcRenderer.invoke('launch-game', mode)
+    launchGame: (mode) => ipcRenderer.invoke('launch-game', mode),
+    loadMainPage: () => ipcRenderer.invoke('load-main-page')
 });
 
 contextBridge.exposeInMainWorld('bepinex', {

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Silk Fly Launcher</title>
+    <link rel="stylesheet" href="welcome.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="app">
+        <video autoplay muted loop id="menu_wallpaper" class="background_video">
+            <source src="assets/background.mp4" type="video/mp4">
+        </video>
+
+        <div class="welcome-div" id="main-div">
+            <br>
+            <div id="page">
+            </div>
+            
+            <div class="button-div" id="button-div">
+            </div>
+        </div>
+    </div>
+    
+    <template id="welcome-template">
+        <h1 class="title">Welcome to Silk Fly Launcher</h1>
+    </template>
+
+    <template id="one-button-template">
+        <button class="default-button bigger-button" onclick="importData()">Import Data</button>
+        <button class="default-button bigger-button" onclick="next()">Next →</button>
+    </template>
+
+    <template id="two-button-template">
+        <button class="default-button bigger-button" onclick="back()">← Back</button>
+        <button class="default-button bigger-button" onclick="next()">Next →</button>
+    </template>
+
+    <template id="path-template">
+        <h1 class="title">Enter Hollow Knight: Silksong path</h1>
+        <p>Please verify the path to your game and edit it if the auto detection didn't work</p>
+        <div class="horizontal-div">
+            <label for="silksong-path-label">Enter Silksong path: </label>
+            <input type="text" class="input" id="silksong-path-input" name="silksong-path-input">
+            <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
+        </div>
+    </template>
+
+    <template id="nexus-template">
+        <h1 class="title">Enter your nexus API key</h1>
+        <p>Please enter your nexus API key. To get your API key go to <a href="https://www.nexusmods.com/settings/api-keys" class="link" id="external-link">https://www.nexusmods.com/settings/api-keys</a> and click on new personnal API key</p>
+        <div class="horizontal-div">
+            <label for="nexus-api-label">Enter your nexus api: </label>
+            <input type="text" class="input" id="nexus-api-input" name="nexus-api-input">
+            <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg">
+            <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
+        </div>
+    </template>
+
+    <template id="style-template">
+        <h1 class="title">Chose the theme of the app</h1>
+    </template>
+
+    <template id="tutorial-template">
+        <h1 class="title">Tutorial to download mod from nexus</h1>
+    </template>
+
+    <script src="welcome.js"></script>
+</body>
+</html>
