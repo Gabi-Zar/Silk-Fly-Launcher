@@ -65,10 +65,10 @@ app.on('window-all-closed', () => {
     }
 })
 
+///////////////// SAVING AND LOADING /////////////////
 ipcMain.handle('save-path', (event, path) => {
     saveSilksongPath(path)
 });
-
 function saveSilksongPath(path) {
     silksongPath = path;
     bepinexFolderPath = `${silksongPath}/BepInEx`
@@ -84,19 +84,6 @@ ipcMain.handle('load-path', () => {
     return silksongPath;
 });
 
-ipcMain.handle('load-nexus-api', () => {
-    nexusAPI = store.get('nexus-api');
-    if (nexusAPI == undefined)  {
-        return "";
-    }
-    return nexusAPI;
-});
-
-ipcMain.handle('save-nexus-api', (event, api) => {
-    nexusAPI = api;
-    createNexus()
-    store.set('nexus-api', nexusAPI);
-});
 
 function saveBepinexVersion(version) {
     bepinexVersion = version;
@@ -107,6 +94,12 @@ function saveBepinexVersion(version) {
     store.set('bepinex-version', version);
 };
 
+ipcMain.handle('load-bepinex-version', () => {
+    bepinexVersion = store.get('bepinex-version');
+    return bepinexVersion;
+});
+
+
 function saveBepinexBackupVersion(version) {
     bepinexBackupVersion = version;
     if (bepinexBackupVersion == undefined) {
@@ -116,15 +109,40 @@ function saveBepinexBackupVersion(version) {
     store.set('bepinex-backup-version', version);
 };
 
-ipcMain.handle('load-bepinex-version', () => {
-    bepinexVersion = store.get('bepinex-version');
-    return bepinexVersion;
-});
-
 ipcMain.handle('load-bepinex-backup-version', () => {
     bepinexBackupVersion = store.get('bepinex-backup-version');
     return bepinexBackupVersion;
 });
+ 
+ipcMain.handle('save-nexus-api', (event, api) => {
+    nexusAPI = api;
+    createNexus()
+    store.set('nexus-api', nexusAPI);
+});
+
+ipcMain.handle('load-nexus-api', () => {
+    nexusAPI = store.get('nexus-api');
+    if (nexusAPI == undefined)  {
+        return "";
+    }
+    return nexusAPI;
+});
+
+
+ipcMain.handle('save-theme', (event, theme) => {
+    store.set('theme', theme);
+});
+
+ipcMain.handle('load-theme', () => {
+    theme = store.get('theme');
+    if (theme == undefined)  {
+        return "Silksong";
+    }
+    return theme;
+});
+
+//////////////////////////////////////////////////////
+/////////////////// DATA HANDLING ////////////////////
 
 async function fileExists(filePath) {
     try {
@@ -135,15 +153,17 @@ async function fileExists(filePath) {
     }
 }
 
-ipcMain.handle('file-exists', async (_, filePath) => {
-    return await fileExists(filePath);
-});
-
 ipcMain.handle('delete-data', async () => {
-    await fs.unlink(dataPath)
+    if (await fileExists(dataPath)) {
+        await fs.unlink(dataPath)
+    }
 });
 
 ipcMain.handle('export-data', async () => {
+    if (!await fileExists(dataPath)) {
+        return
+    }
+
     const { canceled, filePath } = await dialog.showSaveDialog({
         title: 'Export Data',
         defaultPath: 'config.json',
@@ -173,31 +193,8 @@ ipcMain.handle('import-data', async () => {
     return true
 })
 
-ipcMain.handle('open-link', async (event, link) => {
-    await shell.openExternal(link)
-})
-
-ipcMain.handle('launch-game', async (event, mode) => {
-    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`
-    if (mode === "modded"){
-        if (await fileExists(bepinexFolderPath)) {
-            await shell.openExternal(silksongExecutablePath)
-        }
-        else {
-            await installBepinex()
-            await shell.openExternal(silksongExecutablePath)
-        }
-    }
-    if (mode === "vanilla"){
-        if (await fileExists(bepinexFolderPath)) {
-            await backupBepinex()
-            await shell.openExternal(silksongExecutablePath)
-        }
-        else {
-            await shell.openExternal(silksongExecutablePath)
-        }
-    }
-})
+//////////////////////////////////////////////////////
+////////////////////// BEPINEX ///////////////////////
 
 async function installBepinex() {
     if (await fileExists(bepinexBackupPath)) {
@@ -308,6 +305,9 @@ ipcMain.handle('delete-bepinex-backup', async () => {
     }
 })
 
+//////////////////////////////////////////////////////
+/////////////////////// NEXUS ////////////////////////
+
 async function createNexus() {
     if (nexusAPI == undefined) {
         return
@@ -366,6 +366,9 @@ ipcMain.handle('download-mod', async (event, link) => {
     nexusWindow.loadURL(link)
 })
 
+//////////////////////////////////////////////////////
+//////////////////// UNCATEGORIZE ////////////////////
+
 ipcMain.handle('auto-detect-game-path', async () => {
     const defaultsSilksongPaths = [
         ":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong",
@@ -384,4 +387,30 @@ ipcMain.handle('auto-detect-game-path', async () => {
 
 ipcMain.handle('load-main-page', () => {
     mainWindow.loadFile("renderer/index.html")
+})
+
+ipcMain.handle('open-link', async (event, link) => {
+    await shell.openExternal(link)
+})
+
+ipcMain.handle('launch-game', async (event, mode) => {
+    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`
+    if (mode === "modded"){
+        if (await fileExists(bepinexFolderPath)) {
+            await shell.openExternal(silksongExecutablePath)
+        }
+        else {
+            await installBepinex()
+            await shell.openExternal(silksongExecutablePath)
+        }
+    }
+    if (mode === "vanilla"){
+        if (await fileExists(bepinexFolderPath)) {
+            await backupBepinex()
+            await shell.openExternal(silksongExecutablePath)
+        }
+        else {
+            await shell.openExternal(silksongExecutablePath)
+        }
+    }
 })

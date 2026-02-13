@@ -9,42 +9,40 @@
 
     <div class="app">
 
-        <video autoplay muted loop id="menu_wallpaper" class="background_video">
-            <source src="assets/background.mp4" type="video/mp4">
-        </video>
+        <video autoplay muted loop class="background-video" id="background-video" src="assets/background/Silksong.mp4" type="video/mp4"></video>
 
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo" onclick="navigate('home')">
-                <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo_img"/>
-                <h5 class="logo_title">Silk Fly Launcher</h1>
+                <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo-img"/>
+                <h5 class="logo-title">Silk Fly Launcher</h1>
             </div>
 
             <nav class="nav">
                 <div class="nav-section">
                     <span class="nav-title">Execute Silksong</span>
                     <button onclick="launch('vanilla')">
-                        <img src="vanilla_launch_icon.png" class="button_icon"/>
+                        <img src="vanilla_launch_icon.png" class="button-icon"/>
                         Run Vanilla
                     <button onclick="launch('modded')">
-                        <img src="modded_launch_icon.png" class="button_icon"/>
+                        <img src="modded_launch_icon.png" class="button-icon"/>
                         Run Modded
                 </div>
 
                 <div class="nav-section">
                     <span class="nav-title">Mods</span>
                     <button onclick="navigate('mods-installed')">
-                        <img src="installed_mods_icon.png" class="button_icon"/>
+                        <img src="installed_mods_icon.png" class="button-icon"/>
                         Installed
                     <button onclick="navigate('mods-online')">
-                        <img src="online_mods_icon.png" class="button_icon"/>
+                        <img src="online_mods_icon.png" class="button-icon"/>
                         Online
                 </div>
 
                 <div class="nav-section">
                     <span class="nav-title">Settings</span>
                     <button onclick="navigate('general-settings')">
-                        <img src="general_settings_icon.png" class="button_icon"/>
+                        <img src="general_settings_icon.png" class="button-icon"/>
                         General
                 </div>
             </nav>
@@ -90,9 +88,9 @@
                 <p id="mod-description">No description provided</p>
                 <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
 
-                <div class="mod-actions">
-                    <a href="https://google.com" class="default-button" id="download-mod-button">Download</a>
-                    <a href="https://google.com" class="default-button" id="external-link">Website</a>
+                <div class="horizontal-div">
+                    <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="download-mod-button">Download</a>
+                    <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
                 </div>
             </div>
 
@@ -106,6 +104,21 @@
             <label for="silksong-path-label">Enter Silksong path: </label>
             <input type="text" class="input" id="silksong-path-input" name="silksong-path-input">
             <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
+        </div>
+        <div class="horizontal-div">
+            <label for="silksong-path-label">Themes: </label>
+            <div class="themes-div">
+                <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
+                <div class="themes-menu longer-button" id="themes-menu">
+                    <li onclick="changeTheme('Silksong')">Silksong</li>
+                    <li onclick="changeTheme('Citadel of song')">Citadel of song (WIP)</li>
+                    <li onclick="changeTheme('Cradle')">Cradle (WIP)</li>
+                    <li onclick="changeTheme('Abyss')">Abyss (WIP)</li>
+                    <li onclick="changeTheme('Greyroot')">Greyroot (WIP)</li>
+                    <li onclick="changeTheme('Surface')">Surface (WIP)</li>
+                    <li onclick="changeTheme('Steel')">Steel (WIP)</li>
+                </div>
+            </div>
         </div>
         <br>
         <h2>BepInEx</h2>

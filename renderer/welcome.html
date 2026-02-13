@@ -8,9 +8,7 @@
 </head>
 <body>
     <div class="app">
-        <video autoplay muted loop id="menu_wallpaper" class="background_video">
-            <source src="assets/background.mp4" type="video/mp4">
-        </video>
+        <video autoplay muted loop class="background-video" id="background-video" src="assets/background/Silksong.mp4" type="video/mp4"></video>
 
         <div class="welcome-div" id="main-div">
             <br>
@@ -59,6 +57,21 @@
 
     <template id="style-template">
         <h1 class="title">Chose the theme of the app</h1>
+        <div class="horizontal-div welcome-div">
+            <label for="silksong-path-label">Themes: </label>
+            <div class="themes-div">
+                <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
+                <div class="themes-menu longer-button" id="themes-menu">
+                    <li onclick="changeTheme('Silksong')">Silksong</li>
+                    <li onclick="changeTheme('Citadel of song')">Citadel of song (WIP)</li>
+                    <li onclick="changeTheme('Cradle')">Cradle (WIP)</li>
+                    <li onclick="changeTheme('Abyss')">Abyss (WIP)</li>
+                    <li onclick="changeTheme('Greyroot')">Greyroot (WIP)</li>
+                    <li onclick="changeTheme('Surface')">Surface (WIP)</li>
+                    <li onclick="changeTheme('Steel')">Steel (WIP)</li>
+                </div>
+            </div>
+        </div>
     </template>
 
     <template id="tutorial-template">

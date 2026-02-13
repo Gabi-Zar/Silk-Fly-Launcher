@@ -110,3 +110,42 @@ async function importData() {
         electronAPI.loadMainPage()
     }
 }
+
+function toggleThemesMenu() {
+    const themesMenu = document.getElementById("themes-menu")
+    if (themesMenu) {
+        themesMenu.classList.toggle("show")
+    }
+}
+
+async function setThemeButton() {
+    const themesButton = document.getElementById("themes-button")
+    if (themesButton) {
+        themesButton.textContent = await files.loadTheme()
+    }
+}
+
+function changeTheme(theme) {
+    files.saveTheme(theme)
+
+    setThemeButton()
+
+    const themesColors = {
+        "var":             ["--primary-color", "--secondary-color", "--background-color"],
+        "Silksong":        ["rgba(255, 25,  0,   0.3)", "#ff6b6b", "rgba(255, 72,  0,   0.2)"],
+        "Citadel of song": ["rgba(160, 116, 89,  0.3)", "#d3ba91", "rgba(123, 102, 93,  0.2)"],
+        "Cradle":          ["rgba(123, 136, 255, 0.3)", "#7c9fea", "rgba(61,  88,  150, 0.2)"],
+        "Abyss":           ["rgba(255, 255, 255, 0.3)", "#ececec", "rgba(255, 255, 255, 0.2)"],
+        "Greyroot":        ["rgba(181, 255, 180, 0.3)", "#c1ffcd", "rgba(90,  165, 130, 0.2)"],
+        "Surface":         ["rgba(75,  120, 255, 0.3)", "#87c3ff", "rgba(42,  107, 203, 0.2)"],
+        "Steel":           ["rgba(164, 164, 164, 0.3)", "#c5b9b9", "rgba(255, 255, 255, 0.2)"]
+    }
+    for(let i = 0; i < 3; i++) {
+        document.documentElement.style.setProperty(themesColors.var[i], themesColors[theme][i])
+    }
+    
+    const backgroundVideo = document.getElementById("background-video")
+    backgroundVideo.src = `assets/background/${theme}.mp4`
+
+    toggleThemesMenu()
+}

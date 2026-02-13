@@ -7,7 +7,6 @@ contextBridge.exposeInMainWorld('versions', {
 });
 
 contextBridge.exposeInMainWorld('files', {
-    fileExists: (path) => ipcRenderer.invoke('file-exists', path),
     delete: () => ipcRenderer.invoke('delete-data'),
     export: () => ipcRenderer.invoke('export-data'),
     import: () => ipcRenderer.invoke('import-data'),
@@ -18,7 +17,9 @@ contextBridge.exposeInMainWorld('files', {
     loadBepinexVersion: () => ipcRenderer.invoke('load-bepinex-version'),
     loadBepinexBackupVersion: () => ipcRenderer.invoke('load-bepinex-backup-version'),
     saveNexusAPI: (api) => ipcRenderer.invoke('save-nexus-api', api),
-    loadNexusAPI: () => ipcRenderer.invoke('load-nexus-api')
+    loadNexusAPI: () => ipcRenderer.invoke('load-nexus-api'),
+    saveTheme: (theme) => ipcRenderer.invoke('save-theme', theme),
+    loadTheme: () => ipcRenderer.invoke('load-theme')
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
