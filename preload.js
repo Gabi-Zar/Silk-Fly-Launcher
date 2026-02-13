@@ -1,6 +1,9 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
+const VERSION = "1.0.0"
+
 contextBridge.exposeInMainWorld('versions', {
+    silkFlyLauncher: () => VERSION,
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
     electron: () => process.versions.electron
@@ -25,7 +28,8 @@ contextBridge.exposeInMainWorld('files', {
 contextBridge.exposeInMainWorld('electronAPI', {
     openExternalLink: (url) => ipcRenderer.invoke('open-link', url),
     launchGame: (mode) => ipcRenderer.invoke('launch-game', mode),
-    loadMainPage: () => ipcRenderer.invoke('load-main-page')
+    loadMainPage: () => ipcRenderer.invoke('load-main-page'),
+    getPage: () => ipcRenderer.invoke('get-page')
 });
 
 contextBridge.exposeInMainWorld('bepinex', {

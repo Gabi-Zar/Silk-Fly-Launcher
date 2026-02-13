@@ -1,3 +1,4 @@
+////////////////// CONST FOR INDEX ///////////////////
 const title = document.getElementById("title");
 const view = document.getElementById("view");
 
@@ -7,14 +8,40 @@ const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
-const versionText = HomeTemplate.content.getElementById("version-text");
+//////////////////////////////////////////////////////
+///////////////// CONST FOR WELCOME //////////////////
+
+let actualPage = 0
+
+const pageDiv = document.getElementById("page");
+const buttonDiv = document.getElementById("button-div");
+
+const oneButtonTemplate = document.getElementById("one-button-template");
+const twoButtonTemplate = document.getElementById("two-button-template");
+
+const welcomeTemplate = document.getElementById("welcome-template");
+const silksongPathTemplate = document.getElementById("path-template");
+const nexusTemplate = document.getElementById("nexus-template");
+const styleTemplate = document.getElementById("style-template");
+const tutorialTemplate = document.getElementById("tutorial-template");
+
+//////////////////////////////////////////////////////
+////////////////////// STARTUP ///////////////////////
 
 on_startup()
 
 async function on_startup() {
-    changeTheme(await files.loadTheme())
-    navigate("home")
+    if (await electronAPI.getPage() == "index.html") {
+        changeTheme(await files.loadTheme())
+        navigate("home")
+    }
+    else if (await electronAPI.getPage() == "welcome.html") {
+        welcomeNavigate()
+    }
 }
+
+//////////////////////////////////////////////////////
+///////////////////// NAVIGATE ///////////////////////
 
 async function navigate(page) {
     view.replaceChildren()
@@ -22,16 +49,18 @@ async function navigate(page) {
         case "home":
             title.innerText = "Home";
             const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
-            const versionText = HomeTemplateCopy.getElementById("version-text")
-            versionText.innerText =
-                `Chrome version: (v${versions.chrome()}), ` +
-                `Node.js version: (v${versions.node()}), Electron version: (v${versions.electron()})`
             view.appendChild(HomeTemplateCopy)
             break;
 
         case "mods-installed":
             title.innerText = "Installed Mods";
             const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
+            const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form")
+            
+            searchFormInstalled.addEventListener('submit', async function(event) {
+                event.preventDefault()
+            })
+
             view.appendChild(installedModsTemplateCopy)
             break;
 
@@ -39,6 +68,12 @@ async function navigate(page) {
             title.innerText = "Online Mods";
             const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
             const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container")
+            const searchFormNexus = onlineModsTemplateCopy.getElementById("search-form")
+            
+            searchFormNexus.addEventListener('submit', async function(event) {
+                event.preventDefault()
+            })
+
             view.appendChild(onlineModsTemplateCopy)
 
             mods = await nexus.getLatestMods()
@@ -106,6 +141,13 @@ async function navigate(page) {
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
             const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input")
+            const versionsList = settingsTemplateCopy.getElementById("versions-list")
+            const versionsDictionnary = {
+                "Silk-Fly-Launcher": `Silk Fly Launcher: v${versions.silkFlyLauncher()}`, 
+                "Electron": `Electron: v${versions.electron()}`,
+                "Node": `Node.js: v${versions.node()}`,
+                "Chrome": `Chrome: v${versions.chrome()}`,
+            }
 
             silksongPathInput.value = await files.loadSilksongPath()
             silksongPathInput.addEventListener('input', async function(event) {
@@ -118,6 +160,10 @@ async function navigate(page) {
                 let nexusAPI = nexusAPIInput.value
                 files.saveNexusAPI(nexusAPI)
             });
+            
+            for(const element of versionsList.children) {
+                element.innerText = versionsDictionnary[element.id]
+            }
 
             view.appendChild(settingsTemplateCopy)
             setBepinexVersion()
@@ -127,17 +173,95 @@ async function navigate(page) {
     }
 }
 
-async function launch(mode) {
-    alert(`Launching the game in ${mode} mode.`);
-    await electronAPI.launchGame(mode);
-    setBepinexVersion()
+async function welcomeNavigate() {
+    pageDiv.replaceChildren()
+    switch (actualPage) {
+        case 0:
+            pageDiv.appendChild(welcomeTemplate.content.cloneNode(true))
+            buttonDiv.replaceChildren()
+            buttonDiv.appendChild(oneButtonTemplate.content.cloneNode(true))
+            break;
+
+        case 1:
+            pageDiv.appendChild(silksongPathTemplate.content.cloneNode(true))
+            buttonDiv.replaceChildren()
+            buttonDiv.appendChild(twoButtonTemplate.content.cloneNode(true))
+
+            const silksongPathInput = document.getElementById("silksong-path-input")
+            if (await files.loadSilksongPath() == "") {
+                autoDetectGamePath()
+            }
+            else {
+                document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+            }
+
+            silksongPathInput.addEventListener('input', async function(event) {
+                let silksongPath = silksongPathInput.value
+                await files.saveSilksongPath(silksongPath)
+            });
+            break;
+
+        case 2:
+            pageDiv.appendChild(nexusTemplate.content.cloneNode(true))
+            const nexusLink = document.getElementById("external-link")
+            nexusLink.addEventListener('click', function(event) {
+                event.preventDefault()
+                const url = nexusLink.href
+                electronAPI.openExternalLink(url)
+            })
+
+            const nexusAPIInput = document.getElementById("nexus-api-input")
+            nexusAPIInput.value = await files.loadNexusAPI()
+            nexusAPIInput.addEventListener('input', async function(event) {
+                let nexusAPI = nexusAPIInput.value
+                await files.saveNexusAPI(nexusAPI)
+            });
+            break;
+
+        case 3:
+            pageDiv.appendChild(styleTemplate.content.cloneNode(true))
+            break;
+
+        case 4:
+            pageDiv.appendChild(tutorialTemplate.content.cloneNode(true))
+            break;
+
+        case 5:
+            electronAPI.loadMainPage()
+            break;
+    }
 }
 
-async function autoDetectGamePath() {
-    await files.autoDetectGamePath()
-    if (document.getElementById("silksong-path-input")) {
-        document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+function next() {
+    actualPage++
+    welcomeNavigate()
+}
+
+function back() {
+    actualPage--
+    welcomeNavigate()
+}
+
+//////////////////////////////////////////////////////
+/////////////////// DATA HANDLING ////////////////////
+
+async function initialImportData() {
+    if (await files.import()) {
+        electronAPI.loadMainPage()
     }
+}
+
+async function importData() {
+    await files.import()
+    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
+    setBepinexVersion()
+    changeTheme(await files.loadTheme())
+    toggleThemesMenu()
+}
+
+async function exportData() {
+    await files.export()
 }
 
 async function deleteData() {
@@ -146,19 +270,11 @@ async function deleteData() {
     await files.delete()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
     document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
+    setBepinexVersion()
 }
 
-async function exportData() {
-    await files.export()
-}
-
-async function importData() {
-    await files.import()
-    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
-    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
-    changeTheme(await files.loadTheme())
-    toggleThemesMenu()
-}
+//////////////////////////////////////////////////////
+////////////////////// BEPINEX ///////////////////////
 
 async function installBepinex() {
     await bepinex.install()
@@ -201,6 +317,14 @@ async function setBepinexVersion() {
     }
 }
 
+async function searchInstalledMods() {
+    const searchInput = document.getElementById("search-input")
+    console.log(searchInput.value)
+}
+
+//////////////////////////////////////////////////////
+/////////////////////// NEXUS ////////////////////////
+
 async function verifyNexusAPI() {
     response = await nexus.verifyAPI()
 
@@ -216,6 +340,14 @@ async function verifyNexusAPI() {
         nexusCheckImage.src = "assets/cross.svg"
     }
 }
+
+async function searchNexusMods() {
+    const searchInput = document.getElementById("search-input")
+    console.log(searchInput.value)
+}
+
+//////////////////////////////////////////////////////
+/////////////////////// THEMES ///////////////////////
 
 function toggleThemesMenu() {
     const themesMenu = document.getElementById("themes-menu")
@@ -254,4 +386,19 @@ function changeTheme(theme) {
     backgroundVideo.src = `assets/background/${theme}.mp4`
 
     toggleThemesMenu()
+}
+
+//////////////////////////////////////////////////////
+//////////////////// UNCATEGORIZE ////////////////////
+
+async function launch(mode) {
+    await electronAPI.launchGame(mode);
+    setBepinexVersion()
+}
+
+async function autoDetectGamePath() {
+    await files.autoDetectGamePath()
+    if (document.getElementById("silksong-path-input")) {
+        document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+    }
 }

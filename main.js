@@ -29,6 +29,7 @@ let bepinexVersion
 let bepinexBackupVersion
 
 let mainWindow
+let htmlFile
 
 async function createWindow() {
     mainWindow = new BrowserWindow({
@@ -40,13 +41,13 @@ async function createWindow() {
     })
 
     if(await fileExists(dataPath)) {
-        htmlFile = "renderer/index.html"
+        htmlFile = "index.html"
     }
     else {
-        htmlFile = "renderer/welcome.html"
+        htmlFile = "welcome.html"
     }
 
-    mainWindow.loadFile(htmlFile)
+    mainWindow.loadFile(`renderer/${htmlFile}`)
 }
 
 app.whenReady().then(() => {
@@ -386,7 +387,12 @@ ipcMain.handle('auto-detect-game-path', async () => {
 })
 
 ipcMain.handle('load-main-page', () => {
-    mainWindow.loadFile("renderer/index.html")
+    htmlFile = "index.html"
+    mainWindow.loadFile(`renderer/${htmlFile}`)
+})
+
+ipcMain.handle('get-page', () => {
+    return htmlFile
 })
 
 ipcMain.handle('open-link', async (event, link) => {

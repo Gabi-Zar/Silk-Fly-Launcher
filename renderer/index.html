@@ -59,20 +59,24 @@
     <!-- Template -->
     <template id="home-template">
         <h2>Silk Fly Launcher</h2>
-        <h3> Debugging data</h3>
-        <p id="version-text"></p>
     </template>
 
     <template id="installed-mods-template">
-        <p>List of installed mods.</p>
+        <h2>List Of Installed Mods</h2>
+        <form class="horizontal-div" id="search-form">
+            <input class="input" id="search-input" type="text" placeholder="Search For Mods...">
+            <button class="default-button" onclick="searchInstalledMods()">Search</button>
+        </form>
+        <div class="mods-container" id="mods-container">
+        </div>
     </template>
 
     <template id="online-mods-template">
-        <h2>List Of Mods</h2>
-        <div class="search-container">
-            <input type="text" placeholder="Search For Mods...">
-            <button class="search-button">🔍</button>
-        </div>
+        <h2>List Of Nexus Mods</h2>
+        <form class="horizontal-div" id="search-form">
+            <input class="input" id="search-input" type="text" placeholder="Search For Mods...">
+            <button class="default-button" onclick="searchNexusMods()">Search</button>
+        </form>
         <div class="mods-container" id="mods-container">
         </div>
     </template>
@@ -144,6 +148,18 @@
             <button class="default-button" onclick="importData()">Import Data</button>
             <button class="default-button" onclick="exportData()">Export Data</button>
             <button class="important-button" onclick="deleteData()">Delete All Data</button>
+        </div>
+        <br>
+        <h2>Debugging</h2>
+        <div class="horizontal-div">
+            <h3>Versions: </h3>
+            <ul id="versions-list">
+                <li id="Silk-Fly-Launcher"></li>
+                <li id="Electron"></li>
+                <li id="Node"></li>
+                <li id="Chrome"></li>
+            </ul>
+            <p id="version-text"></p>
         </div>
     </template>
 
