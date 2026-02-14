@@ -8,6 +8,8 @@ const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
+let old_page
+
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
 
@@ -44,10 +46,15 @@ async function on_startup() {
 ///////////////////// NAVIGATE ///////////////////////
 
 async function navigate(page) {
+    if (old_page == page) {
+        return
+    }
+    old_page = page
+
     view.replaceChildren()
     switch (page) {
         case "home":
-            title.innerText = "Home";
+            title.innerText = "Silk Fly Launcher";
             const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
             view.appendChild(HomeTemplateCopy)
             break;
@@ -146,7 +153,7 @@ async function navigate(page) {
                 "Silk-Fly-Launcher": `Silk Fly Launcher: v${versions.silkFlyLauncher()}`, 
                 "Electron": `Electron: v${versions.electron()}`,
                 "Node": `Node.js: v${versions.node()}`,
-                "Chrome": `Chrome: v${versions.chrome()}`,
+                "Chromium": `Chromium: v${versions.chromium()}`,
             }
 
             silksongPathInput.value = await files.loadSilksongPath()

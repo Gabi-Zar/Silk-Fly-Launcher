@@ -399,6 +399,22 @@ ipcMain.handle('open-link', async (event, link) => {
     await shell.openExternal(link)
 })
 
+ipcMain.handle('open-window', async (event, file) => {
+    const win = new BrowserWindow({
+        width: 600,
+        height: 720,
+        modal: true,
+        parent: mainWindow,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    })
+
+    win.title = file
+    win.loadFile(file)
+})
+
 ipcMain.handle('launch-game', async (event, mode) => {
     const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`
     if (mode === "modded"){
