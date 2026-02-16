@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('files', {
     loadBepinexBackupVersion: () => ipcRenderer.invoke('load-bepinex-backup-version'),
     saveNexusAPI: (api) => ipcRenderer.invoke('save-nexus-api', api),
     loadNexusAPI: () => ipcRenderer.invoke('load-nexus-api'),
-    saveTheme: (theme) => ipcRenderer.invoke('save-theme', theme),
+    saveTheme: (theme, lacePinState) => ipcRenderer.invoke('save-theme', theme, lacePinState),
     loadTheme: () => ipcRenderer.invoke('load-theme')
 });
 

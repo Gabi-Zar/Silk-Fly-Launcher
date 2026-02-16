@@ -8,7 +8,8 @@ const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
-let old_page
+let oldPage
+let actualTheme = []
 
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
@@ -34,7 +35,8 @@ on_startup()
 
 async function on_startup() {
     if (await electronAPI.getPage() == "index.html") {
-        changeTheme(await files.loadTheme())
+        const theme = await files.loadTheme()
+        changeTheme(theme[0], theme[1])
         navigate("home")
     }
     else if (await electronAPI.getPage() == "welcome.html") {
@@ -46,10 +48,10 @@ async function on_startup() {
 ///////////////////// NAVIGATE ///////////////////////
 
 async function navigate(page) {
-    if (old_page == page) {
+    if (oldPage == page) {
         return
     }
-    old_page = page
+    oldPage = page
 
     view.replaceChildren()
     switch (page) {
@@ -155,6 +157,7 @@ async function navigate(page) {
                 "Node": `Node.js: v${versions.node()}`,
                 "Chromium": `Chromium: v${versions.chromium()}`,
             }
+            const lacePinCheckbox = settingsTemplateCopy.getElementById('lace-pin');
 
             silksongPathInput.value = await files.loadSilksongPath()
             silksongPathInput.addEventListener('input', async function(event) {
@@ -171,6 +174,22 @@ async function navigate(page) {
             for(const element of versionsList.children) {
                 element.innerText = versionsDictionnary[element.id]
             }
+
+            const theme = await files.loadTheme()
+            lacePinCheckbox.checked = theme[1]
+
+            lacePinCheckbox.addEventListener('change', async function() {
+                if (this.checked) {
+                    const theme = await files.loadTheme();
+                    changeTheme(theme[0], true);
+                    toggleThemesMenu()
+                }
+                else {
+                    const theme = await files.loadTheme();
+                    changeTheme(theme[0], false);
+                    toggleThemesMenu()
+                }
+            });
 
             view.appendChild(settingsTemplateCopy)
             setBepinexVersion()
@@ -263,7 +282,10 @@ async function importData() {
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
     document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
     setBepinexVersion()
-    changeTheme(await files.loadTheme())
+    const lacePinCheckbox = document.getElementById('lace-pin')
+    const theme = await files.loadTheme()
+    lacePinCheckbox.checked = theme[1]
+    changeTheme(theme[0])
     toggleThemesMenu()
 }
 
@@ -272,6 +294,8 @@ async function exportData() {
 }
 
 async function deleteData() {
+    const lacePinCheckbox = document.getElementById('lace-pin')
+    lacePinCheckbox.checked = false
     changeTheme("Silksong")
     toggleThemesMenu()
     await files.delete()
@@ -366,12 +390,31 @@ function toggleThemesMenu() {
 async function setThemeButton() {
     const themesButton = document.getElementById("themes-button")
     if (themesButton) {
-        themesButton.textContent = await files.loadTheme()
+        const theme = await files.loadTheme()
+        themesButton.textContent = theme[0]
     }
 }
 
-function changeTheme(theme) {
-    files.saveTheme(theme)
+function changeTheme(theme, state) {
+    toggleThemesMenu()
+
+    const lacePinCheckbox = document.getElementById('lace-pin');
+    if (lacePinCheckbox) {
+        lacePinState = lacePinCheckbox.checked;
+    }
+    else if (state) {
+        lacePinState = state
+    }
+    else {
+        lacePinState = false
+    }
+
+    if (actualTheme[0] == theme && actualTheme[1] == lacePinState) {
+        return
+    }
+    actualTheme = [theme, lacePinState]
+
+    files.saveTheme(theme, lacePinState)
 
     setThemeButton()
 
@@ -390,9 +433,12 @@ function changeTheme(theme) {
     }
 
     const backgroundVideo = document.getElementById("background-video")
-    backgroundVideo.src = `assets/background/${theme}.mp4`
-
-    toggleThemesMenu()
+    let backgroundVideoPath = `assets/background/${theme}.mp4`
+    if (lacePinState) {
+        backgroundVideoPath = `assets/background/${theme} Lace Pin.mp4`
+    }
+    
+    backgroundVideo.src = backgroundVideoPath
 }
 
 //////////////////////////////////////////////////////

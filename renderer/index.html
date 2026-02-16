@@ -126,24 +126,29 @@
     <template id="settings-template">
         <h2>General settings</h2>
         <div class="horizontal-div">
-            <label for="silksong-path-label">Enter Silksong path: </label>
+            <label>Enter Silksong path: </label>
             <input type="text" class="input" id="silksong-path-input" name="silksong-path-input">
             <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
         </div>
         <div class="horizontal-div">
-            <label for="silksong-path-label">Themes: </label>
+            <label>Themes: </label>
             <div class="themes-div">
                 <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
                 <div class="themes-menu longer-button" id="themes-menu">
                     <li onclick="changeTheme('Silksong')">Silksong</li>
-                    <li onclick="changeTheme('Citadel of song')">Citadel of song (WIP)</li>
-                    <li onclick="changeTheme('Cradle')">Cradle (WIP)</li>
-                    <li onclick="changeTheme('Abyss')">Abyss (WIP)</li>
-                    <li onclick="changeTheme('Greyroot')">Greyroot (WIP)</li>
-                    <li onclick="changeTheme('Surface')">Surface (WIP)</li>
-                    <li onclick="changeTheme('Steel')">Steel (WIP)</li>
+                    <li onclick="changeTheme('Citadel of song')">Citadel of song</li>
+                    <li onclick="changeTheme('Cradle')">Cradle</li>
+                    <li onclick="changeTheme('Abyss')">Abyss</li>
+                    <li onclick="changeTheme('Greyroot')">Greyroot</li>
+                    <li onclick="changeTheme('Surface')">Surface</li>
+                    <li onclick="changeTheme('Steel')">Steel</li>
                 </div>
             </div>
+            <label class="lace-pin-checkbox-container">
+                <input type="checkbox" name="lace-pin" id="lace-pin" value="lace-pin-activate">
+                <span class="checkmark"></span>
+                Lace Pin
+            </label>
         </div>
         <br>
         <h2>BepInEx</h2>

@@ -130,14 +130,15 @@ ipcMain.handle('load-nexus-api', () => {
 });
 
 
-ipcMain.handle('save-theme', (event, theme) => {
-    store.set('theme', theme);
+ipcMain.handle('save-theme', (event, theme, lacePinState) => {
+    store.set('theme.theme', theme);
+    store.set('theme.lacePinState', lacePinState);
 });
 
 ipcMain.handle('load-theme', () => {
-    theme = store.get('theme');
-    if (theme == undefined)  {
-        return "Silksong";
+    theme = [store.get('theme.theme'), store.get('theme.lacePinState')];
+    if (theme[0] == undefined)  {
+        return ["Silksong", false];
     }
     return theme;
 });

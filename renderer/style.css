@@ -317,3 +317,58 @@ body {
 .themes-menu li:hover {
     background: var(--background-color);
 }
+
+.lace-pin-checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 36px;
+    color: var(--text-color);
+    user-select: none;
+}
+
+.lace-pin-checkbox-container input {
+    opacity: 0;
+    height: 0;
+    width: 0;
+}
+
+.lace-pin-checkbox-container .checkmark {
+    position: absolute;
+    left: 0;
+    height: 30px;
+    width: 30px;
+    background: var(--transparent-black);
+    border: 1px solid var(--secondary-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.lace-pin-checkbox-container:hover .checkmark {
+    background: var(--darker-transparent-black);
+    border-color: var(--primary-color);
+}
+
+.lace-pin-checkbox-container input:checked ~ .checkmark {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.lace-pin-checkbox-container .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.lace-pin-checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.lace-pin-checkbox-container .checkmark:after {
+    left: 8px;
+    width: 10px;
+    height: 20px;
+    border: solid var(--text-color);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
