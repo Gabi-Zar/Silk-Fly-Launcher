@@ -11,9 +11,9 @@ const store = new Store();
 const userSavePath = app.getPath('userData')
 const dataPath = `${userSavePath}\\config.json`
 let silksongPath = store.get('silksong-path')
+
 let nexusAPI = store.get('nexus-api')
 let nexus = undefined
-
 createNexus()
 
 let bepinexFolderPath = `${silksongPath}/BepInEx`
@@ -27,6 +27,7 @@ const bepinexFiles = [
 
 let bepinexVersion
 let bepinexBackupVersion
+const bepinexStore = new Store({cwd: 'bepinex-version'});
 
 let mainWindow
 let htmlFile
@@ -89,14 +90,14 @@ ipcMain.handle('load-path', () => {
 function saveBepinexVersion(version) {
     bepinexVersion = version;
     if (bepinexVersion == undefined) {
-        store.delete('bepinex-version');
+        bepinexStore.delete('bepinex-version');
         return;
     }
-    store.set('bepinex-version', version);
+    bepinexStore.set('bepinex-version', version);
 };
 
 ipcMain.handle('load-bepinex-version', () => {
-    bepinexVersion = store.get('bepinex-version');
+    bepinexVersion = bepinexStore.get('bepinex-version');
     return bepinexVersion;
 });
 
@@ -104,14 +105,14 @@ ipcMain.handle('load-bepinex-version', () => {
 function saveBepinexBackupVersion(version) {
     bepinexBackupVersion = version;
     if (bepinexBackupVersion == undefined) {
-        store.delete('bepinex-backup-version');
+        bepinexStore.delete('bepinex-backup-version');
         return;
     }
-    store.set('bepinex-backup-version', version);
+    bepinexStore.set('bepinex-backup-version', version);
 };
 
 ipcMain.handle('load-bepinex-backup-version', () => {
-    bepinexBackupVersion = store.get('bepinex-backup-version');
+    bepinexBackupVersion = bepinexStore.get('bepinex-backup-version');
     return bepinexBackupVersion;
 });
  
@@ -212,7 +213,7 @@ async function installBepinex() {
         }
         await fs.rm(bepinexBackupPath, { recursive: true })
 
-        bepinexBackupVersion = store.get('bepinex-backup-version')
+        bepinexBackupVersion = bepinexStore.get('bepinex-backup-version')
         saveBepinexVersion(bepinexBackupVersion)
         saveBepinexBackupVersion(undefined)
     }

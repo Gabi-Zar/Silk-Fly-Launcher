@@ -281,7 +281,6 @@ async function importData() {
     await files.import()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
     document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
-    setBepinexVersion()
     const lacePinCheckbox = document.getElementById('lace-pin')
     const theme = await files.loadTheme()
     lacePinCheckbox.checked = theme[1]
@@ -301,7 +300,6 @@ async function deleteData() {
     await files.delete()
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
     document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
-    setBepinexVersion()
 }
 
 //////////////////////////////////////////////////////
