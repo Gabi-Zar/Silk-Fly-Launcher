@@ -1,144 +1,141 @@
-const { app, BrowserWindow , ipcMain, dialog, shell} = require('electron/main');
-const path = require('node:path');
-const Store = require('electron-store').default;
-const fs = require('fs/promises');
-const { createWriteStream } = require('fs');
-const { pipeline } = require('stream/promises');
-const extract = require('extract-zip');
-const Nexus = require('@nexusmods/nexus-api').default;
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
+import path from "path";
+import { fileURLToPath } from "url";
+import Store from "electron-store";
+import fs from "fs/promises";
+import { createWriteStream } from "fs";
+import { pipeline } from "stream/promises";
+import extract from "extract-zip";
+import NexusModule from "@nexusmods/nexus-api";
+const Nexus = NexusModule.default;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const store = new Store();
-const userSavePath = app.getPath('userData')
-const dataPath = `${userSavePath}\\config.json`
-let silksongPath = store.get('silksong-path')
+const userSavePath = app.getPath("userData");
+const dataPath = `${userSavePath}\\config.json`;
+let silksongPath = store.get("silksong-path");
 
-let nexusAPI = store.get('nexus-api')
-let nexus = undefined
-createNexus()
+let nexusAPI = store.get("nexus-api");
+let nexus = undefined;
+createNexus();
 
-let bepinexFolderPath = `${silksongPath}/BepInEx`
-let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
-const bepinexFiles = [
-        ".doorstop_version",
-        "changelog.txt",
-        "doorstop_config.ini",
-        "winhttp.dll"
-    ]
+let bepinexFolderPath = `${silksongPath}/BepInEx`;
+let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`;
+const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
 
-let bepinexVersion
-let bepinexBackupVersion
-const bepinexStore = new Store({cwd: 'bepinex-version'});
+let bepinexVersion;
+let bepinexBackupVersion;
+const bepinexStore = new Store({ cwd: "bepinex-version" });
 
-let mainWindow
-let htmlFile
+let mainWindow;
+let htmlFile;
 
 async function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-        }
-    })
+            preload: path.join(__dirname, "preload.js"),
+        },
+    });
 
-    if(await fileExists(dataPath)) {
-        htmlFile = "index.html"
-    }
-    else {
-        htmlFile = "welcome.html"
+    if (await fileExists(dataPath)) {
+        htmlFile = "index.html";
+    } else {
+        htmlFile = "welcome.html";
     }
 
-    mainWindow.loadFile(`renderer/${htmlFile}`)
+    mainWindow.loadFile(`renderer/${htmlFile}`);
 }
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
 
-    app.on('activate', () => {
+    app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow()
+            createWindow();
         }
-    })
-})
+    });
+});
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
+app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") {
+        app.quit();
     }
-})
+});
 
+//////////////////////////////////////////////////////
 ///////////////// SAVING AND LOADING /////////////////
-ipcMain.handle('save-path', (event, path) => {
-    saveSilksongPath(path)
+ipcMain.handle("save-path", (event, path) => {
+    saveSilksongPath(path);
 });
 function saveSilksongPath(path) {
     silksongPath = path;
-    bepinexFolderPath = `${silksongPath}/BepInEx`
-    bepinexBackupPath = `${silksongPath}/BepInEx-Backup`
-    store.set('silksong-path', silksongPath);
+    bepinexFolderPath = `${silksongPath}/BepInEx`;
+    bepinexBackupPath = `${silksongPath}/BepInEx-Backup`;
+    store.set("silksong-path", silksongPath);
 }
 
-ipcMain.handle('load-path', () => {
-    silksongPath = store.get('silksong-path');
-    if (silksongPath == undefined)  {
+ipcMain.handle("load-path", () => {
+    silksongPath = store.get("silksong-path");
+    if (silksongPath == undefined) {
         return "";
     }
     return silksongPath;
 });
 
-
 function saveBepinexVersion(version) {
     bepinexVersion = version;
     if (bepinexVersion == undefined) {
-        bepinexStore.delete('bepinex-version');
+        bepinexStore.delete("bepinex-version");
         return;
     }
-    bepinexStore.set('bepinex-version', version);
-};
+    bepinexStore.set("bepinex-version", version);
+}
 
-ipcMain.handle('load-bepinex-version', () => {
-    bepinexVersion = bepinexStore.get('bepinex-version');
+ipcMain.handle("load-bepinex-version", () => {
+    bepinexVersion = bepinexStore.get("bepinex-version");
     return bepinexVersion;
 });
-
 
 function saveBepinexBackupVersion(version) {
     bepinexBackupVersion = version;
     if (bepinexBackupVersion == undefined) {
-        bepinexStore.delete('bepinex-backup-version');
+        bepinexStore.delete("bepinex-backup-version");
         return;
     }
-    bepinexStore.set('bepinex-backup-version', version);
-};
+    bepinexStore.set("bepinex-backup-version", version);
+}
 
-ipcMain.handle('load-bepinex-backup-version', () => {
-    bepinexBackupVersion = bepinexStore.get('bepinex-backup-version');
+ipcMain.handle("load-bepinex-backup-version", () => {
+    bepinexBackupVersion = bepinexStore.get("bepinex-backup-version");
     return bepinexBackupVersion;
 });
- 
-ipcMain.handle('save-nexus-api', (event, api) => {
+
+ipcMain.handle("save-nexus-api", (event, api) => {
     nexusAPI = api;
-    createNexus()
-    store.set('nexus-api', nexusAPI);
+    createNexus();
+    store.set("nexus-api", nexusAPI);
 });
 
-ipcMain.handle('load-nexus-api', () => {
-    nexusAPI = store.get('nexus-api');
-    if (nexusAPI == undefined)  {
+ipcMain.handle("load-nexus-api", () => {
+    nexusAPI = store.get("nexus-api");
+    if (nexusAPI == undefined) {
         return "";
     }
     return nexusAPI;
 });
 
-
-ipcMain.handle('save-theme', (event, theme, lacePinState) => {
-    store.set('theme.theme', theme);
-    store.set('theme.lacePinState', lacePinState);
+ipcMain.handle("save-theme", (event, theme, lacePinState) => {
+    store.set("theme.theme", theme);
+    store.set("theme.lacePinState", lacePinState);
 });
 
-ipcMain.handle('load-theme', () => {
-    theme = [store.get('theme.theme'), store.get('theme.lacePinState')];
-    if (theme[0] == undefined)  {
+ipcMain.handle("load-theme", () => {
+    const theme = [store.get("theme.theme"), store.get("theme.lacePinState")];
+    if (theme[0] == undefined) {
         return ["Silksong", false];
     }
     return theme;
@@ -156,45 +153,43 @@ async function fileExists(filePath) {
     }
 }
 
-ipcMain.handle('delete-data', async () => {
+ipcMain.handle("delete-data", async () => {
     if (await fileExists(dataPath)) {
-        await fs.unlink(dataPath)
+        await fs.unlink(dataPath);
     }
 });
 
-ipcMain.handle('export-data', async () => {
-    if (!await fileExists(dataPath)) {
-        return
+ipcMain.handle("export-data", async () => {
+    if (!(await fileExists(dataPath))) {
+        return;
     }
 
     const { canceled, filePath } = await dialog.showSaveDialog({
-        title: 'Export Data',
-        defaultPath: 'config.json',
-        filters: [
-            { name: 'JSON', extensions: ['json'] }
-        ]
-    })
+        title: "Export Data",
+        defaultPath: "config.json",
+        filters: [{ name: "JSON", extensions: ["json"] }],
+    });
 
-    if (canceled || !filePath) return
+    if (canceled || !filePath) return;
 
-    await fs.copyFile(dataPath, filePath)
-})
+    await fs.copyFile(dataPath, filePath);
+});
 
-ipcMain.handle('import-data', async () => {
+ipcMain.handle("import-data", async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
-        title: 'Import Data',
-        properties: ['openFile'],
-        filters: [{ name: 'JSON', extensions: ['json'] }]
-    })
+        title: "Import Data",
+        properties: ["openFile"],
+        filters: [{ name: "JSON", extensions: ["json"] }],
+    });
 
-    if (canceled || !filePaths) return false
+    if (canceled || !filePaths) return false;
 
-    if(await fileExists(dataPath)) {
-        await fs.unlink(dataPath)
+    if (await fileExists(dataPath)) {
+        await fs.unlink(dataPath);
     }
-    await fs.copyFile(filePaths[0], dataPath,fs.constants.COPYFILE_EXCL)
-    return true
-})
+    await fs.copyFile(filePaths[0], dataPath, fs.constants.COPYFILE_EXCL);
+    return true;
+});
 
 //////////////////////////////////////////////////////
 ////////////////////// BEPINEX ///////////////////////
@@ -202,157 +197,151 @@ ipcMain.handle('import-data', async () => {
 async function installBepinex() {
     if (await fileExists(bepinexBackupPath)) {
         if (await fileExists(`${bepinexBackupPath}/BepInEx`)) {
-            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, { recursive: true })
+            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, {
+                recursive: true,
+            });
         }
 
         for (const file of bepinexFiles) {
-            const filePath = `${silksongPath}/${file}`
+            const filePath = `${silksongPath}/${file}`;
             if (await fileExists(`${bepinexBackupPath}/${file}`)) {
-                await fs.copyFile(`${bepinexBackupPath}/${file}`, filePath)
+                await fs.copyFile(`${bepinexBackupPath}/${file}`, filePath);
             }
         }
-        await fs.rm(bepinexBackupPath, { recursive: true })
+        await fs.rm(bepinexBackupPath, { recursive: true });
 
-        bepinexBackupVersion = bepinexStore.get('bepinex-backup-version')
-        saveBepinexVersion(bepinexBackupVersion)
-        saveBepinexBackupVersion(undefined)
-    }
-    else {
-        const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest"
+        bepinexBackupVersion = bepinexStore.get("bepinex-backup-version");
+        saveBepinexVersion(bepinexBackupVersion);
+        saveBepinexBackupVersion(undefined);
+    } else {
+        const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest";
 
         const res = await fetch(GITHUB_URL, {
             headers: {
                 "User-Agent": "SilkFlyLauncher/1.0.0",
-                "Accept": "application/vnd.github+json",
-            }
-        })
+                Accept: "application/vnd.github+json",
+            },
+        });
 
         if (!res.ok) {
-            throw new Error(`GitHub API error: ${res.status}`)
+            throw new Error(`GitHub API error: ${res.status}`);
         }
 
         const release = await res.json();
 
-        const asset = release.assets.find(
-            a => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64")
-        );
+        const asset = release.assets.find((a) => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64"));
 
-        const download = await fetch(asset.browser_download_url)
+        const download = await fetch(asset.browser_download_url);
         if (!download.ok) {
             throw new Error("Download error");
         }
-        const filePath = `${userSavePath}\\bepinex.zip`
+        const filePath = `${userSavePath}\\bepinex.zip`;
 
-        await pipeline(
-            download.body,
-            createWriteStream(filePath)
-        )
+        await pipeline(download.body, createWriteStream(filePath));
 
-        await extract(filePath, { dir: silksongPath})
-        await fs.unlink(filePath)
+        await extract(filePath, { dir: silksongPath });
+        await fs.unlink(filePath);
 
-        saveBepinexVersion(release.tag_name)
+        saveBepinexVersion(release.tag_name);
     }
 }
 
-ipcMain.handle('install-bepinex', async () => {
-    await installBepinex()
-})
+ipcMain.handle("install-bepinex", async () => {
+    await installBepinex();
+});
 
 async function uninstallBepinex() {
     if (await fileExists(bepinexFolderPath)) {
-        await fs.rm(bepinexFolderPath, { recursive: true })
+        await fs.rm(bepinexFolderPath, { recursive: true });
     }
 
     for (const file of bepinexFiles) {
-        const filePath = `${silksongPath}/${file}`
+        const filePath = `${silksongPath}/${file}`;
         if (await fileExists(filePath)) {
-            await fs.unlink(filePath)
+            await fs.unlink(filePath);
         }
     }
-    saveBepinexVersion(undefined)
+    saveBepinexVersion(undefined);
 }
 
-ipcMain.handle('uninstall-bepinex', async () => {
-    await uninstallBepinex()
-})
+ipcMain.handle("uninstall-bepinex", async () => {
+    await uninstallBepinex();
+});
 
 async function backupBepinex() {
-    if (await fileExists(bepinexBackupPath) == false) {
-        await fs.mkdir(bepinexBackupPath)
+    if ((await fileExists(bepinexBackupPath)) == false) {
+        await fs.mkdir(bepinexBackupPath);
     }
 
     if (await fileExists(bepinexFolderPath)) {
-        await fs.cp(bepinexFolderPath, `${bepinexBackupPath}/BepInEx`, { recursive: true })
+        await fs.cp(bepinexFolderPath, `${bepinexBackupPath}/BepInEx`, {
+            recursive: true,
+        });
     }
 
     for (const file of bepinexFiles) {
-        const filePath = `${silksongPath}/${file}`
+        const filePath = `${silksongPath}/${file}`;
         if (await fileExists(filePath)) {
-            await fs.copyFile(filePath, `${bepinexBackupPath}/${file}`)
+            await fs.copyFile(filePath, `${bepinexBackupPath}/${file}`);
         }
     }
 
-    saveBepinexBackupVersion(bepinexVersion)
-    await uninstallBepinex()
+    saveBepinexBackupVersion(bepinexVersion);
+    await uninstallBepinex();
 }
 
-ipcMain.handle('backup-bepinex', async () => {
-    await backupBepinex()
-})
+ipcMain.handle("backup-bepinex", async () => {
+    await backupBepinex();
+});
 
-ipcMain.handle('delete-bepinex-backup', async () => {
+ipcMain.handle("delete-bepinex-backup", async () => {
     if (await fileExists(bepinexBackupPath)) {
-        await fs.rm(bepinexBackupPath, { recursive: true })
-        saveBepinexBackupVersion(undefined)
+        await fs.rm(bepinexBackupPath, { recursive: true });
+        saveBepinexBackupVersion(undefined);
     }
-})
+});
 
 //////////////////////////////////////////////////////
 /////////////////////// NEXUS ////////////////////////
 
 async function createNexus() {
     if (nexusAPI == undefined) {
-        return
+        return;
     }
 
     try {
-        nexus = await Nexus.create(
-            nexusAPI,
-            'silk-fly-launcher',
-            '1.0.0',
-            'hollowknightsilksong'
-        );
+        nexus = await Nexus.create(nexusAPI, "silk-fly-launcher", "1.0.0", "hollowknightsilksong");
     } catch (error) {
-        nexus = undefined
+        console.log(error);
+        nexus = undefined;
     }
 }
 
-ipcMain.handle('verify-nexus-api', async () => {
-    return await verifyNexusAPI()
-})
+ipcMain.handle("verify-nexus-api", async () => {
+    return await verifyNexusAPI();
+});
 
 async function verifyNexusAPI() {
     if (nexus == undefined) {
-        return false
+        return false;
     }
     if (await nexus.getValidationResult()) {
-        return true
+        return true;
     }
 }
 
-ipcMain.handle('get-latest-mods', async () => {
+ipcMain.handle("get-latest-mods", async () => {
     if (nexus == undefined) {
-        return
+        return;
     }
 
-    mods = await nexus.getLatestAdded()
-    return mods
-})
+    const mods = await nexus.getLatestAdded();
+    return mods;
+});
 
-ipcMain.handle('download-mod', async (event, link) => {
+ipcMain.handle("download-mod", async (event, link) => {
     if (nexus == undefined) {
-        return
+        return;
     }
 
     const nexusWindow = new BrowserWindow({
@@ -362,46 +351,43 @@ ipcMain.handle('download-mod', async (event, link) => {
         parent: mainWindow,
         webPreferences: {
             nodeIntegration: false,
-            contextIsolation: true
-        }
-    })
+            contextIsolation: true,
+        },
+    });
 
-    nexusWindow.loadURL(link)
-})
+    nexusWindow.loadURL(link);
+});
 
 //////////////////////////////////////////////////////
 //////////////////// UNCATEGORIZE ////////////////////
 
-ipcMain.handle('auto-detect-game-path', async () => {
-    const defaultsSilksongPaths = [
-        ":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong",
-        ":/SteamLibrary/steamapps/common/Hollow Knight Silksong"
-    ]
+ipcMain.handle("auto-detect-game-path", async () => {
+    const defaultsSilksongPaths = [":/Program Files (x86)/Steam/steamapps/common/Hollow Knight Silksong", ":/SteamLibrary/steamapps/common/Hollow Knight Silksong"];
     for (const path of defaultsSilksongPaths) {
-        for (let i = 'A'.charCodeAt(0); i <= 'Z'.charCodeAt(0); i++) {
-            const fullPath = `${String.fromCharCode(i)}${path}`
+        for (let i = "A".charCodeAt(0); i <= "Z".charCodeAt(0); i++) {
+            const fullPath = `${String.fromCharCode(i)}${path}`;
             if (await fileExists(fullPath)) {
-                saveSilksongPath(fullPath)
-                return
+                saveSilksongPath(fullPath);
+                return;
             }
         }
     }
-})
+});
 
-ipcMain.handle('load-main-page', () => {
-    htmlFile = "index.html"
-    mainWindow.loadFile(`renderer/${htmlFile}`)
-})
+ipcMain.handle("load-main-page", () => {
+    htmlFile = "index.html";
+    mainWindow.loadFile(`renderer/${htmlFile}`);
+});
 
-ipcMain.handle('get-page', () => {
-    return htmlFile
-})
+ipcMain.handle("get-page", () => {
+    return htmlFile;
+});
 
-ipcMain.handle('open-link', async (event, link) => {
-    await shell.openExternal(link)
-})
+ipcMain.handle("open-link", async (event, link) => {
+    await shell.openExternal(link);
+});
 
-ipcMain.handle('open-window', async (event, file) => {
+ipcMain.handle("open-window", async (event, file) => {
     const win = new BrowserWindow({
         width: 600,
         height: 720,
@@ -409,32 +395,30 @@ ipcMain.handle('open-window', async (event, file) => {
         parent: mainWindow,
         webPreferences: {
             nodeIntegration: false,
-            contextIsolation: true
-        }
-    })
+            contextIsolation: true,
+        },
+    });
 
-    win.title = file
-    win.loadFile(file)
-})
+    win.title = file;
+    win.loadFile(file);
+});
 
-ipcMain.handle('launch-game', async (event, mode) => {
-    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`
-    if (mode === "modded"){
+ipcMain.handle("launch-game", async (event, mode) => {
+    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`;
+    if (mode === "modded") {
         if (await fileExists(bepinexFolderPath)) {
-            await shell.openExternal(silksongExecutablePath)
-        }
-        else {
-            await installBepinex()
-            await shell.openExternal(silksongExecutablePath)
+            await shell.openExternal(silksongExecutablePath);
+        } else {
+            await installBepinex();
+            await shell.openExternal(silksongExecutablePath);
         }
     }
-    if (mode === "vanilla"){
+    if (mode === "vanilla") {
         if (await fileExists(bepinexFolderPath)) {
-            await backupBepinex()
-            await shell.openExternal(silksongExecutablePath)
-        }
-        else {
-            await shell.openExternal(silksongExecutablePath)
+            await backupBepinex();
+            await shell.openExternal(silksongExecutablePath);
+        } else {
+            await shell.openExternal(silksongExecutablePath);
         }
     }
-})
+});

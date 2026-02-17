@@ -2,7 +2,9 @@
     margin: 0;
     box-sizing: border-box;
     font-family: "Segoe UI", sans-serif;
-    cursor: url("assets/cursor.png") 0 0, auto !important;
+    cursor:
+        url("assets/cursor.png") 0 0,
+        auto !important;
 }
 
 :root {
@@ -13,7 +15,7 @@
     --text-color: #eee;
     --transparent-black: rgba(0, 0, 0, 0.4);
     --darker-transparent-black: rgba(0, 0, 0, 0.8);
-    --transparent-grey: rgba(30, 30, 30, 0.8)
+    --transparent-grey: rgba(30, 30, 30, 0.8);
 }
 
 body {
@@ -69,6 +71,10 @@ body {
     height: 100px;
 }
 
+.invert-color {
+    filter: invert(1);
+}
+
 .nav {
     padding: 20px;
 }
@@ -86,7 +92,7 @@ body {
     margin-bottom: 10px;
 
     padding: 0 4px 4px;
-    border-bottom: 1px solid var(--secondary-color);    
+    border-bottom: 1px solid var(--secondary-color);
 }
 
 .nav button {
@@ -124,7 +130,7 @@ body {
     margin-bottom: 20px;
     color: var(--text-color);
     padding: 0 4px 4px;
-    border-bottom: 1px solid var(--secondary-color); 
+    border-bottom: 1px solid var(--secondary-color);
 }
 
 .view {
@@ -135,7 +141,7 @@ body {
     z-index: 0;
     box-shadow: 0 0 50px var(--darker-transparent-black);
     overflow: auto;
-    height: 90%; 
+    height: 90%;
 }
 
 .horizontal-div {

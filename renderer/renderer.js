@@ -8,13 +8,13 @@ const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
 const modTemplate = document.getElementById("mod-template");
 
-let oldPage
-let actualTheme = []
+let oldPage;
+let actualTheme = [];
 
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
 
-let actualPage = 0
+let actualPage = 0;
 
 const pageDiv = document.getElementById("page");
 const buttonDiv = document.getElementById("button-div");
@@ -31,16 +31,15 @@ const tutorialTemplate = document.getElementById("tutorial-template");
 //////////////////////////////////////////////////////
 ////////////////////// STARTUP ///////////////////////
 
-on_startup()
+on_startup();
 
 async function on_startup() {
-    if (await electronAPI.getPage() == "index.html") {
-        const theme = await files.loadTheme()
-        changeTheme(theme[0], theme[1])
-        navigate("home")
-    }
-    else if (await electronAPI.getPage() == "welcome.html") {
-        welcomeNavigate()
+    if ((await electronAPI.getPage()) == "index.html") {
+        const theme = await files.loadTheme();
+        changeTheme(theme[0], theme[1]);
+        navigate("home");
+    } else if ((await electronAPI.getPage()) == "welcome.html") {
+        welcomeNavigate();
     }
 }
 
@@ -49,223 +48,220 @@ async function on_startup() {
 
 async function navigate(page) {
     if (oldPage == page) {
-        return
+        return;
     }
-    oldPage = page
+    oldPage = page;
 
-    view.replaceChildren()
+    view.replaceChildren();
     switch (page) {
         case "home":
             title.innerText = "Silk Fly Launcher";
-            const HomeTemplateCopy = HomeTemplate.content.cloneNode(true)
-            view.appendChild(HomeTemplateCopy)
+            const HomeTemplateCopy = HomeTemplate.content.cloneNode(true);
+            view.appendChild(HomeTemplateCopy);
             break;
 
         case "mods-installed":
             title.innerText = "Installed Mods";
-            const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true)
-            const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form")
-            
-            searchFormInstalled.addEventListener('submit', async function(event) {
-                event.preventDefault()
-            })
+            const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true);
+            const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form");
 
-            view.appendChild(installedModsTemplateCopy)
+            searchFormInstalled.addEventListener("submit", async function (event) {
+                event.preventDefault();
+            });
+
+            view.appendChild(installedModsTemplateCopy);
             break;
 
         case "mods-online":
             title.innerText = "Online Mods";
-            const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true)
-            const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container")
-            const searchFormNexus = onlineModsTemplateCopy.getElementById("search-form")
-            
-            searchFormNexus.addEventListener('submit', async function(event) {
-                event.preventDefault()
-            })
+            const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true);
+            const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container");
+            const searchFormNexus = onlineModsTemplateCopy.getElementById("search-form");
 
-            view.appendChild(onlineModsTemplateCopy)
+            searchFormNexus.addEventListener("submit", async function (event) {
+                event.preventDefault();
+            });
 
-            mods = await nexus.getLatestMods()
+            view.appendChild(onlineModsTemplateCopy);
+
+            mods = await nexus.getLatestMods();
             if (mods == undefined) {
                 break;
             }
-            for(const mod of mods) {
+            for (const mod of mods) {
                 if (mod.name == undefined) {
-                    continue
+                    continue;
                 }
-                const modTemplateCopy = modTemplate.content.cloneNode(true)
+                const modTemplateCopy = modTemplate.content.cloneNode(true);
                 if (mod.name) {
-                    const modTitleText = modTemplateCopy.getElementById("mod-title")
-                    modTitleText.innerText = mod.name
+                    const modTitleText = modTemplateCopy.getElementById("mod-title");
+                    modTitleText.innerText = mod.name;
                 }
                 if (mod.author) {
-                    const modAuthorText = modTemplateCopy.getElementById("mod-author")
-                    modAuthorText.innerText = `by ${mod.author}`
+                    const modAuthorText = modTemplateCopy.getElementById("mod-author");
+                    modAuthorText.innerText = `by ${mod.author}`;
                 }
                 if (mod.endorsement_count) {
-                    const modEndorsementsNumber = modTemplateCopy.getElementById("mod-endorsements-number")
+                    const modEndorsementsNumber = modTemplateCopy.getElementById("mod-endorsements-number");
                     if (mod.endorsement_count > 1) {
-                        modEndorsementsNumber.innerText = `${mod.endorsement_count} likes`
-                    }
-                    else {
-                        modEndorsementsNumber.innerText = `${mod.endorsement_count} like`
+                        modEndorsementsNumber.innerText = `${mod.endorsement_count} likes`;
+                    } else {
+                        modEndorsementsNumber.innerText = `${mod.endorsement_count} like`;
                     }
                 }
                 if (mod.summary) {
-                    const modDescriptionText = modTemplateCopy.getElementById("mod-description")
-                    modDescriptionText.innerText = mod.summary
+                    const modDescriptionText = modTemplateCopy.getElementById("mod-description");
+                    modDescriptionText.innerText = mod.summary;
                 }
                 if (mod.picture_url) {
-                    const modPicture = modTemplateCopy.getElementById("mod-icon")
-                    modPicture.src = mod.picture_url
+                    const modPicture = modTemplateCopy.getElementById("mod-icon");
+                    modPicture.src = mod.picture_url;
                 }
                 if (mod.version && mod.updated_timestamp) {
-                    const modVersionText = modTemplateCopy.getElementById("mod-version")
-                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updated_time.slice(0, 10)}`
+                    const modVersionText = modTemplateCopy.getElementById("mod-version");
+                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updated_time.slice(0, 10)}`;
                 }
 
-                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${mod.mod_id}`
+                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${mod.mod_id}`;
 
-                const modLinkButton = modTemplateCopy.getElementById("external-link")
-                modLinkButton.href = modUrl
-                modLinkButton.addEventListener('click', function(event) {
-                    event.preventDefault()
-                    const modLink = modLinkButton.href
-                    electronAPI.openExternalLink(modLink)
-                })
+                const modLinkButton = modTemplateCopy.getElementById("external-link");
+                modLinkButton.href = modUrl;
+                modLinkButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modLink = modLinkButton.href;
+                    electronAPI.openExternalLink(modLink);
+                });
 
-                modDownloadButton = modTemplateCopy.getElementById("download-mod-button")
-                modDownloadButton.addEventListener('click', function(event) {
-                    event.preventDefault()
-                    const modDownloadLink = `${modUrl}?tab=files`
-                    nexus.download(modDownloadLink)
-                })
+                modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
+                modDownloadButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modDownloadLink = `${modUrl}?tab=files`;
+                    nexus.download(modDownloadLink);
+                });
 
-                ModsContainer.appendChild(modTemplateCopy)
+                ModsContainer.appendChild(modTemplateCopy);
             }
             break;
 
         case "general-settings":
             title.innerText = "Settings";
-            const settingsTemplateCopy = settingsTemplate.content.cloneNode(true)
-            const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input")
-            const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input")
-            const versionsList = settingsTemplateCopy.getElementById("versions-list")
+            const settingsTemplateCopy = settingsTemplate.content.cloneNode(true);
+            const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input");
+            const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input");
+            const versionsList = settingsTemplateCopy.getElementById("versions-list");
             const versionsDictionnary = {
-                "Silk-Fly-Launcher": `Silk Fly Launcher: v${versions.silkFlyLauncher()}`, 
-                "Electron": `Electron: v${versions.electron()}`,
-                "Node": `Node.js: v${versions.node()}`,
-                "Chromium": `Chromium: v${versions.chromium()}`,
-            }
-            const lacePinCheckbox = settingsTemplateCopy.getElementById('lace-pin');
+                "Silk-Fly-Launcher": `Silk Fly Launcher: v${versions.silkFlyLauncher()}`,
+                Electron: `Electron: v${versions.electron()}`,
+                Node: `Node.js: v${versions.node()}`,
+                Chromium: `Chromium: v${versions.chromium()}`,
+            };
+            const lacePinCheckbox = settingsTemplateCopy.getElementById("lace-pin");
 
-            silksongPathInput.value = await files.loadSilksongPath()
-            silksongPathInput.addEventListener('input', async function(event) {
-                let silksongPath = silksongPathInput.value
-                files.saveSilksongPath(silksongPath)
+            silksongPathInput.value = await files.loadSilksongPath();
+            silksongPathInput.addEventListener("input", async function (event) {
+                let silksongPath = silksongPathInput.value;
+                files.saveSilksongPath(silksongPath);
             });
 
-            nexusAPIInput.value = await files.loadNexusAPI()
-            nexusAPIInput.addEventListener('input', async function(event) {
-                let nexusAPI = nexusAPIInput.value
-                files.saveNexusAPI(nexusAPI)
+            nexusAPIInput.value = await files.loadNexusAPI();
+            nexusAPIInput.addEventListener("input", async function (event) {
+                let nexusAPI = nexusAPIInput.value;
+                files.saveNexusAPI(nexusAPI);
             });
-            
-            for(const element of versionsList.children) {
-                element.innerText = versionsDictionnary[element.id]
+
+            for (const element of versionsList.children) {
+                element.innerText = versionsDictionnary[element.id];
             }
 
-            const theme = await files.loadTheme()
-            lacePinCheckbox.checked = theme[1]
+            const theme = await files.loadTheme();
+            lacePinCheckbox.checked = theme[1];
 
-            lacePinCheckbox.addEventListener('change', async function() {
+            lacePinCheckbox.addEventListener("change", async function () {
                 if (this.checked) {
                     const theme = await files.loadTheme();
                     changeTheme(theme[0], true);
-                    toggleThemesMenu()
-                }
-                else {
+                    toggleThemesMenu();
+                } else {
                     const theme = await files.loadTheme();
                     changeTheme(theme[0], false);
-                    toggleThemesMenu()
+                    toggleThemesMenu();
                 }
             });
 
-            view.appendChild(settingsTemplateCopy)
-            setBepinexVersion()
-            setThemeButton()
-            verifyNexusAPI()
+            view.appendChild(settingsTemplateCopy);
+            setBepinexVersion();
+            setThemeButton();
+            verifyNexusAPI();
             break;
     }
 }
 
 async function welcomeNavigate() {
-    pageDiv.replaceChildren()
+    pageDiv.replaceChildren();
     switch (actualPage) {
         case 0:
-            pageDiv.appendChild(welcomeTemplate.content.cloneNode(true))
-            buttonDiv.replaceChildren()
-            buttonDiv.appendChild(oneButtonTemplate.content.cloneNode(true))
+            pageDiv.appendChild(welcomeTemplate.content.cloneNode(true));
+            buttonDiv.replaceChildren();
+            buttonDiv.appendChild(oneButtonTemplate.content.cloneNode(true));
             break;
 
         case 1:
-            pageDiv.appendChild(silksongPathTemplate.content.cloneNode(true))
-            buttonDiv.replaceChildren()
-            buttonDiv.appendChild(twoButtonTemplate.content.cloneNode(true))
+            pageDiv.appendChild(silksongPathTemplate.content.cloneNode(true));
+            buttonDiv.replaceChildren();
+            buttonDiv.appendChild(twoButtonTemplate.content.cloneNode(true));
 
-            const silksongPathInput = document.getElementById("silksong-path-input")
-            if (await files.loadSilksongPath() == "") {
-                autoDetectGamePath()
-            }
-            else {
-                document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+            const silksongPathInput = document.getElementById("silksong-path-input");
+            if ((await files.loadSilksongPath()) == "") {
+                autoDetectGamePath();
+            } else {
+                document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
             }
 
-            silksongPathInput.addEventListener('input', async function(event) {
-                let silksongPath = silksongPathInput.value
-                await files.saveSilksongPath(silksongPath)
+            silksongPathInput.addEventListener("input", async function (event) {
+                let silksongPath = silksongPathInput.value;
+                await files.saveSilksongPath(silksongPath);
             });
             break;
 
         case 2:
-            pageDiv.appendChild(nexusTemplate.content.cloneNode(true))
-            const nexusLink = document.getElementById("external-link")
-            nexusLink.addEventListener('click', function(event) {
-                event.preventDefault()
-                const url = nexusLink.href
-                electronAPI.openExternalLink(url)
-            })
+            pageDiv.appendChild(nexusTemplate.content.cloneNode(true));
+            const nexusLink = document.getElementById("external-link");
+            nexusLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                const url = nexusLink.href;
+                electronAPI.openExternalLink(url);
+            });
 
-            const nexusAPIInput = document.getElementById("nexus-api-input")
-            nexusAPIInput.value = await files.loadNexusAPI()
-            nexusAPIInput.addEventListener('input', async function(event) {
-                let nexusAPI = nexusAPIInput.value
-                await files.saveNexusAPI(nexusAPI)
+            const nexusAPIInput = document.getElementById("nexus-api-input");
+            nexusAPIInput.value = await files.loadNexusAPI();
+            nexusAPIInput.addEventListener("input", async function (event) {
+                let nexusAPI = nexusAPIInput.value;
+                await files.saveNexusAPI(nexusAPI);
             });
             break;
 
         case 3:
-            pageDiv.appendChild(styleTemplate.content.cloneNode(true))
+            pageDiv.appendChild(styleTemplate.content.cloneNode(true));
             break;
 
         case 4:
-            pageDiv.appendChild(tutorialTemplate.content.cloneNode(true))
+            pageDiv.appendChild(tutorialTemplate.content.cloneNode(true));
             break;
 
         case 5:
-            electronAPI.loadMainPage()
+            electronAPI.loadMainPage();
             break;
     }
 }
 
 function next() {
-    actualPage++
-    welcomeNavigate()
+    actualPage++;
+    welcomeNavigate();
 }
 
 function back() {
-    actualPage--
-    welcomeNavigate()
+    actualPage--;
+    welcomeNavigate();
 }
 
 //////////////////////////////////////////////////////
@@ -273,149 +269,145 @@ function back() {
 
 async function initialImportData() {
     if (await files.import()) {
-        electronAPI.loadMainPage()
+        electronAPI.loadMainPage();
     }
 }
 
 async function importData() {
-    await files.import()
-    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
-    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
-    const lacePinCheckbox = document.getElementById('lace-pin')
-    const theme = await files.loadTheme()
-    lacePinCheckbox.checked = theme[1]
-    changeTheme(theme[0])
-    toggleThemesMenu()
+    await files.import();
+    document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
+    document.getElementById("nexus-api-input").value = await files.loadNexusAPI();
+    const lacePinCheckbox = document.getElementById("lace-pin");
+    const theme = await files.loadTheme();
+    lacePinCheckbox.checked = theme[1];
+    changeTheme(theme[0]);
+    toggleThemesMenu();
 }
 
 async function exportData() {
-    await files.export()
+    await files.export();
 }
 
 async function deleteData() {
-    const lacePinCheckbox = document.getElementById('lace-pin')
-    lacePinCheckbox.checked = false
-    changeTheme("Silksong")
-    toggleThemesMenu()
-    await files.delete()
-    document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
-    document.getElementById("nexus-api-input").value = await files.loadNexusAPI()
+    const lacePinCheckbox = document.getElementById("lace-pin");
+    lacePinCheckbox.checked = false;
+    changeTheme("Silksong");
+    toggleThemesMenu();
+    await files.delete();
+    document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
+    document.getElementById("nexus-api-input").value = await files.loadNexusAPI();
 }
 
 //////////////////////////////////////////////////////
 ////////////////////// BEPINEX ///////////////////////
 
 async function installBepinex() {
-    await bepinex.install()
-    setBepinexVersion()
+    await bepinex.install();
+    setBepinexVersion();
 }
 
 async function uninstallBepinex() {
-    await bepinex.uninstall()
-    setBepinexVersion()
+    await bepinex.uninstall();
+    setBepinexVersion();
 }
 
 async function backupBepinex() {
-    await bepinex.backup()
-    setBepinexVersion()
+    await bepinex.backup();
+    setBepinexVersion();
 }
 
 async function deleteBepinexBackup() {
-    await bepinex.deleteBackup()
-    setBepinexVersion()
+    await bepinex.deleteBackup();
+    setBepinexVersion();
 }
 
 async function setBepinexVersion() {
-    const bepinexVersionText = document.getElementById("bepinex-version-text")
+    const bepinexVersionText = document.getElementById("bepinex-version-text");
     if (bepinexVersionText == undefined) {
-        return
+        return;
     }
-    
-    const bepinexVersion = await files.loadBepinexVersion()
-    const bepinexBackupVersion = await files.loadBepinexBackupVersion()
-    if(bepinexVersion == undefined) {
-        if(bepinexBackupVersion == undefined) {
-        bepinexVersionText.innerText = "BepInEx is not installed"
+
+    const bepinexVersion = await files.loadBepinexVersion();
+    const bepinexBackupVersion = await files.loadBepinexBackupVersion();
+    if (bepinexVersion == undefined) {
+        if (bepinexBackupVersion == undefined) {
+            bepinexVersionText.innerText = "BepInEx is not installed";
+        } else {
+            bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backed up`;
         }
-        else {
-            bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backed up`
-        }
-    }
-    else {
-        bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`
+    } else {
+        bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`;
     }
 }
 
 async function searchInstalledMods() {
-    const searchInput = document.getElementById("search-input")
-    console.log(searchInput.value)
+    const searchInput = document.getElementById("search-input");
+    console.log(searchInput.value);
 }
 
 //////////////////////////////////////////////////////
 /////////////////////// NEXUS ////////////////////////
 
 async function verifyNexusAPI() {
-    response = await nexus.verifyAPI()
+    response = await nexus.verifyAPI();
 
-    const nexusCheckImage = document.getElementById("nexus-check-image")
+    const nexusCheckImage = document.getElementById("nexus-check-image");
     if (nexusCheckImage == undefined) {
-        return
+        return;
     }
 
     if (response) {
-        nexusCheckImage.src = "assets/check.svg"
-    }
-    else {
-        nexusCheckImage.src = "assets/cross.svg"
+        nexusCheckImage.src = "assets/check.svg";
+    } else {
+        nexusCheckImage.src = "assets/cross.svg";
     }
 }
 
 async function searchNexusMods() {
-    const searchInput = document.getElementById("search-input")
-    console.log(searchInput.value)
+    const searchInput = document.getElementById("search-input");
+    console.log(searchInput.value);
 }
 
 //////////////////////////////////////////////////////
 /////////////////////// THEMES ///////////////////////
 
 function toggleThemesMenu() {
-    const themesMenu = document.getElementById("themes-menu")
+    const themesMenu = document.getElementById("themes-menu");
     if (themesMenu) {
-        themesMenu.classList.toggle("show")
+        themesMenu.classList.toggle("show");
     }
 }
 
 async function setThemeButton() {
-    const themesButton = document.getElementById("themes-button")
+    const themesButton = document.getElementById("themes-button");
     if (themesButton) {
-        const theme = await files.loadTheme()
-        themesButton.textContent = theme[0]
+        const theme = await files.loadTheme();
+        themesButton.textContent = theme[0];
     }
 }
 
 function changeTheme(theme, state) {
-    toggleThemesMenu()
+    toggleThemesMenu();
 
-    const lacePinCheckbox = document.getElementById('lace-pin');
+    const lacePinCheckbox = document.getElementById("lace-pin");
     if (lacePinCheckbox) {
         lacePinState = lacePinCheckbox.checked;
-    }
-    else if (state) {
-        lacePinState = state
-    }
-    else {
-        lacePinState = false
+    } else if (state) {
+        lacePinState = state;
+    } else {
+        lacePinState = false;
     }
 
     if (actualTheme[0] == theme && actualTheme[1] == lacePinState) {
-        return
+        return;
     }
-    actualTheme = [theme, lacePinState]
+    actualTheme = [theme, lacePinState];
 
-    files.saveTheme(theme, lacePinState)
+    files.saveTheme(theme, lacePinState);
 
-    setThemeButton()
+    setThemeButton();
 
+    // prettier-ignore
     const themesColors = {
         "var":             ["--primary-color", "--secondary-color", "--background-color"],
         "Silksong":        ["rgba(255, 25,  0,   0.3)", "#ff6b6b", "rgba(255, 72,  0,   0.2)"],
@@ -426,17 +418,18 @@ function changeTheme(theme, state) {
         "Surface":         ["rgba(75,  120, 255, 0.3)", "#87c3ff", "rgba(42,  107, 203, 0.2)"],
         "Steel":           ["rgba(164, 164, 164, 0.3)", "#c5b9b9", "rgba(255, 255, 255, 0.2)"]
     }
-    for(let i = 0; i < 3; i++) {
-        document.documentElement.style.setProperty(themesColors.var[i], themesColors[theme][i])
+
+    for (let i = 0; i < 3; i++) {
+        document.documentElement.style.setProperty(themesColors.var[i], themesColors[theme][i]);
     }
 
-    const backgroundVideo = document.getElementById("background-video")
-    let backgroundVideoPath = `assets/background/${theme}.mp4`
+    const backgroundVideo = document.getElementById("background-video");
+    let backgroundVideoPath = `assets/background/${theme}.mp4`;
     if (lacePinState) {
-        backgroundVideoPath = `assets/background/${theme} Lace Pin.mp4`
+        backgroundVideoPath = `assets/background/${theme} Lace Pin.mp4`;
     }
-    
-    backgroundVideo.src = backgroundVideoPath
+
+    backgroundVideo.src = backgroundVideoPath;
 }
 
 //////////////////////////////////////////////////////
@@ -444,12 +437,12 @@ function changeTheme(theme, state) {
 
 async function launch(mode) {
     await electronAPI.launchGame(mode);
-    setBepinexVersion()
+    setBepinexVersion();
 }
 
 async function autoDetectGamePath() {
-    await files.autoDetectGamePath()
+    await files.autoDetectGamePath();
     if (document.getElementById("silksong-path-input")) {
-        document.getElementById("silksong-path-input").value = await files.loadSilksongPath()
+        document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
     }
 }

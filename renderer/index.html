@@ -1,195 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>Silk Fly Launcher</title>
-    <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Silk Fly Launcher</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="app">
+            <video autoplay muted loop class="background-video" id="background-video" src="assets/background/Silksong.mp4" type="video/mp4"></video>
 
-    <div class="app">
-
-        <video autoplay muted loop class="background-video" id="background-video" src="assets/background/Silksong.mp4" type="video/mp4"></video>
-
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo" onclick="navigate('home')">
-                <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo-img"/>
-                <h5 class="logo-title">Silk Fly Launcher</h1>
-            </div>
-
-            <nav class="nav">
-                <div class="nav-section">
-                    <span class="nav-title">Execute Silksong</span>
-                    <button onclick="launch('vanilla')">
-                        <img src="vanilla_launch_icon.png" class="button-icon"/>
-                        Run Vanilla
-                    <button onclick="launch('modded')">
-                        <img src="modded_launch_icon.png" class="button-icon"/>
-                        Run Modded
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="logo" onclick="navigate('home')">
+                    <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="logo-img" />
+                    <h5 class="logo-title">Silk Fly Launcher</h5>
                 </div>
 
-                <div class="nav-section">
-                    <span class="nav-title">Mods</span>
-                    <button onclick="navigate('mods-installed')">
-                        <img src="installed_mods_icon.png" class="button-icon"/>
-                        Installed
-                    <button onclick="navigate('mods-online')">
-                        <img src="online_mods_icon.png" class="button-icon"/>
-                        Online
-                </div>
+                <nav class="nav">
+                    <div class="nav-section">
+                        <span class="nav-title">Execute Silksong</span>
+                        <button onclick="launch('vanilla')">
+                            <img src="vanilla_launch_icon.png" class="button-icon" />
+                            Run Vanilla
+                        </button>
+                        <button onclick="launch('modded')">
+                            <img src="modded_launch_icon.png" class="button-icon" />
+                            Run Modded
+                        </button>
+                    </div>
 
-                <div class="nav-section">
-                    <span class="nav-title">Settings</span>
-                    <button onclick="navigate('general-settings')">
-                        <img src="general_settings_icon.png" class="button-icon"/>
-                        General
-                </div>
-            </nav>
-        </aside>
+                    <div class="nav-section">
+                        <span class="nav-title">Mods</span>
+                        <button onclick="navigate('mods-installed')">
+                            <img src="installed_mods_icon.png" class="button-icon" />
+                            Installed
+                        </button>
+                        <button onclick="navigate('mods-online')">
+                            <img src="online_mods_icon.png" class="button-icon" />
+                            Online
+                        </button>
+                    </div>
 
-        <!-- Main content -->
-        <main class="content">
-            <h1 id="title">Silk Fly Launcher</h1>
-            <div class="view" id="view">
-            </div>
-        </main>
-    </div>
+                    <div class="nav-section">
+                        <span class="nav-title">Settings</span>
+                        <button onclick="navigate('general-settings')">
+                            <img src="general_settings_icon.png" class="button-icon" />
+                            General
+                        </button>
+                    </div>
+                </nav>
+            </aside>
 
-    <!-- Template -->
-    <template id="home-template">
-        <h2>About</h2>
-        <div class="horizontal-div separated-div">
-            <div class="horizontal-div">
-                <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="big-logo-img"/>
-                <div>
-                    <h3>Silk Fly Launcher</h3>
-                    <p class="transparent-text">v1.0.0</p>
-                </div>
-            </div>
-            <div class="horizontal-div">
-                <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="data:image/svg+xml,%3csvg%20width='98'%20height='96'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M48.854%200C21.839%200%200%2022%200%2049.217c0%2021.756%2013.993%2040.172%2033.405%2046.69%202.427.49%203.316-1.059%203.316-2.362%200-1.141-.08-5.052-.08-9.127-13.59%202.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015%204.934.326%207.523%205.052%207.523%205.052%204.367%207.496%2011.404%205.378%2014.235%204.074.404-3.178%201.699-5.378%203.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283%200-5.378%201.94-9.778%205.014-13.2-.485-1.222-2.184-6.275.486-13.038%200%200%204.125-1.304%2013.426%205.052a46.97%2046.97%200%200%201%2012.214-1.63c4.125%200%208.33.571%2012.213%201.63%209.302-6.356%2013.427-5.052%2013.427-5.052%202.67%206.763.97%2011.816.485%2013.038%203.155%203.422%205.015%207.822%205.015%2013.2%200%2018.905-11.404%2023.06-22.324%2024.283%201.78%201.548%203.316%204.481%203.316%209.126%200%206.6-.08%2011.897-.08%2013.526%200%201.304.89%202.853%203.316%202.364%2019.412-6.52%2033.405-24.935%2033.405-46.691C97.707%2022%2075.788%200%2048.854%200z'%20fill='%23fff'/%3e%3c/svg%3e" alt="Github logo" class="logo-img"/> 
-            </div>
+            <!-- Main content -->
+            <main class="content">
+                <h1 id="title">Silk Fly Launcher</h1>
+                <div class="view" id="view"></div>
+            </main>
         </div>
-        <br>
-        <ul>
-            <li>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.</li>
-            <li>This product is licensed under the <a href="" class="link" onclick="electronAPI.openWindow('LICENSE')">GNU General Public License Version 3</a>.</li>
-            <li>This product uses third-party modules or assets under <a href="" class="link" onclick="electronAPI.openWindow('3RD-PARTY-LICENSES')">third-party licenses</a>.</li>
-            <li>Found a bug or have a feature request? Please <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher/issues')">create an issue on GitHub</a>.</li>
-            <li>Made with ♥ by <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar')">GabiZar</a>.</li>
-        </ul>
-        <br>
-    </template>
 
-    <template id="installed-mods-template">
-        <h2>List Of Installed Mods</h2>
-        <form class="horizontal-div" id="search-form">
-            <input class="input" id="search-input" type="text" placeholder="Search For Mods...">
-            <button class="default-button" onclick="searchInstalledMods()">Search</button>
-        </form>
-        <div class="mods-container" id="mods-container">
-        </div>
-    </template>
-
-    <template id="online-mods-template">
-        <h2>List Of Nexus Mods</h2>
-        <form class="horizontal-div" id="search-form">
-            <input class="input" id="search-input" type="text" placeholder="Search For Mods...">
-            <button class="default-button" onclick="searchNexusMods()">Search</button>
-        </form>
-        <div class="mods-container" id="mods-container">
-        </div>
-    </template>
-
-    <template id="mod-template">
-        <div class="mod-container">
-            <div class="mod-text">
-                <div class="horizontal-div" >
-                    <h3 id="mod-title">Unknown Title</h3>
-                    <p id="mod-author">Unknown author</p>
-                    <p id="mod-endorsements-number">? likes</p>
-                </div>
-                <p id="mod-description">No description provided</p>
-                <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
-
+        <!-- Template -->
+        <template id="home-template">
+            <h2>About</h2>
+            <div class="horizontal-div separated-div">
                 <div class="horizontal-div">
-                    <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="download-mod-button">Download</a>
-                    <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
+                    <img src="assets/logo.png" alt="Silk Fly Launcher Logo" class="big-logo-img" />
+                    <div>
+                        <h3>Silk Fly Launcher</h3>
+                        <p class="transparent-text">v1.0.0</p>
+                    </div>
+                </div>
+                <div class="horizontal-div">
+                    <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="assets/github.svg" alt="Github logo" class="logo-img invert-color" />
                 </div>
             </div>
-
-            <img class="mod-icon" src="assets/placeholder_icon.png" alt="mod icon" id="mod-icon">
-        </div>
-    </template>
-
-    <template id="settings-template">
-        <h2>General settings</h2>
-        <div class="horizontal-div">
-            <label>Enter Silksong path: </label>
-            <input type="text" class="input" id="silksong-path-input" name="silksong-path-input">
-            <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
-        </div>
-        <div class="horizontal-div">
-            <label>Themes: </label>
-            <div class="themes-div">
-                <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
-                <div class="themes-menu longer-button" id="themes-menu">
-                    <li onclick="changeTheme('Silksong')">Silksong</li>
-                    <li onclick="changeTheme('Citadel of song')">Citadel of song</li>
-                    <li onclick="changeTheme('Cradle')">Cradle</li>
-                    <li onclick="changeTheme('Abyss')">Abyss</li>
-                    <li onclick="changeTheme('Greyroot')">Greyroot</li>
-                    <li onclick="changeTheme('Surface')">Surface</li>
-                    <li onclick="changeTheme('Steel')">Steel</li>
-                </div>
-            </div>
-            <label class="lace-pin-checkbox-container">
-                <input type="checkbox" name="lace-pin" id="lace-pin">
-                <span class="checkmark"></span>
-                Lace Pin
-            </label>
-        </div>
-        <br>
-        <h2>BepInEx</h2>
-        <p class="transparent-text" id="bepinex-version-text"></p>
-        <div class="horizontal-div">
-            <button class="default-button" onclick="installBepinex()">Install</button>
-            <button class="important-button" onclick="uninstallBepinex()">Uninstall</button>
-            <button class="default-button" onclick="backupBepinex()">Backup</button>
-            <button class="important-button" onclick="deleteBepinexBackup()">Delete Backup</button>
-        </div>
-        <br>
-        <h2>Nexus</h2>
-        <p class="transparent-text" id="bepinex-version-text"></p>
-        <div class="horizontal-div">
-            <label for="nexus-api-label">Enter your nexus api: </label>
-            <input type="text" class="input" id="nexus-api-input" name="nexus-api-input">
-            <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg">
-            <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
-        </div>
-        <br>
-        <h2>Import/Export</h2>
-        <div class="horizontal-div">
-            <button class="default-button" onclick="importData()">Import Data</button>
-            <button class="default-button" onclick="exportData()">Export Data</button>
-            <button class="important-button" onclick="deleteData()">Delete All Data</button>
-        </div>
-        <br>
-        <h2>Debugging</h2>
-        <div class="horizontal-div">
-            <h3>Versions: </h3>
-            <ul id="versions-list">
-                <li id="Silk-Fly-Launcher"></li>
-                <li id="Electron"></li>
-                <li id="Node"></li>
-                <li id="Chromium"></li>
+            <br />
+            <ul>
+                <li>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.</li>
+                <li>This product is licensed under the <a href="" class="link" onclick="electronAPI.openWindow('LICENSE')">GNU General Public License Version 3</a>.</li>
+                <li>This product uses third-party modules or assets under <a href="" class="link" onclick="electronAPI.openWindow('3RD-PARTY-LICENSES')">third-party licenses</a>.</li>
+                <li>
+                    Found a bug or have a feature request? Please
+                    <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher/issues')">create an issue on GitHub</a>.
+                </li>
+                <li>Made with ♥ by <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar')">GabiZar</a>.</li>
             </ul>
-            <p id="version-text"></p>
-        </div>
-    </template>
+            <br />
+        </template>
 
-    <script src="renderer.js"></script>
+        <template id="installed-mods-template">
+            <h2>List Of Installed Mods</h2>
+            <form class="horizontal-div" id="search-form">
+                <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
+                <button class="default-button" onclick="searchInstalledMods()">Search</button>
+            </form>
+            <div class="mods-container" id="mods-container"></div>
+        </template>
 
-</body>
+        <template id="online-mods-template">
+            <h2>List Of Nexus Mods</h2>
+            <form class="horizontal-div" id="search-form">
+                <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
+                <button class="default-button" onclick="searchNexusMods()">Search</button>
+            </form>
+            <div class="mods-container" id="mods-container"></div>
+        </template>
+
+        <template id="mod-template">
+            <div class="mod-container">
+                <div class="mod-text">
+                    <div class="horizontal-div">
+                        <h3 id="mod-title">Unknown Title</h3>
+                        <p id="mod-author">Unknown author</p>
+                        <p id="mod-endorsements-number">? likes</p>
+                    </div>
+                    <p id="mod-description">No description provided</p>
+                    <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
+
+                    <div class="horizontal-div">
+                        <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="download-mod-button">Download</a>
+                        <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
+                    </div>
+                </div>
+
+                <img class="mod-icon" src="assets/placeholder_icon.png" alt="mod icon" id="mod-icon" />
+            </div>
+        </template>
+
+        <template id="settings-template">
+            <h2>General settings</h2>
+            <div class="horizontal-div">
+                <label>Enter Silksong path: </label>
+                <input type="text" class="input" id="silksong-path-input" name="silksong-path-input" />
+                <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
+            </div>
+            <div class="horizontal-div">
+                <label>Themes: </label>
+                <div class="themes-div">
+                    <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
+                    <div class="themes-menu longer-button" id="themes-menu">
+                        <li onclick="changeTheme('Silksong')">Silksong</li>
+                        <li onclick="changeTheme('Citadel of song')">Citadel of song</li>
+                        <li onclick="changeTheme('Cradle')">Cradle</li>
+                        <li onclick="changeTheme('Abyss')">Abyss</li>
+                        <li onclick="changeTheme('Greyroot')">Greyroot</li>
+                        <li onclick="changeTheme('Surface')">Surface</li>
+                        <li onclick="changeTheme('Steel')">Steel</li>
+                    </div>
+                </div>
+                <label class="lace-pin-checkbox-container">
+                    <input type="checkbox" name="lace-pin" id="lace-pin" />
+                    <span class="checkmark"></span>
+                    Lace Pin
+                </label>
+            </div>
+            <br />
+            <h2>BepInEx</h2>
+            <p class="transparent-text" id="bepinex-version-text"></p>
+            <div class="horizontal-div">
+                <button class="default-button" onclick="installBepinex()">Install</button>
+                <button class="important-button" onclick="uninstallBepinex()">Uninstall</button>
+                <button class="default-button" onclick="backupBepinex()">Backup</button>
+                <button class="important-button" onclick="deleteBepinexBackup()">Delete Backup</button>
+            </div>
+            <br />
+            <h2>Nexus</h2>
+            <p class="transparent-text" id="bepinex-version-text"></p>
+            <div class="horizontal-div">
+                <label for="nexus-api-label">Enter your nexus api: </label>
+                <input type="text" class="input" id="nexus-api-input" name="nexus-api-input" />
+                <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg" />
+                <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
+            </div>
+            <br />
+            <h2>Import/Export</h2>
+            <div class="horizontal-div">
+                <button class="default-button" onclick="importData()">Import Data</button>
+                <button class="default-button" onclick="exportData()">Export Data</button>
+                <button class="important-button" onclick="deleteData()">Delete All Data</button>
+            </div>
+            <br />
+            <h2>Debugging</h2>
+            <div class="horizontal-div">
+                <h3>Versions:</h3>
+                <ul id="versions-list">
+                    <li id="Silk-Fly-Launcher"></li>
+                    <li id="Electron"></li>
+                    <li id="Node"></li>
+                    <li id="Chromium"></li>
+                </ul>
+                <p id="version-text"></p>
+            </div>
+        </template>
+
+        <script src="renderer.js"></script>
+    </body>
 </html>

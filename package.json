@@ -1,20 +1,21 @@
 {
-  "name": "silkflylauncher",
-  "version": "1.0.0",
-  "description": "A launcher and manager for silksong bepinex mods written in javascript",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "GabiZar",
-  "license": "SEE LICENSE IN LICENSE",
-  "devDependencies": {
-    "electron": "^39.2.7"
-  },
-  "dependencies": {
-    "@nexusmods/nexus-api": "^1.1.5",
-    "electron-store": "^11.0.2",
-    "extract-zip": "^2.0.1"
-  }
+    "name": "silkflylauncher",
+    "version": "1.0.0",
+    "description": "A launcher and manager for silksong bepinex mods written in javascript",
+    "main": "main.js",
+    "type": "module",
+    "scripts": {
+        "start": "electron .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "GabiZar",
+    "license": "GPL-3.0",
+    "devDependencies": {
+        "electron": "^39.2.7"
+    },
+    "dependencies": {
+        "@nexusmods/nexus-api": "^1.1.5",
+        "electron-store": "^11.0.2",
+        "extract-zip": "^2.0.1"
+    }
 }
