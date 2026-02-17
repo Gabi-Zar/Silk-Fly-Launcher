@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>Silk Fly Launcher</title>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' https://*.nexusmods.com" />
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
@@ -19,32 +20,32 @@
                 <nav class="nav">
                     <div class="nav-section">
                         <span class="nav-title">Execute Silksong</span>
-                        <button onclick="launch('vanilla')">
-                            <img src="vanilla_launch_icon.png" class="button-icon" />
+                        <button class="horizontal-div" onclick="launch('vanilla')">
+                            <img src="assets/icons/start-vanilla.svg" class="icons invert-color" />
                             Run Vanilla
                         </button>
-                        <button onclick="launch('modded')">
-                            <img src="modded_launch_icon.png" class="button-icon" />
+                        <button class="horizontal-div" onclick="launch('modded')">
+                            <img src="assets/icons/start-modded.svg" class="icons invert-color" />
                             Run Modded
                         </button>
                     </div>
 
                     <div class="nav-section">
                         <span class="nav-title">Mods</span>
-                        <button onclick="navigate('mods-installed')">
-                            <img src="installed_mods_icon.png" class="button-icon" />
+                        <button class="horizontal-div" onclick="navigate('mods-installed')">
+                            <img src="assets/icons/folder.svg" class="icons invert-color" />
                             Installed
                         </button>
-                        <button onclick="navigate('mods-online')">
-                            <img src="online_mods_icon.png" class="button-icon" />
+                        <button class="horizontal-div" onclick="navigate('mods-online')">
+                            <img src="assets/icons/cloud.svg" class="icons invert-color" />
                             Online
                         </button>
                     </div>
 
                     <div class="nav-section">
                         <span class="nav-title">Settings</span>
-                        <button onclick="navigate('general-settings')">
-                            <img src="general_settings_icon.png" class="button-icon" />
+                        <button class="horizontal-div" onclick="navigate('general-settings')">
+                            <img src="assets/icons/settings.svg" class="icons invert-color" />
                             General
                         </button>
                     </div>
@@ -70,7 +71,7 @@
                     </div>
                 </div>
                 <div class="horizontal-div">
-                    <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="assets/github.svg" alt="Github logo" class="logo-img invert-color" />
+                    <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="assets/icons/github.svg" alt="Github logo" class="logo-img invert-color" />
                 </div>
             </div>
             <br />
@@ -168,7 +169,7 @@
             <div class="horizontal-div">
                 <label for="nexus-api-label">Enter your nexus api: </label>
                 <input type="text" class="input" id="nexus-api-input" name="nexus-api-input" />
-                <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg" />
+                <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
                 <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
             </div>
             <br />

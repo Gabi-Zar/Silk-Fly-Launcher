@@ -357,9 +357,9 @@ async function verifyNexusAPI() {
     }
 
     if (response) {
-        nexusCheckImage.src = "assets/check.svg";
+        nexusCheckImage.src = "assets/icons/check.svg";
     } else {
-        nexusCheckImage.src = "assets/cross.svg";
+        nexusCheckImage.src = "assets/icons/cross.svg";
     }
 }
 
