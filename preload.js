@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld("files", {
     loadNexusAPI: () => ipcRenderer.invoke("load-nexus-api"),
     saveTheme: (theme, lacePinState) => ipcRenderer.invoke("save-theme", theme, lacePinState),
     loadTheme: () => ipcRenderer.invoke("load-theme"),
+    loadInstalledModsInfo: () => ipcRenderer.invoke("load-installed-mods-info"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -43,5 +44,6 @@ contextBridge.exposeInMainWorld("bepinex", {
 contextBridge.exposeInMainWorld("nexus", {
     verifyAPI: () => ipcRenderer.invoke("verify-nexus-api"),
     getLatestMods: () => ipcRenderer.invoke("get-latest-mods"),
-    download: (link) => ipcRenderer.invoke("download-mod", link),
+    download: (link) => ipcRenderer.invoke("open-download", link),
+    uninstall: (modId) => ipcRenderer.invoke("uninstall-mod", modId),
 });

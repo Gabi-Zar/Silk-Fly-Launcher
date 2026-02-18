@@ -6,6 +6,7 @@ const HomeTemplate = document.getElementById("home-template");
 const installedModsTemplate = document.getElementById("installed-mods-template");
 const onlineModsTemplate = document.getElementById("online-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
+const installedModTemplate = document.getElementById("installed-mod-template");
 const modTemplate = document.getElementById("mod-template");
 
 let oldPage;
@@ -50,6 +51,9 @@ async function navigate(page) {
     if (oldPage == page) {
         return;
     }
+    if (page == "refresh") {
+        page = oldPage;
+    }
     oldPage = page;
 
     view.replaceChildren();
@@ -63,6 +67,7 @@ async function navigate(page) {
         case "mods-installed":
             title.innerText = "Installed Mods";
             const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true);
+            const installedModsContainer = installedModsTemplateCopy.getElementById("mods-container");
             const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form");
 
             searchFormInstalled.addEventListener("submit", async function (event) {
@@ -70,6 +75,56 @@ async function navigate(page) {
             });
 
             view.appendChild(installedModsTemplateCopy);
+
+            const modsInfo = await files.loadInstalledModsInfo();
+            if (modsInfo == []) {
+                break;
+            }
+
+            for (const modInfo of modsInfo) {
+                const installedModTemplateCopy = installedModTemplate.content.cloneNode(true);
+                if (modInfo.name) {
+                    const modTitleText = installedModTemplateCopy.getElementById("mod-title");
+                    modTitleText.innerText = modInfo.name;
+                }
+                if (modInfo.author) {
+                    const modAuthorText = installedModTemplateCopy.getElementById("mod-author");
+                    modAuthorText.innerText = `by ${modInfo.author}`;
+                }
+                if (modInfo.summary) {
+                    const modDescriptionText = installedModTemplateCopy.getElementById("mod-description");
+                    modDescriptionText.innerText = modInfo.summary;
+                }
+                if (modInfo.picture_url) {
+                    const modPicture = installedModTemplateCopy.getElementById("mod-icon");
+                    modPicture.src = modInfo.picture_url;
+                }
+                if (modInfo.version && modInfo.updated_time) {
+                    const modVersionText = installedModTemplateCopy.getElementById("mod-version");
+                    modVersionText.innerText = `V${modInfo.version} last updated on ${modInfo.updated_time.slice(0, 10)}`;
+                }
+
+                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.mod_id}`;
+
+                const modLinkButton = installedModTemplateCopy.getElementById("external-link");
+                modLinkButton.href = modUrl;
+                modLinkButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modLink = modLinkButton.href;
+                    electronAPI.openExternalLink(modLink);
+                });
+
+                modDownloadButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
+                modDownloadButton.addEventListener("click", async function (event) {
+                    event.preventDefault();
+                    await nexus.uninstall(modInfo.mod_id);
+
+                    navigate("refresh");
+                });
+
+                installedModsContainer.appendChild(installedModTemplateCopy);
+            }
+
             break;
 
         case "mods-online":

@@ -11,9 +11,15 @@ const Nexus = NexusModule.default;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const gotTheLock = app.requestSingleInstanceLock();
+const isDev = !app.isPackaged;
 
 const store = new Store();
+const bepinexStore = new Store({ cwd: "bepinex-version" });
+const installedModsStore = new Store({ cwd: "installed-mods-version" });
+
 const userSavePath = app.getPath("userData");
+const modSavePath = `${userSavePath}\\mods`;
 const dataPath = `${userSavePath}\\config.json`;
 let silksongPath = store.get("silksong-path");
 
@@ -27,10 +33,24 @@ const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini
 
 let bepinexVersion;
 let bepinexBackupVersion;
-const bepinexStore = new Store({ cwd: "bepinex-version" });
 
 let mainWindow;
+let nexusWindow;
 let htmlFile;
+
+//////////////////////////////////////////////////////
+////////////////////// STARTUP ///////////////////////
+
+if (!gotTheLock) {
+    app.quit();
+} else {
+    app.on("second-instance", (event, argv) => {
+        const nxmUrl = argv.find((arg) => arg.startsWith("nxm://"));
+        if (nxmUrl) {
+            handleNxmUrl(nxmUrl);
+        }
+    });
+}
 
 async function createWindow() {
     mainWindow = new BrowserWindow({
@@ -51,7 +71,16 @@ async function createWindow() {
 }
 
 app.whenReady().then(() => {
-    createWindow();
+    if (isDev) {
+        app.setAsDefaultProtocolClient("nxm", process.execPath, [path.resolve(process.argv[1])]);
+    } else {
+        app.setAsDefaultProtocolClient("nxm");
+    }
+
+    if (gotTheLock) {
+        checkInstalledMods();
+        createWindow();
+    }
 
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -64,6 +93,11 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         app.quit();
     }
+});
+
+app.on("open-url", (event, url) => {
+    event.preventDefault();
+    handleNxmUrl(url);
 });
 
 //////////////////////////////////////////////////////
@@ -141,6 +175,31 @@ ipcMain.handle("load-theme", () => {
     return theme;
 });
 
+async function saveModInfo(modId, suppr = false) {
+    if (suppr == true) {
+        installedModsStore.delete(String(modId));
+        return;
+    }
+
+    const modInfo = await nexus.getModInfo(modId);
+
+    installedModsStore.set(`${modId}.mod_id`, modInfo.mod_id);
+    installedModsStore.set(`${modId}.name`, modInfo.name);
+    installedModsStore.set(`${modId}.summary`, modInfo.summary);
+    installedModsStore.set(`${modId}.picture_url`, modInfo.picture_url);
+    installedModsStore.set(`${modId}.version`, modInfo.version);
+    installedModsStore.set(`${modId}.updated_time`, modInfo.updated_time);
+    installedModsStore.set(`${modId}.author`, modInfo.author);
+}
+
+ipcMain.handle("load-installed-mods-info", () => {
+    let modsInfo = [];
+    for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
+        modsInfo.push(modInfo);
+    }
+    return modsInfo;
+});
+
 //////////////////////////////////////////////////////
 /////////////////// DATA HANDLING ////////////////////
 
@@ -197,9 +256,7 @@ ipcMain.handle("import-data", async () => {
 async function installBepinex() {
     if (await fileExists(bepinexBackupPath)) {
         if (await fileExists(`${bepinexBackupPath}/BepInEx`)) {
-            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, {
-                recursive: true,
-            });
+            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, { recursive: true });
         }
 
         for (const file of bepinexFiles) {
@@ -231,18 +288,13 @@ async function installBepinex() {
 
         const asset = release.assets.find((a) => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64"));
 
-        const download = await fetch(asset.browser_download_url);
-        if (!download.ok) {
-            throw new Error("Download error");
-        }
-        const filePath = `${userSavePath}\\bepinex.zip`;
-
-        await pipeline(download.body, createWriteStream(filePath));
-
-        await extract(filePath, { dir: silksongPath });
-        await fs.unlink(filePath);
+        await downloadAndUnzip(asset.browser_download_url, silksongPath);
 
         saveBepinexVersion(release.tag_name);
+    }
+
+    if (await fileExists(modSavePath)) {
+        await fs.cp(`${modSavePath}`, `${bepinexFolderPath}/plugins`, { recursive: true });
     }
 }
 
@@ -271,6 +323,10 @@ ipcMain.handle("uninstall-bepinex", async () => {
 async function backupBepinex() {
     if ((await fileExists(bepinexBackupPath)) == false) {
         await fs.mkdir(bepinexBackupPath);
+    }
+
+    if (fileExists(`${bepinexFolderPath}/plugins`)) {
+        await fs.rm(`${bepinexFolderPath}/plugins`, { recursive: true });
     }
 
     if (await fileExists(bepinexFolderPath)) {
@@ -331,7 +387,7 @@ async function verifyNexusAPI() {
 }
 
 ipcMain.handle("get-latest-mods", async () => {
-    if (nexus == undefined) {
+    if (!(await verifyNexusAPI())) {
         return;
     }
 
@@ -339,12 +395,12 @@ ipcMain.handle("get-latest-mods", async () => {
     return mods;
 });
 
-ipcMain.handle("download-mod", async (event, link) => {
-    if (nexus == undefined) {
+ipcMain.handle("open-download", async (event, link) => {
+    if (!(await verifyNexusAPI())) {
         return;
     }
 
-    const nexusWindow = new BrowserWindow({
+    nexusWindow = new BrowserWindow({
         width: 1080,
         height: 720,
         modal: true,
@@ -356,6 +412,60 @@ ipcMain.handle("download-mod", async (event, link) => {
     });
 
     nexusWindow.loadURL(link);
+});
+
+function handleNxmUrl(url) {
+    nexusWindow.close();
+
+    const parsedUrl = new URL(url);
+
+    const key = parsedUrl.searchParams.get("key");
+    const expires = Number(parsedUrl.searchParams.get("expires"));
+
+    const [, , modId, , fileId] = parsedUrl.pathname.split("/");
+
+    startDownload(Number(modId), Number(fileId), key, expires);
+}
+
+async function startDownload(modId, fileId, key, expires) {
+    if (!(await verifyNexusAPI())) {
+        return;
+    }
+
+    const url = await nexus.getDownloadURLs(modId, fileId, key, expires);
+    const download_url = url[0].URI;
+
+    if (!(await fileExists(modSavePath))) {
+        await fs.mkdir(modSavePath);
+    }
+
+    await downloadAndUnzip(download_url, `${modSavePath}/${modId}`);
+    if (await fileExists(bepinexFolderPath)) {
+        await fs.cp(`${modSavePath}/${modId}`, `${bepinexFolderPath}/plugins/${modId}`, { recursive: true });
+    }
+
+    saveModInfo(modId);
+}
+
+async function checkInstalledMods() {
+    for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
+        if (!(await fileExists(`${modSavePath}/${modInfo.mod_id}`))) {
+            saveModInfo(key, true);
+            await fs.rm(`${bepinexFolderPath}/plugins/${modInfo.mod_id}`, { recursive: true });
+        }
+    }
+}
+
+ipcMain.handle("uninstall-mod", async (event, modId) => {
+    const modPath = `${bepinexFolderPath}/plugins/${modId}`;
+    if (await fileExists(`${modSavePath}/${modId}`)) {
+        await fs.rm(`${modSavePath}/${modId}`, { recursive: true });
+    }
+    if (await fileExists(modPath)) {
+        await fs.rm(modPath, { recursive: true });
+    }
+
+    saveModInfo(modId, true);
 });
 
 //////////////////////////////////////////////////////
@@ -422,3 +532,17 @@ ipcMain.handle("launch-game", async (event, mode) => {
         }
     }
 });
+
+async function downloadAndUnzip(url, path) {
+    const download = await fetch(url);
+    if (!download.ok) {
+        throw new Error("Download error");
+    }
+
+    const tempPath = `${userSavePath}\\tempZip.zip`;
+
+    await pipeline(download.body, createWriteStream(tempPath));
+
+    await extract(tempPath, { dir: path });
+    await fs.unlink(tempPath);
+}
