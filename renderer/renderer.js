@@ -139,7 +139,7 @@ async function navigate(page) {
 
             view.appendChild(onlineModsTemplateCopy);
 
-            mods = await nexus.getLatestMods();
+            mods = await nexus.getMods();
             if (mods == undefined) {
                 break;
             }
@@ -172,7 +172,7 @@ async function navigate(page) {
                     const modPicture = modTemplateCopy.getElementById("mod-icon");
                     modPicture.src = mod.picture_url;
                 }
-                if (mod.version && mod.updated_timestamp) {
+                if (mod.version && mod.updated_time) {
                     const modVersionText = modTemplateCopy.getElementById("mod-version");
                     modVersionText.innerText = `V${mod.version} last updated on ${mod.updated_time.slice(0, 10)}`;
                 }
@@ -397,7 +397,8 @@ async function setBepinexVersion() {
 
 async function searchInstalledMods() {
     const searchInput = document.getElementById("search-input");
-    console.log(searchInput.value);
+    await nexus.searchInstalled(searchInput.value);
+    navigate("refresh");
 }
 
 //////////////////////////////////////////////////////
@@ -420,7 +421,8 @@ async function verifyNexusAPI() {
 
 async function searchNexusMods() {
     const searchInput = document.getElementById("search-input");
-    console.log(searchInput.value);
+    await nexus.search(searchInput.value);
+    navigate("refresh");
 }
 
 //////////////////////////////////////////////////////
@@ -501,3 +503,20 @@ async function autoDetectGamePath() {
         document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
     }
 }
+
+function showToast(message, type = "info", duration = 3000) {
+    const toastDiv = document.getElementById("toast-div");
+    const toast = document.createElement("p");
+
+    toast.classList.add("toast", type);
+    toast.innerText = message;
+    toastDiv.appendChild(toast);
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.addEventListener("transitionend", () => toast.remove());
+    }, duration);
+}
+
+electronAPI.onShowToast(showToast);

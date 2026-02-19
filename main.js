@@ -7,7 +7,7 @@ import { createWriteStream } from "fs";
 import { pipeline } from "stream/promises";
 import extract from "extract-zip";
 import NexusModule from "@nexusmods/nexus-api";
-const Nexus = NexusModule.default;
+import { gql, GraphQLClient } from "graphql-request";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,9 +23,12 @@ const modSavePath = `${userSavePath}\\mods`;
 const dataPath = `${userSavePath}\\config.json`;
 let silksongPath = store.get("silksong-path");
 
+const Nexus = NexusModule.default;
 let nexusAPI = store.get("nexus-api");
 let nexus = undefined;
 createNexus();
+let cachedModList = undefined;
+let query = "";
 
 let bepinexFolderPath = `${silksongPath}/BepInEx`;
 let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`;
@@ -154,12 +157,16 @@ ipcMain.handle("save-nexus-api", (event, api) => {
     store.set("nexus-api", nexusAPI);
 });
 
-ipcMain.handle("load-nexus-api", () => {
+function loadNexusApi() {
     nexusAPI = store.get("nexus-api");
     if (nexusAPI == undefined) {
         return "";
     }
     return nexusAPI;
+}
+
+ipcMain.handle("load-nexus-api", () => {
+    return loadNexusApi();
 });
 
 ipcMain.handle("save-theme", (event, theme, lacePinState) => {
@@ -197,6 +204,10 @@ ipcMain.handle("load-installed-mods-info", () => {
     for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
         modsInfo.push(modInfo);
     }
+
+    modsInfo.sort((a, b) => a.name.localeCompare(b.name));
+    modsInfo = modsInfo.filter((mod) => mod.name.toLowerCase().includes(query.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
+
     return modsInfo;
 });
 
@@ -386,17 +397,21 @@ async function verifyNexusAPI() {
     }
 }
 
-ipcMain.handle("get-latest-mods", async () => {
-    if (!(await verifyNexusAPI())) {
-        return;
+ipcMain.handle("get-mods", async () => {
+    if (!cachedModList) {
+        if (!(await verifyNexusAPI())) {
+            mainWindow.webContents.send("showToast", "Unable to fetch mods.", "error");
+            return;
+        }
+        cachedModList = await nexus.getLatestAdded();
     }
 
-    const mods = await nexus.getLatestAdded();
-    return mods;
+    return cachedModList;
 });
 
 ipcMain.handle("open-download", async (event, link) => {
     if (!(await verifyNexusAPI())) {
+        mainWindow.webContents.send("showToast", "Unable to download.", "error");
         return;
     }
 
@@ -429,6 +444,7 @@ function handleNxmUrl(url) {
 
 async function startDownload(modId, fileId, key, expires) {
     if (!(await verifyNexusAPI())) {
+        mainWindow.webContents.send("showToast", "Unable to download.", "error");
         return;
     }
 
@@ -445,6 +461,7 @@ async function startDownload(modId, fileId, key, expires) {
     }
 
     saveModInfo(modId);
+    mainWindow.webContents.send("showToast", "Mod downloaded successfully.");
 }
 
 async function checkInstalledMods() {
@@ -466,6 +483,60 @@ ipcMain.handle("uninstall-mod", async (event, modId) => {
     }
 
     saveModInfo(modId, true);
+});
+
+ipcMain.handle("search-nexus-mods", async (event, keywords) => {
+    const count = 10;
+    const endpoint = "https://api.nexusmods.com/v2/graphql";
+    const client = new GraphQLClient(endpoint, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    const query = gql`
+        query Mods($filter: ModsFilter, $offset: Int, $count: Int) {
+            mods(filter: $filter, offset: $offset, count: $count) {
+                nodes {
+                    author
+                    endorsements
+                    modId
+                    name
+                    pictureUrl
+                    summary
+                    updatedAt
+                    version
+                }
+            }
+        }
+    `;
+
+    const variables = {
+        filter: {
+            op: "AND",
+            gameDomainName: [{ value: "hollowknightsilksong" }],
+            name: [{ value: keywords, op: "WILDCARD" }],
+        },
+        offset: 0,
+        count: count,
+    };
+
+    const data = await client.request(query, variables);
+    for (let i = 0; i < data.mods.nodes.length; i++) {
+        data.mods.nodes[i].mod_id = data.mods.nodes[i].modId;
+        delete data.mods.nodes[i].modId;
+        data.mods.nodes[i].picture_url = data.mods.nodes[i].pictureUrl;
+        delete data.mods.nodes[i].pictureUrl;
+        data.mods.nodes[i].endorsement_count = data.mods.nodes[i].endorsements;
+        delete data.mods.nodes[i].endorsements;
+        data.mods.nodes[i].updated_time = data.mods.nodes[i].updatedAt;
+        delete data.mods.nodes[i].updatedAt;
+    }
+    cachedModList = data.mods.nodes;
+});
+
+ipcMain.handle("search-installed-mods", async (event, keywords) => {
+    query = keywords;
 });
 
 //////////////////////////////////////////////////////
@@ -536,7 +607,8 @@ ipcMain.handle("launch-game", async (event, mode) => {
 async function downloadAndUnzip(url, path) {
     const download = await fetch(url);
     if (!download.ok) {
-        throw new Error("Download error");
+        mainWindow.webContents.send("showToast", "Error during download.", "error");
+        return;
     }
 
     const tempPath = `${userSavePath}\\tempZip.zip`;

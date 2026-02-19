@@ -235,7 +235,7 @@ body {
 }
 
 .mods-container {
-    height: 80%;
+    height: 70%;
     transform: translateY(50px);
     padding: 20px;
     overflow: auto;
@@ -381,4 +381,41 @@ body {
     border: solid var(--text-color);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+}
+
+.toast-div {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.toast {
+    width: 300px;
+    background: var(--transparent-black);
+    padding: 10px 20px;
+    border: 1px solid var(--secondary-color);
+    border-radius: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.error {
+    color: #f44336;
+}
+.toast.info {
+    color: var(--text-color);
+}
+.toast.warning {
+    color: #ff9800;
 }

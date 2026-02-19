@@ -32,6 +32,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     launchGame: (mode) => ipcRenderer.invoke("launch-game", mode),
     loadMainPage: () => ipcRenderer.invoke("load-main-page"),
     getPage: () => ipcRenderer.invoke("get-page"),
+    onShowToast: (callback) => {
+        ipcRenderer.on("showToast", (event, message, type, duration) => {
+            callback(message, type, duration);
+        });
+    },
 });
 
 contextBridge.exposeInMainWorld("bepinex", {
@@ -43,7 +48,9 @@ contextBridge.exposeInMainWorld("bepinex", {
 
 contextBridge.exposeInMainWorld("nexus", {
     verifyAPI: () => ipcRenderer.invoke("verify-nexus-api"),
-    getLatestMods: () => ipcRenderer.invoke("get-latest-mods"),
+    getMods: () => ipcRenderer.invoke("get-mods"),
     download: (link) => ipcRenderer.invoke("open-download", link),
     uninstall: (modId) => ipcRenderer.invoke("uninstall-mod", modId),
+    search: (keywords) => ipcRenderer.invoke("search-nexus-mods", keywords),
+    searchInstalled: (keywords) => ipcRenderer.invoke("search-installed-mods", keywords),
 });
