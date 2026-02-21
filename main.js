@@ -5,9 +5,11 @@ import Store from "electron-store";
 import fs from "fs/promises";
 import { createWriteStream } from "fs";
 import { pipeline } from "stream/promises";
-import extract from "extract-zip";
 import NexusModule from "@nexusmods/nexus-api";
 import { gql, GraphQLClient } from "graphql-request";
+import { path7za } from "7zip-bin";
+import node7z from "node-7z";
+const { extractFull } = node7z;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -633,18 +635,31 @@ ipcMain.handle("launch-game", async (event, mode) => {
 });
 
 async function downloadAndUnzip(url, path) {
-    const download = await fetch(url);
+    url = new URL(url);
+    const fileName = url.pathname.split("/").pop();
+    const extension = fileName.split(".").pop().toLowerCase();
+
+    const download = await fetch(url.href);
     if (!download.ok) {
         mainWindow.webContents.send("showToast", "Error during download.", "error");
         return;
     }
 
-    const tempPath = `${userSavePath}\\tempZip.zip`;
-
+    const tempPath = `${userSavePath}\\tempZip.${extension}`;
     await pipeline(download.body, createWriteStream(tempPath));
-
-    await extract(tempPath, { dir: path });
+    await extractArchive(tempPath, path);
     await fs.unlink(tempPath);
+}
+
+function extractArchive(archivePath, destPath) {
+    return new Promise((resolve, reject) => {
+        const stream = extractFull(archivePath, destPath, {
+            $bin: path7za,
+        });
+
+        stream.on("end", resolve);
+        stream.on("error", reject);
+    });
 }
 
 ipcMain.handle("get-version", () => {

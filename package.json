@@ -1,7 +1,8 @@
 {
     "name": "silkflylauncher",
+    "productName": "Silk Fly Launcher",
     "version": "1.0.0",
-    "description": "A launcher and manager for silksong bepinex mods written in javascript",
+    "description": "Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.",
     "main": "main.js",
     "type": "module",
     "scripts": {
@@ -15,9 +16,10 @@
     },
     "dependencies": {
         "@nexusmods/nexus-api": "^1.1.5",
+        "7zip-bin": "^5.2.0",
         "electron-store": "^11.0.2",
-        "extract-zip": "^2.0.1",
         "graphql": "^16.12.0",
-        "graphql-request": "^7.4.0"
+        "graphql-request": "^7.4.0",
+        "node-7z": "^3.0.0"
     }
 }
