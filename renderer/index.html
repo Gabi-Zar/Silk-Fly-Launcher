@@ -91,19 +91,47 @@
 
         <template id="installed-mods-template">
             <h2>List Of Installed Mods</h2>
-            <form class="horizontal-div" id="search-form">
-                <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
-                <button class="default-button" onclick="searchInstalledMods()">Search</button>
-            </form>
+            <div class="horizontal-div">
+                <form class="horizontal-div search-form" id="search-form">
+                    <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
+                    <button class="default-button" onclick="searchInstalledMods()">Search</button>
+                </form>
+                <div class="list-div">
+                    <div class="default-button smaller-button" id="sort-button" onclick="toggleSortMenu()">Sort</div>
+                    <div class="list-menu longer-button list-menu-inverted" id="sort-menu">
+                        <li id="name" onclick="changeSort('name')">by name</li>
+                        <li id="downloads" onclick="changeSort('downloads')">by downloads count</li>
+                        <li id="endorsements" onclick="changeSort('endorsements')">by endorsements count</li>
+                        <li id="createdAt" onclick="changeSort('createdAt')">by date of creation</li>
+                        <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
+                        <li id="size" onclick="changeSort('size')">by size</li>
+                    </div>
+                </div>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+            </div>
             <div class="mods-container" id="mods-container"></div>
         </template>
 
         <template id="online-mods-template">
             <h2>List Of Nexus Mods</h2>
-            <form class="horizontal-div" id="search-form">
-                <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
-                <button class="default-button" onclick="searchNexusMods()">Search</button>
-            </form>
+            <div class="horizontal-div">
+                <form class="horizontal-div search-form" id="search-form">
+                    <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
+                    <button class="default-button" onclick="searchNexusMods()">Search</button>
+                </form>
+                <div class="list-div">
+                    <div class="default-button smaller-button" id="sort-button" onclick="toggleSortMenu()">Sort</div>
+                    <div class="list-menu longer-button list-menu-inverted" id="sort-menu">
+                        <li id="name" onclick="changeSort('name')">by name</li>
+                        <li id="downloads" onclick="changeSort('downloads')">by downloads count</li>
+                        <li id="endorsements" onclick="changeSort('endorsements')">by endorsements count</li>
+                        <li id="createdAt" onclick="changeSort('createdAt')">by date of creation</li>
+                        <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
+                        <li id="size" onclick="changeSort('size')">by size</li>
+                    </div>
+                </div>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+            </div>
             <div class="mods-container" id="mods-container"></div>
         </template>
 
@@ -113,10 +141,12 @@
                     <div class="horizontal-div">
                         <h3 id="mod-title">Unknown Title</h3>
                         <p id="mod-author">Unknown author</p>
+                        <p id="mod-endorsements-number">? likes</p>
+                        <p id="mod-downloads-number">? download</p>
                     </div>
-                    <p id="mod-description">No description provided</p>
+                    <p id="mod-description" class="long-text">No description provided</p>
                     <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
-
+                    <br />
                     <div class="horizontal-div">
                         <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="uninstall-mod-button">Uninstall</a>
                         <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
@@ -134,10 +164,11 @@
                         <h3 id="mod-title">Unknown Title</h3>
                         <p id="mod-author">Unknown author</p>
                         <p id="mod-endorsements-number">? likes</p>
+                        <p id="mod-downloads-number">? download</p>
                     </div>
-                    <p id="mod-description">No description provided</p>
+                    <p id="mod-description" class="long-text">No description provided</p>
                     <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
-
+                    <br />
                     <div class="horizontal-div">
                         <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="download-mod-button">Download</a>
                         <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
@@ -155,18 +186,19 @@
                 <input type="text" class="input" id="silksong-path-input" name="silksong-path-input" />
                 <button class="default-button" onclick="autoDetectGamePath()">Auto Detect</button>
             </div>
+            <br />
             <div class="horizontal-div">
                 <label>Themes: </label>
-                <div class="themes-div">
+                <div class="list-div">
                     <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
-                    <div class="themes-menu longer-button" id="themes-menu">
-                        <li onclick="changeTheme('Silksong')">Silksong</li>
-                        <li onclick="changeTheme('Citadel of song')">Citadel of song</li>
-                        <li onclick="changeTheme('Cradle')">Cradle</li>
-                        <li onclick="changeTheme('Abyss')">Abyss</li>
-                        <li onclick="changeTheme('Greyroot')">Greyroot</li>
-                        <li onclick="changeTheme('Surface')">Surface</li>
-                        <li onclick="changeTheme('Steel')">Steel</li>
+                    <div class="list-menu longer-button" id="themes-menu">
+                        <li id="Silksong" onclick="changeTheme('Silksong')">Silksong</li>
+                        <li id="Citadel of song" onclick="changeTheme('Citadel of song')">Citadel of song</li>
+                        <li id="Cradle" onclick="changeTheme('Cradle')">Cradle</li>
+                        <li id="Abyss" onclick="changeTheme('Abyss')">Abyss</li>
+                        <li id="Greyroot" onclick="changeTheme('Greyroot')">Greyroot</li>
+                        <li id="Surface" onclick="changeTheme('Surface')">Surface</li>
+                        <li id="Steel" onclick="changeTheme('Steel')">Steel</li>
                     </div>
                 </div>
                 <label class="lace-pin-checkbox-container">
@@ -178,6 +210,7 @@
             <br />
             <h2>BepInEx</h2>
             <p class="transparent-text" id="bepinex-version-text"></p>
+            <br />
             <div class="horizontal-div">
                 <button class="default-button" onclick="installBepinex()">Install</button>
                 <button class="important-button" onclick="uninstallBepinex()">Uninstall</button>

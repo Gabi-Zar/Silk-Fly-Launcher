@@ -55,7 +55,7 @@
             <div class="horizontal-div">
                 <label for="nexus-api-label">Enter your nexus api: </label>
                 <input type="text" class="input" id="nexus-api-input" name="nexus-api-input" />
-                <img class="nexus-check-image" id="nexus-check-image" src="assets/cross.svg" />
+                <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
                 <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
             </div>
         </template>
@@ -64,16 +64,16 @@
             <h1 class="title">Chose the theme of the app</h1>
             <div class="horizontal-div welcome-div">
                 <label>Themes: </label>
-                <div class="themes-div">
+                <div class="list-div">
                     <div class="default-button longer-button" id="themes-button" onclick="toggleThemesMenu()">Silksong</div>
-                    <div class="themes-menu longer-button" id="themes-menu">
-                        <li onclick="changeTheme('Silksong')">Silksong</li>
-                        <li onclick="changeTheme('Citadel of song')">Citadel of song</li>
-                        <li onclick="changeTheme('Cradle')">Cradle</li>
-                        <li onclick="changeTheme('Abyss')">Abyss</li>
-                        <li onclick="changeTheme('Greyroot')">Greyroot</li>
-                        <li onclick="changeTheme('Surface')">Surface</li>
-                        <li onclick="changeTheme('Steel')">Steel</li>
+                    <div class="list-menu longer-button" id="themes-menu">
+                        <li id="Silksong" onclick="changeTheme('Silksong')">Silksong</li>
+                        <li id="Citadel of song" onclick="changeTheme('Citadel of song')">Citadel of song</li>
+                        <li id="Cradle" onclick="changeTheme('Cradle')">Cradle</li>
+                        <li id="Abyss" onclick="changeTheme('Abyss')">Abyss</li>
+                        <li id="Greyroot" onclick="changeTheme('Greyroot')">Greyroot</li>
+                        <li id="Surface" onclick="changeTheme('Surface')">Surface</li>
+                        <li id="Steel" onclick="changeTheme('Steel')">Steel</li>
                     </div>
                 </div>
             </div>

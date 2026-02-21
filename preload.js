@@ -1,9 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-const VERSION = "1.0.0";
-
 contextBridge.exposeInMainWorld("versions", {
-    silkFlyLauncher: () => VERSION,
+    silkFlyLauncher: () => ipcRenderer.invoke("get-version"),
     node: () => process.versions.node,
     chromium: () => process.versions.chrome,
     electron: () => process.versions.electron,
@@ -23,7 +21,6 @@ contextBridge.exposeInMainWorld("files", {
     loadNexusAPI: () => ipcRenderer.invoke("load-nexus-api"),
     saveTheme: (theme, lacePinState) => ipcRenderer.invoke("save-theme", theme, lacePinState),
     loadTheme: () => ipcRenderer.invoke("load-theme"),
-    loadInstalledModsInfo: () => ipcRenderer.invoke("load-installed-mods-info"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -48,9 +45,9 @@ contextBridge.exposeInMainWorld("bepinex", {
 
 contextBridge.exposeInMainWorld("nexus", {
     verifyAPI: () => ipcRenderer.invoke("verify-nexus-api"),
-    getMods: () => ipcRenderer.invoke("get-mods"),
+    getMods: (type) => ipcRenderer.invoke("get-mods", type),
     download: (link) => ipcRenderer.invoke("open-download", link),
     uninstall: (modId) => ipcRenderer.invoke("uninstall-mod", modId),
-    search: (keywords) => ipcRenderer.invoke("search-nexus-mods", keywords),
-    searchInstalled: (keywords) => ipcRenderer.invoke("search-installed-mods", keywords),
+    search: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-nexus-mods", keywords, offset, count, sortFilter, sortOrder),
+    searchInstalled: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-installed-mods", keywords, offset, count, sortFilter, sortOrder),
 });

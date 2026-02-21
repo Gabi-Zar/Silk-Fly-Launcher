@@ -11,6 +11,12 @@ const modTemplate = document.getElementById("mod-template");
 
 let oldPage;
 let actualTheme = [];
+let searchValueNexus = "";
+let searchValueInstalled = "";
+let onlineSortFilter = "downloads";
+let installedSortFilter = "name";
+let onlineSortOrder = "DESC";
+let installedSortOrder = "ASC";
 
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
@@ -40,6 +46,7 @@ async function on_startup() {
         changeTheme(theme[0], theme[1]);
         navigate("home");
     } else if ((await electronAPI.getPage()) == "welcome.html") {
+        changeTheme("Silksong");
         welcomeNavigate();
     }
 }
@@ -69,14 +76,18 @@ async function navigate(page) {
             const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true);
             const installedModsContainer = installedModsTemplateCopy.getElementById("mods-container");
             const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form");
+            const searchInputInstalled = installedModsTemplateCopy.getElementById("search-input");
 
             searchFormInstalled.addEventListener("submit", async function (event) {
                 event.preventDefault();
             });
+            searchInputInstalled.value = searchValueInstalled;
 
             view.appendChild(installedModsTemplateCopy);
+            toggleSelectedListButton("sort-menu", installedSortFilter);
+            setSortOrderButton();
 
-            const modsInfo = await files.loadInstalledModsInfo();
+            const modsInfo = await nexus.getMods(page);
             if (modsInfo == []) {
                 break;
             }
@@ -91,20 +102,36 @@ async function navigate(page) {
                     const modAuthorText = installedModTemplateCopy.getElementById("mod-author");
                     modAuthorText.innerText = `by ${modInfo.author}`;
                 }
+                if (modInfo.endorsements) {
+                    const modEndorsementsNumber = installedModTemplateCopy.getElementById("mod-endorsements-number");
+                    if (modInfo.endorsements > 1) {
+                        modEndorsementsNumber.innerText = `${modInfo.endorsements} likes`;
+                    } else {
+                        modEndorsementsNumber.innerText = `${modInfo.endorsements} like`;
+                    }
+                }
+                if (modInfo.downloads) {
+                    const modDownloadsNumber = installedModTemplateCopy.getElementById("mod-downloads-number");
+                    if (modInfo.downloads > 1) {
+                        modDownloadsNumber.innerText = `${modInfo.downloads} downloads`;
+                    } else {
+                        modDownloadsNumber.innerText = `${modInfo.downloads} download`;
+                    }
+                }
                 if (modInfo.summary) {
                     const modDescriptionText = installedModTemplateCopy.getElementById("mod-description");
                     modDescriptionText.innerText = modInfo.summary;
                 }
-                if (modInfo.picture_url) {
+                if (modInfo.pictureUrl) {
                     const modPicture = installedModTemplateCopy.getElementById("mod-icon");
-                    modPicture.src = modInfo.picture_url;
+                    modPicture.src = modInfo.pictureUrl;
                 }
-                if (modInfo.version && modInfo.updated_time) {
+                if (modInfo.version && modInfo.updatedAt) {
                     const modVersionText = installedModTemplateCopy.getElementById("mod-version");
-                    modVersionText.innerText = `V${modInfo.version} last updated on ${modInfo.updated_time.slice(0, 10)}`;
+                    modVersionText.innerText = `V${modInfo.version} last updated on ${modInfo.updatedAt.slice(0, 10)}`;
                 }
 
-                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.mod_id}`;
+                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.modId}`;
 
                 const modLinkButton = installedModTemplateCopy.getElementById("external-link");
                 modLinkButton.href = modUrl;
@@ -117,7 +144,7 @@ async function navigate(page) {
                 modDownloadButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
                 modDownloadButton.addEventListener("click", async function (event) {
                     event.preventDefault();
-                    await nexus.uninstall(modInfo.mod_id);
+                    await nexus.uninstall(modInfo.modId);
 
                     navigate("refresh");
                 });
@@ -132,14 +159,18 @@ async function navigate(page) {
             const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true);
             const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container");
             const searchFormNexus = onlineModsTemplateCopy.getElementById("search-form");
+            const searchInputNexus = onlineModsTemplateCopy.getElementById("search-input");
 
             searchFormNexus.addEventListener("submit", async function (event) {
                 event.preventDefault();
             });
+            searchInputNexus.value = searchValueNexus;
 
             view.appendChild(onlineModsTemplateCopy);
+            toggleSelectedListButton("sort-menu", onlineSortFilter);
+            setSortOrderButton();
 
-            mods = await nexus.getMods();
+            mods = await nexus.getMods(page);
             if (mods == undefined) {
                 break;
             }
@@ -156,28 +187,36 @@ async function navigate(page) {
                     const modAuthorText = modTemplateCopy.getElementById("mod-author");
                     modAuthorText.innerText = `by ${mod.author}`;
                 }
-                if (mod.endorsement_count) {
+                if (mod.endorsements) {
                     const modEndorsementsNumber = modTemplateCopy.getElementById("mod-endorsements-number");
-                    if (mod.endorsement_count > 1) {
-                        modEndorsementsNumber.innerText = `${mod.endorsement_count} likes`;
+                    if (mod.endorsements > 1) {
+                        modEndorsementsNumber.innerText = `${mod.endorsements} likes`;
                     } else {
-                        modEndorsementsNumber.innerText = `${mod.endorsement_count} like`;
+                        modEndorsementsNumber.innerText = `${mod.endorsements} like`;
+                    }
+                }
+                if (mod.downloads) {
+                    const modDownloadsNumber = modTemplateCopy.getElementById("mod-downloads-number");
+                    if (mod.downloads > 1) {
+                        modDownloadsNumber.innerText = `${mod.downloads} downloads`;
+                    } else {
+                        modDownloadsNumber.innerText = `${mod.downloads} download`;
                     }
                 }
                 if (mod.summary) {
                     const modDescriptionText = modTemplateCopy.getElementById("mod-description");
                     modDescriptionText.innerText = mod.summary;
                 }
-                if (mod.picture_url) {
+                if (mod.pictureUrl) {
                     const modPicture = modTemplateCopy.getElementById("mod-icon");
-                    modPicture.src = mod.picture_url;
+                    modPicture.src = mod.pictureUrl;
                 }
-                if (mod.version && mod.updated_time) {
+                if (mod.version && mod.updatedAt) {
                     const modVersionText = modTemplateCopy.getElementById("mod-version");
-                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updated_time.slice(0, 10)}`;
+                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updatedAt.slice(0, 10)}`;
                 }
 
-                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${mod.mod_id}`;
+                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${mod.modId}`;
 
                 const modLinkButton = modTemplateCopy.getElementById("external-link");
                 modLinkButton.href = modUrl;
@@ -205,7 +244,7 @@ async function navigate(page) {
             const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input");
             const versionsList = settingsTemplateCopy.getElementById("versions-list");
             const versionsDictionnary = {
-                "Silk-Fly-Launcher": `Silk Fly Launcher: v${versions.silkFlyLauncher()}`,
+                "Silk-Fly-Launcher": `Silk Fly Launcher: v${await versions.silkFlyLauncher()}`,
                 Electron: `Electron: v${versions.electron()}`,
                 Node: `Node.js: v${versions.node()}`,
                 Chromium: `Chromium: v${versions.chromium()}`,
@@ -246,6 +285,7 @@ async function navigate(page) {
             view.appendChild(settingsTemplateCopy);
             setBepinexVersion();
             setThemeButton();
+            toggleSelectedListButton("themes-menu", actualTheme[0]);
             verifyNexusAPI();
             break;
     }
@@ -297,6 +337,7 @@ async function welcomeNavigate() {
 
         case 3:
             pageDiv.appendChild(styleTemplate.content.cloneNode(true));
+            toggleSelectedListButton("themes-menu", actualTheme[0]);
             break;
 
         case 4:
@@ -397,8 +438,9 @@ async function setBepinexVersion() {
 
 async function searchInstalledMods() {
     const searchInput = document.getElementById("search-input");
-    await nexus.searchInstalled(searchInput.value);
-    navigate("refresh");
+    searchValueInstalled = searchInput.value;
+    await nexus.searchInstalled(searchValueInstalled, undefined, undefined, installedSortFilter, installedSortOrder);
+    await navigate("refresh");
 }
 
 //////////////////////////////////////////////////////
@@ -420,9 +462,12 @@ async function verifyNexusAPI() {
 }
 
 async function searchNexusMods() {
-    const searchInput = document.getElementById("search-input");
-    await nexus.search(searchInput.value);
-    navigate("refresh");
+    let searchInput = document.getElementById("search-input");
+    searchValueNexus = searchInput.value;
+    await nexus.search(searchValueNexus, undefined, undefined, onlineSortFilter, onlineSortOrder);
+    await navigate("refresh");
+    searchInput = document.getElementById("search-input");
+    searchInput.value = searchValueNexus;
 }
 
 //////////////////////////////////////////////////////
@@ -445,6 +490,7 @@ async function setThemeButton() {
 
 function changeTheme(theme, state) {
     toggleThemesMenu();
+    toggleSelectedListButton("themes-menu", theme);
 
     const lacePinCheckbox = document.getElementById("lace-pin");
     if (lacePinCheckbox) {
@@ -520,3 +566,73 @@ function showToast(message, type = "info", duration = 3000) {
 }
 
 electronAPI.onShowToast(showToast);
+
+function toggleSortMenu() {
+    const sortMenu = document.getElementById("sort-menu");
+    if (sortMenu) {
+        sortMenu.classList.toggle("show");
+    }
+}
+
+function changeSort(sortFilterParameter) {
+    toggleSortMenu();
+    toggleSelectedListButton("sort-menu", sortFilterParameter);
+
+    if (oldPage == "mods-installed") {
+        installedSortFilter = sortFilterParameter;
+        searchInstalledMods();
+    } else if (oldPage == "mods-online") {
+        onlineSortFilter = sortFilterParameter;
+        searchNexusMods();
+    }
+}
+
+function inverseSort() {
+    if (oldPage == "mods-installed") {
+        if (installedSortOrder == "ASC") {
+            installedSortOrder = "DESC";
+        } else {
+            installedSortOrder = "ASC";
+        }
+        searchInstalledMods();
+    } else if (oldPage == "mods-online") {
+        if (onlineSortOrder == "ASC") {
+            onlineSortOrder = "DESC";
+        } else {
+            onlineSortOrder = "ASC";
+        }
+        searchNexusMods();
+    }
+}
+
+function toggleSelectedListButton(ListMenuId, buttonId) {
+    const themesMenu = document.getElementById(ListMenuId);
+    if (themesMenu) {
+        Array.from(themesMenu.children).forEach((child) => {
+            child.classList.remove("selected");
+        });
+    }
+
+    const themesButton = document.getElementById(buttonId);
+    if (themesButton) {
+        themesButton.classList.toggle("selected");
+    }
+}
+
+function setSortOrderButton() {
+    let sortOrder;
+    if (oldPage == "mods-installed") {
+        sortOrder = installedSortOrder;
+    } else if (oldPage == "mods-online") {
+        sortOrder = onlineSortOrder;
+    }
+
+    const sortOrderButton = document.getElementById("sort-order-image");
+    if (sortOrderButton) {
+        if (sortOrder == "ASC") {
+            sortOrderButton.src = "assets/icons/sort-order-2.svg";
+        } else {
+            sortOrderButton.src = "assets/icons/sort-order-1.svg";
+        }
+    }
+}
