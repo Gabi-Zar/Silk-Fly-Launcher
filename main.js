@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
@@ -19,7 +19,7 @@ const VERSION = "1.0.0";
 
 const store = new Store();
 const bepinexStore = new Store({ cwd: "bepinex-version" });
-const installedModsStore = new Store({ cwd: "installed-mods-version" });
+const installedModsStore = new Store({ cwd: "installed-mods-list" });
 
 const userSavePath = app.getPath("userData");
 const modSavePath = `${userSavePath}\\mods`;
@@ -46,6 +46,12 @@ let htmlFile;
 
 //////////////////////////////////////////////////////
 ////////////////////// STARTUP ///////////////////////
+
+let sevenZipPath = path7za;
+if (!isDev) {
+    sevenZipPath = path7za.replace("\\app.asar\\node_modules", "");
+    Menu.setApplicationMenu(null);
+}
 
 if (!gotTheLock) {
     app.quit();
@@ -416,7 +422,9 @@ ipcMain.handle("open-download", async (event, link) => {
 });
 
 function handleNxmUrl(url) {
-    nexusWindow.close();
+    if (nexusWindow) {
+        nexusWindow.close();
+    }
 
     const parsedUrl = new URL(url);
 
@@ -654,7 +662,7 @@ async function downloadAndUnzip(url, path) {
 function extractArchive(archivePath, destPath) {
     return new Promise((resolve, reject) => {
         const stream = extractFull(archivePath, destPath, {
-            $bin: path7za,
+            $bin: sevenZipPath,
         });
 
         stream.on("end", resolve);
