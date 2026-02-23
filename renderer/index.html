@@ -92,7 +92,7 @@
         <template id="installed-mods-template">
             <h2>List Of Installed Mods</h2>
             <div class="horizontal-div">
-                <form class="horizontal-div search-form" id="search-form">
+                <form class="horizontal-div input-form" id="search-form">
                     <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
                     <button class="default-button" onclick="searchInstalledMods()">Search</button>
                 </form>
@@ -115,7 +115,7 @@
         <template id="online-mods-template">
             <h2>List Of Nexus Mods</h2>
             <div class="horizontal-div">
-                <form class="horizontal-div search-form" id="search-form">
+                <form class="horizontal-div input-form" id="search-form">
                     <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
                     <button class="default-button" onclick="searchNexusMods()">Search</button>
                 </form>
@@ -221,18 +221,23 @@
             <h2>Nexus</h2>
             <p class="transparent-text" id="bepinex-version-text"></p>
             <div class="horizontal-div">
-                <label for="nexus-api-label">Enter your nexus api: </label>
-                <input type="text" class="input" id="nexus-api-input" name="nexus-api-input" />
+                <label>Nexus API key: </label>
                 <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
-                <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
+                <form class="horizontal-div input-form" id="nexus-api-form">
+                    <input class="input" id="nexus-api-input" type="text" placeholder="Enter your nexus api" />
+                    <button class="default-button" onclick="setNexusAPI()">Set</button>
+                </form>
+                <button class="default-button" onclick="resetNexusAPI()">Reset</button>
             </div>
             <br />
             <h2>Import/Export</h2>
             <div class="horizontal-div">
                 <button class="default-button" onclick="importData()">Import Data</button>
                 <button class="default-button" onclick="exportData()">Export Data</button>
-                <button class="important-button" onclick="deleteData()">Delete All Data</button>
+                <button class="important-button" onclick="deleteData()">Delete Data</button>
             </div>
+            <br />
+            <p class="transparent-text">This data does not include your Nexus API key or the list of your installed mods.</p>
             <br />
             <h2>Debugging</h2>
             <div class="horizontal-div">

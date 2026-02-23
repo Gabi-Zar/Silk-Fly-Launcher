@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu, safeStorage } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
@@ -10,26 +10,26 @@ import { gql, GraphQLClient } from "graphql-request";
 import { path7za } from "7zip-bin";
 import node7z from "node-7z";
 const { extractFull } = node7z;
+import packageJson from "./package.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gotTheLock = app.requestSingleInstanceLock();
 const isDev = !app.isPackaged;
-const VERSION = "1.0.0";
+const VERSION = packageJson.version;
 
 const store = new Store();
-const bepinexStore = new Store({ cwd: "bepinex-version" });
-const installedModsStore = new Store({ cwd: "installed-mods-list" });
+const bepinexStore = new Store({ name: "bepinex-version" });
+const installedModsStore = new Store({ name: "installed-mods-list" });
 
 const userSavePath = app.getPath("userData");
 const modSavePath = `${userSavePath}\\mods`;
 const dataPath = `${userSavePath}\\config.json`;
 let silksongPath = store.get("silksong-path");
 
+const NexusAPIStore = new Store({ name: "nexus-api", encryptionKey: packageJson["AES-key-nexus-api"], fileExtension: "encrypted", clearInvalidConfig: true });
 const Nexus = NexusModule.default;
-let nexusAPI = store.get("nexus-api");
 let nexus = undefined;
-createNexus();
 let installedCachedModList = undefined;
 let onlineCachedModList = undefined;
 
@@ -90,6 +90,7 @@ app.whenReady().then(() => {
     }
 
     if (gotTheLock) {
+        createNexus(loadNexusApi());
         checkInstalledMods();
         createWindow();
     }
@@ -160,22 +161,28 @@ ipcMain.handle("load-bepinex-backup-version", () => {
     return bepinexBackupVersion;
 });
 
-ipcMain.handle("save-nexus-api", (event, api) => {
-    nexusAPI = api;
-    createNexus();
-    store.set("nexus-api", nexusAPI);
+ipcMain.handle("save-nexus-api", async (event, api) => {
+    if (api) {
+        const encryptedAPI = safeStorage.encryptString(api);
+        NexusAPIStore.set("nexus-api", encryptedAPI.toString("base64"));
+    } else {
+        NexusAPIStore.delete("nexus-api");
+    }
+    await createNexus(api);
 });
 
 function loadNexusApi() {
-    nexusAPI = store.get("nexus-api");
-    if (nexusAPI == undefined) {
-        return "";
+    const encryptedAPI = NexusAPIStore.get("nexus-api");
+    if (encryptedAPI) {
+        return safeStorage.decryptString(Buffer.from(encryptedAPI, "base64"));
     }
-    return nexusAPI;
 }
 
 ipcMain.handle("load-nexus-api", () => {
-    return loadNexusApi();
+    if (loadNexusApi()) {
+        return true;
+    }
+    return false;
 });
 
 ipcMain.handle("save-theme", (event, theme, lacePinState) => {
@@ -255,6 +262,11 @@ ipcMain.handle("import-data", async () => {
 ////////////////////// BEPINEX ///////////////////////
 
 async function installBepinex() {
+    if (!(await fileExists(silksongPath))) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
     if (await fileExists(bepinexBackupPath)) {
         if (await fileExists(`${bepinexBackupPath}/BepInEx`)) {
             await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, { recursive: true });
@@ -282,6 +294,9 @@ async function installBepinex() {
         });
 
         if (!res.ok) {
+            if (res.status == 403) {
+                mainWindow.webContents.send("showToast", "Github has blocked the application. Please try again later.", "error");
+            }
             throw new Error(`GitHub API error: ${res.status}`);
         }
 
@@ -304,6 +319,11 @@ ipcMain.handle("install-bepinex", async () => {
 });
 
 async function uninstallBepinex() {
+    if (!(await fileExists(silksongPath))) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
     if (await fileExists(bepinexFolderPath)) {
         await fs.rm(bepinexFolderPath, { recursive: true });
     }
@@ -322,6 +342,11 @@ ipcMain.handle("uninstall-bepinex", async () => {
 });
 
 async function backupBepinex() {
+    if (!(await fileExists(silksongPath))) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
     if ((await fileExists(bepinexBackupPath)) == false) {
         await fs.mkdir(bepinexBackupPath);
     }
@@ -352,6 +377,11 @@ ipcMain.handle("backup-bepinex", async () => {
 });
 
 ipcMain.handle("delete-bepinex-backup", async () => {
+    if (!(await fileExists(silksongPath))) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
     if (await fileExists(bepinexBackupPath)) {
         await fs.rm(bepinexBackupPath, { recursive: true });
         saveBepinexBackupVersion(undefined);
@@ -361,15 +391,21 @@ ipcMain.handle("delete-bepinex-backup", async () => {
 //////////////////////////////////////////////////////
 /////////////////////// NEXUS ////////////////////////
 
-async function createNexus() {
-    if (nexusAPI == undefined) {
+async function createNexus(api) {
+    if (api == undefined) {
+        nexus = undefined;
         return;
     }
 
     try {
-        nexus = await Nexus.create(nexusAPI, "silk-fly-launcher", VERSION, "hollowknightsilksong");
+        nexus = await Nexus.create(api, "silk-fly-launcher", VERSION, "hollowknightsilksong");
     } catch (error) {
-        console.log(error);
+        if (error.mStatusCode == 401) {
+            mainWindow.webContents.send("showToast", "Invalid Nexus API key", "error");
+        }
+        if (error.code == "ENOTFOUND") {
+            mainWindow.webContents.send("showToast", "Unable to communicate with Nexus servers", "error");
+        }
         nexus = undefined;
     }
 }

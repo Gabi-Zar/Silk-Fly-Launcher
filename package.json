@@ -1,12 +1,11 @@
 {
     "name": "silkflylauncher",
     "productName": "Silk Fly Launcher",
-    "version": "1.0.0",
+    "version": "1.0.0-dev",
     "description": "Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.",
     "main": "main.js",
     "type": "module",
     "scripts": {
-        "dev": "electron .",
         "start": "electron-forge start",
         "package": "electron-forge package",
         "make": "electron-forge make",
@@ -33,5 +32,6 @@
         "graphql": "^16.12.0",
         "graphql-request": "^7.4.0",
         "node-7z": "^3.0.0"
-    }
+    },
+    "AES-key-nexus-api": "__AES_KEY__"
 }

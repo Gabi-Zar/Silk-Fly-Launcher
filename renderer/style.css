@@ -436,7 +436,7 @@ body {
     color: #ff9800;
 }
 
-.search-form {
+.input-form {
     display: flex;
     flex: 1;
 }

@@ -78,7 +78,7 @@ async function navigate(page) {
             const searchFormInstalled = installedModsTemplateCopy.getElementById("search-form");
             const searchInputInstalled = installedModsTemplateCopy.getElementById("search-input");
 
-            searchFormInstalled.addEventListener("submit", async function (event) {
+            searchFormInstalled.addEventListener("submit", function (event) {
                 event.preventDefault();
             });
             searchInputInstalled.value = searchValueInstalled;
@@ -241,7 +241,7 @@ async function navigate(page) {
             title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true);
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input");
-            const nexusAPIInput = settingsTemplateCopy.getElementById("nexus-api-input");
+            const nexusAPIForm = settingsTemplateCopy.getElementById("nexus-api-form");
             const versionsList = settingsTemplateCopy.getElementById("versions-list");
             const versionsDictionnary = {
                 "Silk-Fly-Launcher": `Silk Fly Launcher: v${await versions.silkFlyLauncher()}`,
@@ -257,10 +257,8 @@ async function navigate(page) {
                 files.saveSilksongPath(silksongPath);
             });
 
-            nexusAPIInput.value = await files.loadNexusAPI();
-            nexusAPIInput.addEventListener("input", async function (event) {
-                let nexusAPI = nexusAPIInput.value;
-                files.saveNexusAPI(nexusAPI);
+            nexusAPIForm.addEventListener("submit", function (event) {
+                event.preventDefault();
             });
 
             for (const element of versionsList.children) {
@@ -286,7 +284,7 @@ async function navigate(page) {
             setBepinexVersion();
             setThemeButton();
             toggleSelectedListButton("themes-menu", actualTheme[0]);
-            verifyNexusAPI();
+            setNexusAPI();
             break;
     }
 }
@@ -321,18 +319,18 @@ async function welcomeNavigate() {
         case 2:
             pageDiv.appendChild(nexusTemplate.content.cloneNode(true));
             const nexusLink = document.getElementById("external-link");
+            const nexusAPIForm = document.getElementById("nexus-api-form");
+
             nexusLink.addEventListener("click", function (event) {
                 event.preventDefault();
                 const url = nexusLink.href;
                 electronAPI.openExternalLink(url);
             });
 
-            const nexusAPIInput = document.getElementById("nexus-api-input");
-            nexusAPIInput.value = await files.loadNexusAPI();
-            nexusAPIInput.addEventListener("input", async function (event) {
-                let nexusAPI = nexusAPIInput.value;
-                await files.saveNexusAPI(nexusAPI);
+            nexusAPIForm.addEventListener("submit", function (event) {
+                event.preventDefault();
             });
+            setNexusAPI();
             break;
 
         case 3:
@@ -372,7 +370,6 @@ async function initialImportData() {
 async function importData() {
     await files.import();
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
-    document.getElementById("nexus-api-input").value = await files.loadNexusAPI();
     const lacePinCheckbox = document.getElementById("lace-pin");
     const theme = await files.loadTheme();
     lacePinCheckbox.checked = theme[1];
@@ -391,7 +388,6 @@ async function deleteData() {
     toggleThemesMenu();
     await files.delete();
     document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
-    document.getElementById("nexus-api-input").value = await files.loadNexusAPI();
 }
 
 //////////////////////////////////////////////////////
@@ -468,6 +464,32 @@ async function searchNexusMods() {
     await navigate("refresh");
     searchInput = document.getElementById("search-input");
     searchInput.value = searchValueNexus;
+}
+
+async function setNexusAPI() {
+    const nexusAPIInput = document.getElementById("nexus-api-input");
+    const secretString = "●".repeat(1000);
+    if (!(await files.loadNexusAPI())) {
+        if (nexusAPIInput.value && nexusAPIInput.value != secretString) {
+            await files.saveNexusAPI(nexusAPIInput.value);
+            nexusAPIInput.value = secretString;
+            nexusAPIInput.readOnly = true;
+        } else {
+            nexusAPIInput.value = "";
+            nexusAPIInput.readOnly = false;
+        }
+    } else {
+        nexusAPIInput.value = secretString;
+        nexusAPIInput.readOnly = true;
+    }
+    verifyNexusAPI();
+}
+
+async function resetNexusAPI() {
+    if (await files.loadNexusAPI()) {
+        await files.saveNexusAPI(undefined);
+        setNexusAPI();
+    }
 }
 
 //////////////////////////////////////////////////////

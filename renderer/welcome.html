@@ -16,6 +16,7 @@
                 <div id="page"></div>
                 <div class="button-div" id="button-div"></div>
             </div>
+            <div class="toast-div" id="toast-div"></div>
         </div>
 
         <template id="welcome-template">
@@ -53,10 +54,12 @@
                 <a href="https://www.nexusmods.com/settings/api-keys" class="link" id="external-link">https://www.nexusmods.com/settings/api-keys</a> and click on new personnal API key
             </p>
             <div class="horizontal-div">
-                <label for="nexus-api-label">Enter your nexus api: </label>
-                <input type="text" class="input" id="nexus-api-input" name="nexus-api-input" />
                 <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
-                <button class="default-button" onclick="verifyNexusAPI()">Verify</button>
+                <form class="horizontal-div input-form" id="nexus-api-form">
+                    <input class="input" id="nexus-api-input" type="text" placeholder="Enter your nexus api" />
+                    <button class="default-button" onclick="setNexusAPI()">Set</button>
+                </form>
+                <button class="default-button" onclick="resetNexusAPI()">Reset</button>
             </div>
         </template>
 
