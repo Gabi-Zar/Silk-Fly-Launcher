@@ -17,26 +17,25 @@ const __dirname = path.dirname(__filename);
 const gotTheLock = app.requestSingleInstanceLock();
 const isDev = !app.isPackaged;
 const VERSION = packageJson.version;
+const NAME = packageJson.productName;
+const userAgent = `${NAME}/${VERSION}`;
 
 const store = new Store();
 const bepinexStore = new Store({ name: "bepinex-version" });
 const installedModsStore = new Store({ name: "installed-mods-list" });
+const NexusAPIStore = new Store({ name: "nexus-api", encryptionKey: packageJson["AES-key-nexus-api"], fileExtension: "encrypted", clearInvalidConfig: true });
 
 const userSavePath = app.getPath("userData");
-const modSavePath = `${userSavePath}\\mods`;
-const dataPath = `${userSavePath}\\config.json`;
-let silksongPath = store.get("silksong-path");
+const modSavePath = path.join(userSavePath, "mods");
+const dataPath = path.join(userSavePath, "config.json");
+let sevenZipPath = path7za;
 
-const NexusAPIStore = new Store({ name: "nexus-api", encryptionKey: packageJson["AES-key-nexus-api"], fileExtension: "encrypted", clearInvalidConfig: true });
 const Nexus = NexusModule.default;
-let nexus = undefined;
-let installedCachedModList = undefined;
-let onlineCachedModList = undefined;
+let nexus;
+let installedCachedModList;
+let onlineCachedModList;
 
-let bepinexFolderPath = `${silksongPath}/BepInEx`;
-let bepinexBackupPath = `${silksongPath}/BepInEx-Backup`;
 const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
-
 let bepinexVersion;
 let bepinexBackupVersion;
 
@@ -46,12 +45,6 @@ let htmlFile;
 
 //////////////////////////////////////////////////////
 ////////////////////// STARTUP ///////////////////////
-
-let sevenZipPath = path7za;
-if (!isDev) {
-    sevenZipPath = path7za.replace("\\app.asar\\node_modules", "");
-    Menu.setApplicationMenu(null);
-}
 
 if (!gotTheLock) {
     app.quit();
@@ -71,6 +64,7 @@ async function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
         },
+        show: false,
     });
 
     if (await fileExists(dataPath)) {
@@ -79,7 +73,11 @@ async function createWindow() {
         htmlFile = "welcome.html";
     }
 
-    mainWindow.loadFile(`renderer/${htmlFile}`);
+    mainWindow.loadFile(path.join("renderer", htmlFile));
+
+    mainWindow.once("ready-to-show", () => {
+        mainWindow.show();
+    });
 }
 
 app.whenReady().then(() => {
@@ -87,6 +85,8 @@ app.whenReady().then(() => {
         app.setAsDefaultProtocolClient("nxm", process.execPath, [path.resolve(process.argv[1])]);
     } else {
         app.setAsDefaultProtocolClient("nxm");
+        sevenZipPath = path7za.replace("\\app.asar\\node_modules", "");
+        Menu.setApplicationMenu(null);
     }
 
     if (gotTheLock) {
@@ -119,18 +119,19 @@ ipcMain.handle("save-path", (event, path) => {
     saveSilksongPath(path);
 });
 function saveSilksongPath(path) {
-    silksongPath = path;
-    bepinexFolderPath = `${silksongPath}/BepInEx`;
-    bepinexBackupPath = `${silksongPath}/BepInEx-Backup`;
-    store.set("silksong-path", silksongPath);
+    store.set("silksong-path", path);
 }
 
-ipcMain.handle("load-path", () => {
-    silksongPath = store.get("silksong-path");
+function loadSilksongPath() {
+    const silksongPath = store.get("silksong-path");
     if (silksongPath == undefined) {
         return "";
     }
     return silksongPath;
+}
+
+ipcMain.handle("load-path", () => {
+    return loadSilksongPath();
 });
 
 function saveBepinexVersion(version) {
@@ -262,33 +263,31 @@ ipcMain.handle("import-data", async () => {
 ////////////////////// BEPINEX ///////////////////////
 
 async function installBepinex() {
+    const silksongPath = loadSilksongPath();
+    const bepinexBackupPath = path.join(silksongPath, "BepInEx-Backup");
+
     if (!(await fileExists(silksongPath))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
         return;
     }
 
     if (await fileExists(bepinexBackupPath)) {
-        if (await fileExists(`${bepinexBackupPath}/BepInEx`)) {
-            await fs.cp(`${bepinexBackupPath}/BepInEx`, bepinexFolderPath, { recursive: true });
-        }
+        mainWindow.webContents.send("showToast", "Installing Bepinex from Backup");
 
-        for (const file of bepinexFiles) {
-            const filePath = `${silksongPath}/${file}`;
-            if (await fileExists(`${bepinexBackupPath}/${file}`)) {
-                await fs.copyFile(`${bepinexBackupPath}/${file}`, filePath);
-            }
-        }
+        await fs.cp(bepinexBackupPath, silksongPath, { recursive: true });
         await fs.rm(bepinexBackupPath, { recursive: true });
 
         bepinexBackupVersion = bepinexStore.get("bepinex-backup-version");
         saveBepinexVersion(bepinexBackupVersion);
         saveBepinexBackupVersion(undefined);
     } else {
+        mainWindow.webContents.send("showToast", "Installing Bepinex from Github");
+
         const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest";
 
         const res = await fetch(GITHUB_URL, {
             headers: {
-                "User-Agent": `SilkFlyLauncher/${VERSION}`,
+                "User-Agent": userAgent,
                 Accept: "application/vnd.github+json",
             },
         });
@@ -310,7 +309,7 @@ async function installBepinex() {
     }
 
     if (await fileExists(modSavePath)) {
-        await fs.cp(`${modSavePath}`, `${bepinexFolderPath}/plugins`, { recursive: true });
+        await fs.cp(modSavePath, path.join(silksongPath, "BepInEx", "plugins"), { recursive: true });
     }
 }
 
@@ -319,6 +318,9 @@ ipcMain.handle("install-bepinex", async () => {
 });
 
 async function uninstallBepinex() {
+    const silksongPath = loadSilksongPath();
+    const bepinexFolderPath = path.join(silksongPath, "BepInEx");
+
     if (!(await fileExists(silksongPath))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
         return;
@@ -329,7 +331,7 @@ async function uninstallBepinex() {
     }
 
     for (const file of bepinexFiles) {
-        const filePath = `${silksongPath}/${file}`;
+        const filePath = path.join(silksongPath, file);
         if (await fileExists(filePath)) {
             await fs.unlink(filePath);
         }
@@ -342,6 +344,11 @@ ipcMain.handle("uninstall-bepinex", async () => {
 });
 
 async function backupBepinex() {
+    const silksongPath = loadSilksongPath();
+    const bepinexFolderPath = path.join(silksongPath, "BepInEx");
+    const bepinexBackupPath = path.join(silksongPath, "BepInEx-Backup");
+    const BepinexPluginsPath = path.join(silksongPath, "BepInEx", "plugins");
+
     if (!(await fileExists(silksongPath))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
         return;
@@ -351,20 +358,20 @@ async function backupBepinex() {
         await fs.mkdir(bepinexBackupPath);
     }
 
-    if (fileExists(`${bepinexFolderPath}/plugins`)) {
-        await fs.rm(`${bepinexFolderPath}/plugins`, { recursive: true });
+    if (fileExists(BepinexPluginsPath)) {
+        await fs.rm(BepinexPluginsPath, { recursive: true });
     }
 
     if (await fileExists(bepinexFolderPath)) {
-        await fs.cp(bepinexFolderPath, `${bepinexBackupPath}/BepInEx`, {
+        await fs.cp(bepinexFolderPath, path.join(bepinexBackupPath, "BepInEx"), {
             recursive: true,
         });
     }
 
     for (const file of bepinexFiles) {
-        const filePath = `${silksongPath}/${file}`;
+        const filePath = path.join(silksongPath, file);
         if (await fileExists(filePath)) {
-            await fs.copyFile(filePath, `${bepinexBackupPath}/${file}`);
+            await fs.copyFile(filePath, path.join(bepinexBackupPath, file));
         }
     }
 
@@ -377,6 +384,9 @@ ipcMain.handle("backup-bepinex", async () => {
 });
 
 ipcMain.handle("delete-bepinex-backup", async () => {
+    const silksongPath = loadSilksongPath();
+    const bepinexBackupPath = path.join(silksongPath, "BepInEx-Backup");
+
     if (!(await fileExists(silksongPath))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
         return;
@@ -398,7 +408,7 @@ async function createNexus(api) {
     }
 
     try {
-        nexus = await Nexus.create(api, "silk-fly-launcher", VERSION, "hollowknightsilksong");
+        nexus = await Nexus.create(api, NAME, VERSION, "hollowknightsilksong");
     } catch (error) {
         if (error.mStatusCode == 401) {
             mainWindow.webContents.send("showToast", "Invalid Nexus API key", "error");
@@ -452,6 +462,7 @@ ipcMain.handle("open-download", async (event, link) => {
             nodeIntegration: false,
             contextIsolation: true,
         },
+        backgroundColor: "#000000",
     });
 
     nexusWindow.loadURL(link);
@@ -473,6 +484,9 @@ function handleNxmUrl(url) {
 }
 
 async function startDownload(modId, fileId, key, expires) {
+    modId = String(modId);
+    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
+
     if (!(await verifyNexusAPI())) {
         mainWindow.webContents.send("showToast", "Unable to download.", "error");
         return;
@@ -485,9 +499,9 @@ async function startDownload(modId, fileId, key, expires) {
         await fs.mkdir(modSavePath);
     }
 
-    await downloadAndUnzip(download_url, `${modSavePath}/${modId}`);
+    await downloadAndUnzip(download_url, path.join(modSavePath, modId));
     if (await fileExists(bepinexFolderPath)) {
-        await fs.cp(`${modSavePath}/${modId}`, `${bepinexFolderPath}/plugins/${modId}`, { recursive: true });
+        await fs.cp(path.join(modSavePath, modId), path.join(bepinexFolderPath, "plugins", modId), { recursive: true });
     }
 
     saveModInfo(modId);
@@ -496,18 +510,23 @@ async function startDownload(modId, fileId, key, expires) {
 }
 
 async function checkInstalledMods() {
+    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
+
     for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
-        if (!(await fileExists(`${modSavePath}/${modInfo.modId}`))) {
+        modInfo.modId = String(modInfo.modId);
+        if (!(await fileExists(path.join(modSavePath, modInfo.modId)))) {
             saveModInfo(key, true);
-            await fs.rm(`${bepinexFolderPath}/plugins/${modInfo.modId}`, { recursive: true });
+            await fs.rm(path.join(bepinexFolderPath, "plugins", modInfo.modId), { recursive: true });
         }
     }
 }
 
 ipcMain.handle("uninstall-mod", async (event, modId) => {
-    const modPath = `${bepinexFolderPath}/plugins/${modId}`;
-    if (await fileExists(`${modSavePath}/${modId}`)) {
-        await fs.rm(`${modSavePath}/${modId}`, { recursive: true });
+    modId = String(modId);
+    const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
+    const modPath = path.join(BepinexPluginsPath, modId);
+    if (await fileExists(path.join(modSavePath, modId))) {
+        await fs.rm(path.join(modSavePath, modId), { recursive: true });
     }
     if (await fileExists(modPath)) {
         await fs.rm(modPath, { recursive: true });
@@ -535,7 +554,7 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
     const endpoint = "https://api.nexusmods.com/v2/graphql";
     const client = new GraphQLClient(endpoint, {
         headers: {
-            "User-Agent": `SilkFlyLauncher/${VERSION}`,
+            "User-Agent": userAgent,
             "Content-Type": "application/json",
         },
     });
@@ -631,7 +650,7 @@ ipcMain.handle("auto-detect-game-path", async () => {
 
 ipcMain.handle("load-main-page", () => {
     htmlFile = "index.html";
-    mainWindow.loadFile(`renderer/${htmlFile}`);
+    mainWindow.loadFile(path.join("renderer", htmlFile));
 });
 
 ipcMain.handle("get-page", () => {
@@ -659,7 +678,12 @@ ipcMain.handle("open-window", async (event, file) => {
 });
 
 ipcMain.handle("launch-game", async (event, mode) => {
-    const silksongExecutablePath = `${silksongPath}/Hollow Knight Silksong.exe`;
+    const silksongExecutablePath = path.join(loadSilksongPath(), "Hollow Knight Silksong.exe");
+    if (!fileExists(silksongExecutablePath)) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
     if (mode === "modded") {
         if (await fileExists(bepinexFolderPath)) {
             await shell.openExternal(silksongExecutablePath);
@@ -678,7 +702,7 @@ ipcMain.handle("launch-game", async (event, mode) => {
     }
 });
 
-async function downloadAndUnzip(url, path) {
+async function downloadAndUnzip(url, toPath) {
     url = new URL(url);
     const fileName = url.pathname.split("/").pop();
     const extension = fileName.split(".").pop().toLowerCase();
@@ -689,9 +713,9 @@ async function downloadAndUnzip(url, path) {
         return;
     }
 
-    const tempPath = `${userSavePath}\\tempZip.${extension}`;
+    const tempPath = path.join(userSavePath, `tempArchive.${extension}`);
     await pipeline(download.body, createWriteStream(tempPath));
-    await extractArchive(tempPath, path);
+    await extractArchive(tempPath, toPath);
     await fs.unlink(tempPath);
 }
 

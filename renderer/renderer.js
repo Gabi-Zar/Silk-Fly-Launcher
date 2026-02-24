@@ -141,8 +141,8 @@ async function navigate(page) {
                     electronAPI.openExternalLink(modLink);
                 });
 
-                modDownloadButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
-                modDownloadButton.addEventListener("click", async function (event) {
+                const uninstallModButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
+                uninstallModButton.addEventListener("click", async function (event) {
                     event.preventDefault();
                     await nexus.uninstall(modInfo.modId);
 
