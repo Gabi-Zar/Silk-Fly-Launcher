@@ -110,6 +110,16 @@
                 <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
+            <div class="separated-div">
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage('min')">First page</button>
+                    <button class="default-button" onclick="changeModsPage(-1)">Previous</button>
+                </div>
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage(1)">Next</button>
+                    <button class="default-button" onclick="changeModsPage('max')">Last page</button>
+                </div>
+            </div>
         </template>
 
         <template id="online-mods-template">
@@ -133,6 +143,16 @@
                 <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
+            <div class="separated-div">
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage('min')">First page</button>
+                    <button class="default-button" onclick="changeModsPage(-1)">Previous</button>
+                </div>
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage(1)">Next</button>
+                    <button class="default-button" onclick="changeModsPage('max')">Last page</button>
+                </div>
+            </div>
         </template>
 
         <template id="installed-mod-template">

@@ -11,12 +11,21 @@ const modTemplate = document.getElementById("mod-template");
 
 let oldPage;
 let actualTheme = [];
+
 let searchValueNexus = "";
 let searchValueInstalled = "";
 let onlineSortFilter = "downloads";
 let installedSortFilter = "name";
 let onlineSortOrder = "DESC";
 let installedSortOrder = "ASC";
+let onlineOffset = 0;
+let installedOffset = 0;
+let lastOnlineOffset = 0;
+let lastInstalledOffset = 0;
+let onlineModsCount = 10;
+let installedModsCount = 10;
+let onlineModsTotalCount;
+let installedModsTotalCount;
 
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
@@ -87,7 +96,8 @@ async function navigate(page) {
             toggleSelectedListButton("sort-menu", installedSortFilter);
             setSortOrderButton();
 
-            const modsInfo = await nexus.getMods(page);
+            const { modsInfo, installedTotalCount } = await nexus.getMods(page);
+            installedModsTotalCount = installedTotalCount;
             if (modsInfo == []) {
                 break;
             }
@@ -170,7 +180,8 @@ async function navigate(page) {
             toggleSelectedListButton("sort-menu", onlineSortFilter);
             setSortOrderButton();
 
-            mods = await nexus.getMods(page);
+            const { mods, onlineTotalCount } = await nexus.getMods(page);
+            onlineModsTotalCount = onlineTotalCount;
             if (mods == undefined) {
                 break;
             }
@@ -435,7 +446,7 @@ async function setBepinexVersion() {
 async function searchInstalledMods() {
     const searchInput = document.getElementById("search-input");
     searchValueInstalled = searchInput.value;
-    await nexus.searchInstalled(searchValueInstalled, undefined, undefined, installedSortFilter, installedSortOrder);
+    await nexus.searchInstalled(searchValueInstalled, installedOffset, installedModsCount, installedSortFilter, installedSortOrder);
     await navigate("refresh");
 }
 
@@ -460,7 +471,7 @@ async function verifyNexusAPI() {
 async function searchNexusMods() {
     let searchInput = document.getElementById("search-input");
     searchValueNexus = searchInput.value;
-    await nexus.search(searchValueNexus, undefined, undefined, onlineSortFilter, onlineSortOrder);
+    await nexus.search(searchValueNexus, onlineOffset, onlineModsCount, onlineSortFilter, onlineSortOrder);
     await navigate("refresh");
     searchInput = document.getElementById("search-input");
     searchInput.value = searchValueNexus;
@@ -493,7 +504,7 @@ async function resetNexusAPI() {
 }
 
 //////////////////////////////////////////////////////
-/////////////////////// THEMES ///////////////////////
+//////////////// THEMES / SORT / LIST ////////////////
 
 function toggleThemesMenu() {
     const themesMenu = document.getElementById("themes-menu");
@@ -557,42 +568,28 @@ function changeTheme(theme, state) {
     backgroundVideo.src = backgroundVideoPath;
 }
 
-//////////////////////////////////////////////////////
-//////////////////// UNCATEGORIZE ////////////////////
-
-async function launch(mode) {
-    await electronAPI.launchGame(mode);
-    setBepinexVersion();
-}
-
-async function autoDetectGamePath() {
-    await files.autoDetectGamePath();
-    if (document.getElementById("silksong-path-input")) {
-        document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
-    }
-}
-
-function showToast(message, type = "info", duration = 3000) {
-    const toastDiv = document.getElementById("toast-div");
-    const toast = document.createElement("p");
-
-    toast.classList.add("toast", type);
-    toast.innerText = message;
-    toastDiv.appendChild(toast);
-    toast.classList.add("show");
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-        toast.addEventListener("transitionend", () => toast.remove());
-    }, duration);
-}
-
-electronAPI.onShowToast(showToast);
-
 function toggleSortMenu() {
     const sortMenu = document.getElementById("sort-menu");
     if (sortMenu) {
         sortMenu.classList.toggle("show");
+    }
+}
+
+function setSortOrderButton() {
+    let sortOrder;
+    if (oldPage == "mods-installed") {
+        sortOrder = installedSortOrder;
+    } else if (oldPage == "mods-online") {
+        sortOrder = onlineSortOrder;
+    }
+
+    const sortOrderButton = document.getElementById("sort-order-image");
+    if (sortOrderButton) {
+        if (sortOrder == "ASC") {
+            sortOrderButton.src = "assets/icons/sort-order-2.svg";
+        } else {
+            sortOrderButton.src = "assets/icons/sort-order-1.svg";
+        }
     }
 }
 
@@ -641,20 +638,70 @@ function toggleSelectedListButton(ListMenuId, buttonId) {
     }
 }
 
-function setSortOrderButton() {
-    let sortOrder;
-    if (oldPage == "mods-installed") {
-        sortOrder = installedSortOrder;
-    } else if (oldPage == "mods-online") {
-        sortOrder = onlineSortOrder;
-    }
+//////////////////////////////////////////////////////
+//////////////////// UNCATEGORIZE ////////////////////
 
-    const sortOrderButton = document.getElementById("sort-order-image");
-    if (sortOrderButton) {
-        if (sortOrder == "ASC") {
-            sortOrderButton.src = "assets/icons/sort-order-2.svg";
+async function launch(mode) {
+    await electronAPI.launchGame(mode);
+    setBepinexVersion();
+}
+
+async function autoDetectGamePath() {
+    await files.autoDetectGamePath();
+    if (document.getElementById("silksong-path-input")) {
+        document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
+    }
+}
+
+function showToast(message, type = "info", duration = 3000) {
+    const toastDiv = document.getElementById("toast-div");
+    const toast = document.createElement("p");
+
+    toast.classList.add("toast", type);
+    toast.innerText = message;
+    toastDiv.appendChild(toast);
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.addEventListener("transitionend", () => toast.remove());
+    }, duration);
+}
+
+electronAPI.onShowToast(showToast);
+
+function changeModsPage(offsetChange) {
+    if (oldPage == "mods-installed") {
+        if (offsetChange == "min") {
+            installedOffset = 0;
+        } else if (offsetChange == "max") {
+            installedOffset = installedModsTotalCount;
         } else {
-            sortOrderButton.src = "assets/icons/sort-order-1.svg";
+            installedOffset += installedModsCount * offsetChange;
+            installedOffset = clamp(installedOffset, 0, installedModsTotalCount);
+        }
+        installedOffset = Math.floor(installedOffset / 10) * 10;
+        if (lastInstalledOffset != installedOffset) {
+            lastInstalledOffset = installedOffset;
+            searchInstalledMods();
+        }
+    } else if (oldPage == "mods-online") {
+        if (offsetChange == "min") {
+            onlineOffset = 0;
+        } else if (offsetChange == "max") {
+            onlineOffset = onlineModsTotalCount;
+        } else {
+            onlineOffset += onlineModsCount * offsetChange;
+            onlineOffset = clamp(onlineOffset, 0, onlineModsTotalCount);
+        }
+        onlineOffset = Math.floor(onlineOffset / 10) * 10;
+        if (lastOnlineOffset != onlineOffset) {
+            lastOnlineOffset = onlineOffset;
+            searchNexusMods();
         }
     }
+}
+
+function clamp(number, min, max) {
+    return Math.max(min, Math.min(number, max));
 }

@@ -33,7 +33,9 @@ let sevenZipPath = path7za;
 const Nexus = NexusModule.default;
 let nexus;
 let installedCachedModList;
+let installedTotalModsCount;
 let onlineCachedModList;
+let onlineTotalModsCount;
 
 const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
 let bepinexVersion;
@@ -438,12 +440,12 @@ ipcMain.handle("get-mods", async (event, type) => {
         if (!installedCachedModList) {
             await searchInstalledMods("");
         }
-        return installedCachedModList;
+        return { modsInfo: installedCachedModList, installedTotalCount: installedTotalModsCount };
     } else if (type == "mods-online") {
         if (!onlineCachedModList) {
             await searchNexusMods("");
         }
-        return onlineCachedModList;
+        return { mods: onlineCachedModList, onlineTotalCount: onlineTotalModsCount };
     }
 });
 
@@ -603,7 +605,7 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
         }
     }
 
-    return data.mods.totalCount;
+    onlineTotalModsCount = data.mods.totalCount;
 }
 
 ipcMain.handle("search-installed-mods", async (event, keywords, offset, count, sortFilter, sortOrder) => {
@@ -629,7 +631,8 @@ async function searchInstalledMods(keywords, offset = 0, count = 10, sortFilter 
         modsInfoSorted = modsInfoFiltered.sort((a, b) => sortFactor * (a[sortFilter] - b[sortFilter]));
     }
 
-    installedCachedModList = modsInfoSorted;
+    installedTotalModsCount = modsInfoSorted.length;
+    installedCachedModList = modsInfoSorted.slice(offset, offset + count);
 }
 
 //////////////////////////////////////////////////////

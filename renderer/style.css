@@ -138,6 +138,8 @@ body {
 }
 
 .view {
+    display: flex;
+    flex-direction: column;
     background: var(--darker-transparent-black);
     border-radius: 12px;
     padding: 40px;
@@ -242,10 +244,11 @@ body {
 }
 
 .mods-container {
-    height: 70%;
-    transform: translateY(50px);
-    padding: 20px;
+    flex: 1;
     overflow: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-right: 10px;
 }
 
 .mod-container {
