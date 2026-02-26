@@ -4,10 +4,10 @@
 </h3>
 
 <p align="center">
-    <img alt="Release" src="https://img.shields.io/github/v/release/Gabi-Zar/Silk-Fly-Launcher">
-    <img alt="Stars" src="https://img.shields.io/github/stars/Gabi-Zar/Silk-Fly-Launcher?color=magenta">
-    <img alt="Forks" src="https://img.shields.io/github/forks/Gabi-Zar/Silk-Fly-Launcher?color=purple">
-    <img alt="License" src="https://img.shields.io/github/license/Gabi-Zar/Silk-Fly-Launcher?color=BB0000">
+    <img alt="Release" src="https://img.shields.io/github/v/release/Gabi-Zar/Silk-Fly-Launcher?include_prereleases&style=flat&color=green">
+    <img alt="Stars" src="https://img.shields.io/github/stars/Gabi-Zar/Silk-Fly-Launcher?style=flat&color=magenta">
+    <img alt="Forks" src="https://img.shields.io/github/forks/Gabi-Zar/Silk-Fly-Launcher?style=flat&color=purple">
+    <img alt="License" src="https://img.shields.io/github/license/Gabi-Zar/Silk-Fly-Launcher?style=flat&color=BB0000">
     <br>
     <a href="https://github.com/Gabi-Zar"><img title="Developer" src="https://img.shields.io/badge/developer-GabiZar-blue"></a>
     <img alt="Maintained" src="https://img.shields.io/badge/Maintained-Yes-009900">
