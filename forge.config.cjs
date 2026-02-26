@@ -4,15 +4,13 @@ const fs = require("fs/promises");
 const path = require("path");
 
 const buildTarget = process.env.BUILD_TARGET || "all";
-let isPerMachine = buildTarget.includes("system") ? true : false;
 
 const makers = [];
-if (buildTarget.includes("msi") || buildTarget == "all") {
+if (buildTarget == "msi" || buildTarget == "all") {
     makers.push({
         name: "@electron-forge/maker-wix",
         config: {
             icon: "./assets/icon.ico",
-            perMachine: isPerMachine,
             ui: { enabled: true, chooseDirectory: true },
         },
     });
@@ -75,22 +73,15 @@ module.exports = {
             }
         },
         postMake: async (forgeConfig, makeResults) => {
-            if (buildTarget.includes("msi") || buildTarget == "all") {
-                const outDir = path.join(__dirname, "out", "make", "wix");
-                const customTag = buildTarget.includes("system") ? "system" : "user";
-                const newDir = outDir.replace("wix", `wix-${customTag}`);
-                if (await fileExists(newDir)) {
-                    await fs.rm(newDir, { recursive: true });
-                }
-                await fs.rename(outDir, newDir);
-
-                const files = await fs.readdir(newDir, { recursive: true });
+            if (buildTarget == "msi" || buildTarget == "all") {
+                const outDir = path.join(__dirname, "out", "make", "wix", "x64");
+                const files = await fs.readdir(outDir, { recursive: true });
                 const msiFile = path.join(
-                    newDir,
+                    outDir,
                     files.find((file) => file.endsWith(".msi")),
                 );
-                const newName = `${makeResults[0].packageJSON.productName}-${makeResults[0].platform}-${makeResults[0].arch}-${makeResults[0].packageJSON.version}-${customTag}.msi`;
-                const newMsiFile = path.join(newDir, "x64", newName);
+                const newName = `${makeResults[0].packageJSON.productName}-${makeResults[0].platform}-${makeResults[0].arch}-${makeResults[0].packageJSON.version}.msi`;
+                const newMsiFile = path.join(outDir, newName);
                 await fs.rename(msiFile, newMsiFile);
             }
 

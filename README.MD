@@ -55,11 +55,11 @@ Built with Electron, it provides a clean UI, secure Nexus API integration, and s
 
 ## 🚀 Installation & Usage
 
-1. Download the app in your desired format from the [GitHub Releases](https://github.com/Gabi-Zar/Silk-Fly-Launcher/releases) page or build it from [source](#how-to-build).
+1. Download the app in your desired format from the [GitHub Releases](https://github.com/Gabi-Zar/Silk-Fly-Launcher/releases) page or build it from [source](#how-to-build) to have the latest features.
 
 2. Install it and follow the in-app guide
 
-## How to build
+## ⚙️ How to build
 
 1. Install [Git](https://git-scm.com/) and [Node JS](https://nodejs.org)
 2. Clone the repo `git clone https://github.com/Gabi-Zar/Silk-Fly-Launcher `

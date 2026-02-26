@@ -9,8 +9,7 @@
         "start": "electron-forge start",
         "package": "electron-forge package",
         "make": "electron-forge make",
-        "make:msi-system": "cross-env BUILD_TARGET=msi-system electron-forge make",
-        "make:msi-user": "cross-env BUILD_TARGET=msi-user electron-forge make",
+        "make:msi": "cross-env BUILD_TARGET=msi electron-forge make",
         "make:zip": "cross-env BUILD_TARGET=zip electron-forge make"
     },
     "author": "GabiZar",
