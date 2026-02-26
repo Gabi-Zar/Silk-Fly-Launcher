@@ -77,6 +77,8 @@ async function navigate(page) {
         case "home":
             title.innerText = "Silk Fly Launcher";
             const HomeTemplateCopy = HomeTemplate.content.cloneNode(true);
+            versionText = HomeTemplateCopy.getElementById("version-text");
+            versionText.innerText = await versions.silkFlyLauncher();
             view.appendChild(HomeTemplateCopy);
             break;
 
