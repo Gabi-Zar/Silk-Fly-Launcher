@@ -38,7 +38,7 @@ let onlineCachedModList;
 let onlineTotalModsCount;
 
 const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
-let bepinexVersion;
+let bepinexVersion = bepinexStore.get("bepinex-version");
 let bepinexBackupVersion;
 
 let mainWindow;
@@ -120,6 +120,7 @@ app.on("open-url", (event, url) => {
 ipcMain.handle("save-path", (event, path) => {
     saveSilksongPath(path);
 });
+
 function saveSilksongPath(path) {
     store.set("silksong-path", path);
 }
@@ -208,6 +209,7 @@ async function saveModInfo(modId, suppr = false) {
     }
 
     const modInfo = onlineCachedModList.find((mod) => mod.modId == modId);
+    modInfo.activated = true;
     installedModsStore.set(String(modId), modInfo);
 }
 
@@ -310,9 +312,7 @@ async function installBepinex() {
         saveBepinexVersion(release.tag_name);
     }
 
-    if (await fileExists(modSavePath)) {
-        await fs.cp(modSavePath, path.join(silksongPath, "BepInEx", "plugins"), { recursive: true });
-    }
+    checkInstalledMods();
 }
 
 ipcMain.handle("install-bepinex", async () => {
@@ -440,12 +440,12 @@ ipcMain.handle("get-mods", async (event, type) => {
         if (!installedCachedModList) {
             await searchInstalledMods("");
         }
-        return { modsInfo: installedCachedModList, installedTotalCount: installedTotalModsCount };
+        return { installedModsInfo: installedCachedModList, installedTotalCount: installedTotalModsCount };
     } else if (type == "mods-online") {
         if (!onlineCachedModList) {
             await searchNexusMods("");
         }
-        return { mods: onlineCachedModList, onlineTotalCount: onlineTotalModsCount };
+        return { onlineModsInfo: onlineCachedModList, onlineTotalCount: onlineTotalModsCount };
     }
 });
 
@@ -510,38 +510,6 @@ async function startDownload(modId, fileId, key, expires) {
     mainWindow.webContents.send("showToast", "Mod downloaded successfully.");
     installedCachedModList = undefined;
 }
-
-async function checkInstalledMods() {
-    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
-
-    for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
-        modInfo.modId = String(modInfo.modId);
-        if (!(await fileExists(path.join(modSavePath, modInfo.modId)))) {
-            saveModInfo(key, true);
-            await fs.rm(path.join(bepinexFolderPath, "plugins", modInfo.modId), { recursive: true });
-        }
-    }
-}
-
-ipcMain.handle("uninstall-mod", async (event, modId) => {
-    modId = String(modId);
-    const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
-    const modPath = path.join(BepinexPluginsPath, modId);
-    if (await fileExists(path.join(modSavePath, modId))) {
-        await fs.rm(path.join(modSavePath, modId), { recursive: true });
-    }
-    if (await fileExists(modPath)) {
-        await fs.rm(modPath, { recursive: true });
-    }
-
-    for (let i = 0; i < installedCachedModList.length; i++) {
-        if (installedCachedModList[i].modId == modId) {
-            installedCachedModList.splice(i, 1);
-        }
-    }
-
-    saveModInfo(modId, true);
-});
 
 ipcMain.handle("search-nexus-mods", async (event, keywords, offset, count, sortFilter, sortOrder) => {
     await searchNexusMods(keywords, offset, count, sortFilter, sortOrder);
@@ -608,6 +576,9 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
     onlineTotalModsCount = data.mods.totalCount;
 }
 
+//////////////////////////////////////////////////////
+//////////////////////// MODS ////////////////////////
+
 ipcMain.handle("search-installed-mods", async (event, keywords, offset, count, sortFilter, sortOrder) => {
     await searchInstalledMods(keywords, offset, count, sortFilter, sortOrder);
 });
@@ -634,6 +605,73 @@ async function searchInstalledMods(keywords, offset = 0, count = 10, sortFilter 
     installedTotalModsCount = modsInfoSorted.length;
     installedCachedModList = modsInfoSorted.slice(offset, offset + count);
 }
+
+async function checkInstalledMods() {
+    const bepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
+
+    for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
+        modInfo.modId = String(modInfo.modId);
+        if (!(await fileExists(path.join(modSavePath, modInfo.modId)))) {
+            saveModInfo(key, true);
+            if (await fileExists(path.join(bepinexPluginsPath, modInfo.modId))) {
+                await fs.rm(path.join(bepinexPluginsPath, modInfo.modId), { recursive: true });
+            }
+            continue;
+        }
+
+        if (modInfo.activated) {
+            await fs.cp(path.join(modSavePath, modInfo.modId), path.join(bepinexPluginsPath, modInfo.modId), { recursive: true });
+        }
+    }
+}
+
+ipcMain.handle("uninstall-mod", async (event, modId) => {
+    modId = String(modId);
+    const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
+    const modPath = path.join(BepinexPluginsPath, modId);
+    if (await fileExists(path.join(modSavePath, modId))) {
+        await fs.rm(path.join(modSavePath, modId), { recursive: true });
+    }
+    if (await fileExists(modPath)) {
+        await fs.rm(modPath, { recursive: true });
+    }
+
+    for (let i = 0; i < installedCachedModList.length; i++) {
+        if (installedCachedModList[i].modId == modId) {
+            installedCachedModList.splice(i, 1);
+        }
+    }
+
+    saveModInfo(modId, true);
+});
+
+ipcMain.handle("activate-mod", async (event, modId) => {
+    const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
+
+    if (!installedModsStore.get(`${modId}.activated`)) {
+        installedModsStore.set(`${modId}.activated`, true);
+
+        if (bepinexVersion) {
+            if (!(await fileExists(path.join(BepinexPluginsPath, String(modId))))) {
+                await fs.cp(path.join(modSavePath, String(modId)), path.join(BepinexPluginsPath, String(modId)), { recursive: true });
+            }
+        }
+    }
+});
+
+ipcMain.handle("deactivate-mod", async (event, modId) => {
+    const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
+
+    if (installedModsStore.get(`${modId}.activated`)) {
+        installedModsStore.set(`${modId}.activated`, false);
+
+        if (bepinexVersion) {
+            if (await fileExists(path.join(BepinexPluginsPath, String(modId)))) {
+                await fs.rm(path.join(BepinexPluginsPath, String(modId)), { recursive: true });
+            }
+        }
+    }
+});
 
 //////////////////////////////////////////////////////
 //////////////////// UNCATEGORIZE ////////////////////

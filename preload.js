@@ -45,9 +45,14 @@ contextBridge.exposeInMainWorld("bepinex", {
 
 contextBridge.exposeInMainWorld("nexus", {
     verifyAPI: () => ipcRenderer.invoke("verify-nexus-api"),
-    getMods: (type) => ipcRenderer.invoke("get-mods", type),
     download: (link) => ipcRenderer.invoke("open-download", link),
-    uninstall: (modId) => ipcRenderer.invoke("uninstall-mod", modId),
     search: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-nexus-mods", keywords, offset, count, sortFilter, sortOrder),
+});
+
+contextBridge.exposeInMainWorld("mods", {
     searchInstalled: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-installed-mods", keywords, offset, count, sortFilter, sortOrder),
+    uninstall: (modId) => ipcRenderer.invoke("uninstall-mod", modId),
+    getMods: (type) => ipcRenderer.invoke("get-mods", type),
+    activateMods: (modId) => ipcRenderer.invoke("activate-mod", modId),
+    deactivateMods: (modId) => ipcRenderer.invoke("deactivate-mod", modId),
 });

@@ -347,7 +347,7 @@ body {
     background: var(--primary-color);
 }
 
-.lace-pin-checkbox-container {
+.checkbox-container {
     display: flex;
     align-items: center;
     position: relative;
@@ -356,13 +356,13 @@ body {
     user-select: none;
 }
 
-.lace-pin-checkbox-container input {
+.checkbox-container input {
     opacity: 0;
     height: 0;
     width: 0;
 }
 
-.lace-pin-checkbox-container .checkmark {
+.checkbox-container .checkmark {
     position: absolute;
     left: 0;
     height: 30px;
@@ -373,27 +373,27 @@ body {
     transition: all 0.2s ease;
 }
 
-.lace-pin-checkbox-container:hover .checkmark {
+.checkbox-container:hover .checkmark {
     background: var(--darker-transparent-black);
     border-color: var(--primary-color);
 }
 
-.lace-pin-checkbox-container input:checked ~ .checkmark {
+.checkbox-container input:checked ~ .checkmark {
     background: var(--primary-color);
     border-color: var(--primary-color);
 }
 
-.lace-pin-checkbox-container .checkmark:after {
+.checkbox-container .checkmark:after {
     content: "";
     position: absolute;
     display: none;
 }
 
-.lace-pin-checkbox-container input:checked ~ .checkmark:after {
+.checkbox-container input:checked ~ .checkmark:after {
     display: block;
 }
 
-.lace-pin-checkbox-container .checkmark:after {
+.checkbox-container .checkmark:after {
     left: 8px;
     width: 10px;
     height: 20px;

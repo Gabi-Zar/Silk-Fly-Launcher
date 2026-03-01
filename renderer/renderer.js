@@ -98,14 +98,15 @@ async function navigate(page) {
             toggleSelectedListButton("sort-menu", installedSortFilter);
             setSortOrderButton();
 
-            const { modsInfo, installedTotalCount } = await nexus.getMods(page);
+            const { installedModsInfo, installedTotalCount } = await mods.getMods(page);
             installedModsTotalCount = installedTotalCount;
-            if (modsInfo == []) {
+            if (installedModsInfo == []) {
                 break;
             }
 
-            for (const modInfo of modsInfo) {
+            for (const modInfo of installedModsInfo) {
                 const installedModTemplateCopy = installedModTemplate.content.cloneNode(true);
+
                 if (modInfo.name) {
                     const modTitleText = installedModTemplateCopy.getElementById("mod-title");
                     modTitleText.innerText = modInfo.name;
@@ -143,6 +144,21 @@ async function navigate(page) {
                     modVersionText.innerText = `V${modInfo.version} last updated on ${modInfo.updatedAt.slice(0, 10)}`;
                 }
 
+                const isActivatedCheckbox = installedModTemplateCopy.getElementById("activated-mod");
+                if (modInfo.activated) {
+                    isActivatedCheckbox.checked = true;
+                }
+
+                isActivatedCheckbox.addEventListener("change", async function () {
+                    if (this.checked) {
+                        mods.activateMods(modInfo.modId);
+                        searchInstalledMods();
+                    } else {
+                        mods.deactivateMods(modInfo.modId);
+                        searchInstalledMods();
+                    }
+                });
+
                 const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.modId}`;
 
                 const modLinkButton = installedModTemplateCopy.getElementById("external-link");
@@ -156,7 +172,7 @@ async function navigate(page) {
                 const uninstallModButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
                 uninstallModButton.addEventListener("click", async function (event) {
                     event.preventDefault();
-                    await nexus.uninstall(modInfo.modId);
+                    await mods.uninstall(modInfo.modId);
 
                     navigate("refresh");
                 });
@@ -182,12 +198,12 @@ async function navigate(page) {
             toggleSelectedListButton("sort-menu", onlineSortFilter);
             setSortOrderButton();
 
-            const { mods, onlineTotalCount } = await nexus.getMods(page);
+            const { onlineModsInfo, onlineTotalCount } = await mods.getMods(page);
             onlineModsTotalCount = onlineTotalCount;
-            if (mods == undefined) {
+            if (onlineModsInfo == undefined) {
                 break;
             }
-            for (const mod of mods) {
+            for (const mod of onlineModsInfo) {
                 if (mod.name == undefined) {
                     continue;
                 }
@@ -448,7 +464,7 @@ async function setBepinexVersion() {
 async function searchInstalledMods() {
     const searchInput = document.getElementById("search-input");
     searchValueInstalled = searchInput.value;
-    await nexus.searchInstalled(searchValueInstalled, installedOffset, installedModsCount, installedSortFilter, installedSortOrder);
+    await mods.searchInstalled(searchValueInstalled, installedOffset, installedModsCount, installedSortFilter, installedSortOrder);
     await navigate("refresh");
 }
 
