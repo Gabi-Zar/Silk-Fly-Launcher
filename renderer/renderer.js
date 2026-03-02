@@ -4,7 +4,8 @@ const view = document.getElementById("view");
 
 const HomeTemplate = document.getElementById("home-template");
 const installedModsTemplate = document.getElementById("installed-mods-template");
-const onlineModsTemplate = document.getElementById("online-mods-template");
+const nexusModsTemplate = document.getElementById("nexus-mods-template");
+const thunderstoreModsTemplate = document.getElementById("thunderstore-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
 const installedModTemplate = document.getElementById("installed-mod-template");
 const modTemplate = document.getElementById("mod-template");
@@ -14,18 +15,31 @@ let actualTheme = [];
 
 let searchValueNexus = "";
 let searchValueInstalled = "";
+let searchValueThunderstore = "";
+
 let onlineSortFilter = "downloads";
 let installedSortFilter = "name";
+let thunderstoreSortFilter = "downloads";
+
 let onlineSortOrder = "DESC";
 let installedSortOrder = "ASC";
+let thunderstoreSortOrder = "DESC";
+
 let onlineOffset = 0;
 let installedOffset = 0;
+let thunderstoreOffset = 0;
+
 let lastOnlineOffset = 0;
 let lastInstalledOffset = 0;
+let lastThunderstoreOffset = 0;
+
 let onlineModsCount = 10;
 let installedModsCount = 10;
+let thunderstoreModsCount = 10;
+
 let onlineModsTotalCount;
 let installedModsTotalCount;
+let thunderstoreModsTotalCount;
 
 //////////////////////////////////////////////////////
 ///////////////// CONST FOR WELCOME //////////////////
@@ -183,8 +197,8 @@ async function navigate(page) {
             break;
 
         case "mods-online":
-            title.innerText = "Online Mods";
-            const onlineModsTemplateCopy = onlineModsTemplate.content.cloneNode(true);
+            title.innerText = "Nexus Mods";
+            const onlineModsTemplateCopy = nexusModsTemplate.content.cloneNode(true);
             const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container");
             const searchFormNexus = onlineModsTemplateCopy.getElementById("search-form");
             const searchInputNexus = onlineModsTemplateCopy.getElementById("search-input");
@@ -266,6 +280,22 @@ async function navigate(page) {
             }
             break;
 
+        case "mods-thunderstore":
+            title.innerText = "Thunderstore Mods";
+            const thunderstoreModsTemplateCopy = thunderstoreModsTemplate.content.cloneNode(true);
+            const thunderstoreModsContainer = thunderstoreModsTemplateCopy.getElementById("mods-container");
+            const searchFormThunderstore = thunderstoreModsTemplateCopy.getElementById("search-form");
+            const searchInputThunderstore = thunderstoreModsTemplateCopy.getElementById("search-input");
+
+            searchFormThunderstore.addEventListener("submit", async function (event) {
+                event.preventDefault();
+            });
+            searchInputThunderstore.value = searchValueThunderstore;
+
+            view.appendChild(thunderstoreModsTemplateCopy);
+            toggleSelectedListButton("sort-menu", thunderstoreSortFilter);
+            setSortOrderButton();
+            break;
         case "general-settings":
             title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true);
@@ -469,7 +499,7 @@ async function searchInstalledMods() {
 }
 
 //////////////////////////////////////////////////////
-/////////////////////// NEXUS ////////////////////////
+//////////////// NEXUS / THUNDERSTORE ////////////////
 
 async function verifyNexusAPI() {
     response = await nexus.verifyAPI();
@@ -519,6 +549,15 @@ async function resetNexusAPI() {
         await files.saveNexusAPI(undefined);
         setNexusAPI();
     }
+}
+
+async function searchThunderstoreMods() {
+    let searchInput = document.getElementById("search-input");
+    searchValueThunderstore = searchInput.value;
+    await thunderstore.search(searchValueThunderstore, thunderstoreOffset, thunderstoreModsCount, thunderstoreSortFilter, thunderstoreSortOrder);
+    await navigate("refresh");
+    searchInput = document.getElementById("search-input");
+    searchInput.value = searchValueThunderstore;
 }
 
 //////////////////////////////////////////////////////
@@ -599,6 +638,8 @@ function setSortOrderButton() {
         sortOrder = installedSortOrder;
     } else if (oldPage == "mods-online") {
         sortOrder = onlineSortOrder;
+    } else if (oldPage == "mods-thunderstore") {
+        sortOrder = thunderstoreSortOrder;
     }
 
     const sortOrderButton = document.getElementById("sort-order-image");
@@ -621,6 +662,9 @@ function changeSort(sortFilterParameter) {
     } else if (oldPage == "mods-online") {
         onlineSortFilter = sortFilterParameter;
         searchNexusMods();
+    } else if (oldPage == "mods-thunderstore") {
+        thunderstoreSortFilter = sortFilterParameter;
+        searchThunderstoreMods();
     }
 }
 
@@ -639,6 +683,13 @@ function inverseSort() {
             onlineSortOrder = "ASC";
         }
         searchNexusMods();
+    } else if (oldPage == "mods-thunderstore") {
+        if (thunderstoreSortOrder == "ASC") {
+            thunderstoreSortOrder = "DESC";
+        } else {
+            thunderstoreSortOrder = "ASC";
+        }
+        searchThunderstoreMods();
     }
 }
 
@@ -715,6 +766,20 @@ function changeModsPage(offsetChange) {
         onlineOffset = Math.floor(onlineOffset / 10) * 10;
         if (lastOnlineOffset != onlineOffset) {
             lastOnlineOffset = onlineOffset;
+            searchNexusMods();
+        }
+    } else if (oldPage == "mods-thunderstore") {
+        if (offsetChange == "min") {
+            thunderstoreOffset = 0;
+        } else if (offsetChange == "max") {
+            thunderstoreOffset = thunderstoreModsTotalCount;
+        } else {
+            thunderstoreOffset += thunderstoreModsCount * offsetChange;
+            thunderstoreOffset = clamp(thunderstoreOffset, 0, thunderstoreModsTotalCount);
+        }
+        thunderstoreOffset = Math.floor(thunderstoreOffset / 10) * 10;
+        if (lastThunderstoreOffset != thunderstoreOffset) {
+            lastThunderstoreOffset = thunderstoreOffset;
             searchNexusMods();
         }
     }

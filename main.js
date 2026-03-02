@@ -401,7 +401,7 @@ ipcMain.handle("delete-bepinex-backup", async () => {
 });
 
 //////////////////////////////////////////////////////
-/////////////////////// NEXUS ////////////////////////
+//////////////// NEXUS / THUNDERSTORE ////////////////
 
 async function createNexus(api) {
     if (api == undefined) {
@@ -574,6 +574,14 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
     }
 
     onlineTotalModsCount = data.mods.totalCount;
+}
+
+ipcMain.handle("search-thunderstore-mods", async (event, keywords, offset, count, sortFilter, sortOrder) => {
+    searchThunderstoreMods(keywords, offset, count, sortFilter, sortOrder);
+});
+
+async function searchThunderstoreMods(keywords, offset = 0, count = 10, sortFilter = "downloads", sortOrder = "DESC") {
+    console.log("WIP");
 }
 
 //////////////////////////////////////////////////////

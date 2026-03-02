@@ -36,9 +36,13 @@
                             <img src="assets/icons/folder.svg" class="icons invert-color" />
                             Installed
                         </button>
+                        <button class="horizontal-div" onclick="navigate('mods-thunderstore')">
+                            <img src="assets/icons/thunderstore.svg" class="icons" />
+                            Thunderstore
+                        </button>
                         <button class="horizontal-div" onclick="navigate('mods-online')">
-                            <img src="assets/icons/cloud.svg" class="icons invert-color" />
-                            Online
+                            <img src="assets/icons/nexus-mods.svg" class="icons" />
+                            Nexus
                         </button>
                     </div>
 
@@ -122,7 +126,7 @@
             </div>
         </template>
 
-        <template id="online-mods-template">
+        <template id="nexus-mods-template">
             <h2>List Of Nexus Mods</h2>
             <div class="horizontal-div">
                 <form class="horizontal-div input-form" id="search-form">
@@ -138,6 +142,38 @@
                         <li id="createdAt" onclick="changeSort('createdAt')">by date of creation</li>
                         <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
                         <li id="size" onclick="changeSort('size')">by size</li>
+                    </div>
+                </div>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+            </div>
+            <div class="mods-container" id="mods-container"></div>
+            <div class="separated-div">
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage('min')">First page</button>
+                    <button class="default-button" onclick="changeModsPage(-1)">Previous</button>
+                </div>
+                <div class="horizontal-div">
+                    <button class="default-button" onclick="changeModsPage(1)">Next</button>
+                    <button class="default-button" onclick="changeModsPage('max')">Last page</button>
+                </div>
+            </div>
+        </template>
+
+        <template id="thunderstore-mods-template">
+            <h2>List Of Thunderstore Mods</h2>
+            <div class="horizontal-div">
+                <form class="horizontal-div input-form" id="search-form">
+                    <input class="input" id="search-input" type="text" placeholder="Search For Mods..." />
+                    <button class="default-button" onclick="searchThunderstoreMods()">Search</button>
+                </form>
+                <div class="list-div">
+                    <div class="default-button smaller-button" id="sort-button" onclick="toggleSortMenu()">Sort</div>
+                    <div class="list-menu longer-button list-menu-inverted" id="sort-menu">
+                        <li id="name" onclick="changeSort('name')">by name</li>
+                        <li id="downloads" onclick="changeSort('downloads')">by downloads count</li>
+                        <li id="endorsements" onclick="changeSort('endorsements')">by rating count</li>
+                        <li id="createdAt" onclick="changeSort('createdAt')">by date of creation</li>
+                        <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
                     </div>
                 </div>
                 <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>

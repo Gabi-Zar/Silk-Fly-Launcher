@@ -56,3 +56,7 @@ contextBridge.exposeInMainWorld("mods", {
     activateMods: (modId) => ipcRenderer.invoke("activate-mod", modId),
     deactivateMods: (modId) => ipcRenderer.invoke("deactivate-mod", modId),
 });
+
+contextBridge.exposeInMainWorld("thunderstore", {
+    search: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-thunderstore-mods", keywords, offset, count, sortFilter, sortOrder),
+});
