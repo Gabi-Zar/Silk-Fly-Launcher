@@ -447,3 +447,19 @@ body {
 .long-text {
     overflow-wrap: anywhere;
 }
+
+.banner-div {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--secondary-color);
+    background: var(--primary-color);
+    margin-bottom: 20px;
+    height: 64px;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.banner-div.show {
+    display: flex;
+}

@@ -34,6 +34,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
             callback(message, type, duration);
         });
     },
+    onShowBanner: (callback) => {
+        ipcRenderer.on("showBanner", (event, message) => {
+            callback(message);
+        });
+    },
 });
 
 contextBridge.exposeInMainWorld("bepinex", {

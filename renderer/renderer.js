@@ -739,6 +739,23 @@ function showToast(message, type = "info", duration = 3000) {
 
 electronAPI.onShowToast(showToast);
 
+function showBanner(message) {
+    const bannerDiv = document.getElementById("banner-div");
+    const bannerText = document.getElementById("banner-text");
+
+    console.log(bannerDiv);
+
+    bannerText.innerHTML = message;
+    bannerDiv.classList.add("show");
+}
+
+electronAPI.onShowBanner(showBanner);
+
+function hideBanner() {
+    const bannerDiv = document.getElementById("banner-div");
+    bannerDiv.classList.remove("show");
+}
+
 function changeModsPage(offsetChange) {
     if (oldPage == "mods-installed") {
         if (offsetChange == "min") {

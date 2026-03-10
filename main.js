@@ -11,6 +11,7 @@ import { path7za } from "7zip-bin";
 import node7z from "node-7z";
 const { extractFull } = node7z;
 import packageJson from "./package.json" with { type: "json" };
+import semverGt from "semver/functions/gt.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,6 +80,9 @@ async function createWindow() {
 
     mainWindow.once("ready-to-show", () => {
         mainWindow.show();
+        if (!isDev) {
+            verifyUpdate();
+        }
     });
 }
 
@@ -114,6 +118,51 @@ app.on("open-url", (event, url) => {
     event.preventDefault();
     handleNxmUrl(url);
 });
+
+async function verifyUpdate() {
+    const GITHUB_URL = "https://api.github.com/repos/Gabi-Zar/Silk-Fly-Launcher/releases";
+
+    const res = await fetch(GITHUB_URL, {
+        headers: {
+            "User-Agent": userAgent,
+            Accept: "application/vnd.github+json",
+        },
+    });
+
+    if (!res.ok) {
+        if (res.status == 403) {
+            mainWindow.webContents.send("showToast", "Github has blocked the application. Please try again later.", "error");
+        }
+        throw new Error(`GitHub API error: ${res.status}`);
+    }
+
+    const releases = await res.json();
+    const prerelease = releases.find((r) => r.prerelease);
+    const release = releases.find((r) => !r.prerelease && !r.draft);
+
+    let prereleaseVersion;
+    let releaseVersion;
+    let latestVersion;
+
+    if (prerelease) {
+        prereleaseVersion = prerelease.tag_name.replace(/^v/, "");
+        latestVersion = prereleaseVersion;
+    }
+    if (release) {
+        releaseVersion = release.tag_name.replace(/^v/, "");
+        latestVersion = releaseVersion;
+    }
+
+    if (prereleaseVersion && releaseVersion) {
+        latestVersion = semverGt(prereleaseVersion, releaseVersion) ? prereleaseVersion : releaseVersion;
+    }
+    if (latestVersion != VERSION) {
+        mainWindow.webContents.send(
+            "showBanner",
+            `Update v${latestVersion} is available on <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher/releases/tag/v${latestVersion}')">GitHub</a>! Your current version is ${VERSION}.`,
+        );
+    }
+}
 
 //////////////////////////////////////////////////////
 ///////////////// SAVING AND LOADING /////////////////
