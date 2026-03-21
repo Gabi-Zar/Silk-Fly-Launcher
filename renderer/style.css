@@ -49,6 +49,13 @@ body {
     flex-direction: column;
 }
 
+.sidebar-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+
 .logo {
     height: 70px;
     display: flex;
@@ -73,10 +80,6 @@ body {
 
 .big-logo-img {
     height: 100px;
-}
-
-.invert-color {
-    filter: invert(1);
 }
 
 .nav {

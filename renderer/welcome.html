@@ -22,7 +22,7 @@
         <template id="welcome-template">
             <h1 class="title">Welcome to Silk Fly Launcher</h1>
             <div class="horizontal-div welcome-div">
-                <p>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.</p>
+                <p>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus and Thunderstore, built with Electron.</p>
                 <p>Made with ♥ by <a href="" class="link" onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar')">GabiZar</a>.</p>
             </div>
         </template>
@@ -47,22 +47,6 @@
             </div>
         </template>
 
-        <template id="nexus-template">
-            <h1 class="title">Enter your nexus API key</h1>
-            <p>
-                Please enter your nexus API key. To get your API key go to
-                <a href="https://www.nexusmods.com/settings/api-keys" class="link" id="external-link">https://www.nexusmods.com/settings/api-keys</a> and click on new personnal API key
-            </p>
-            <div class="horizontal-div">
-                <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
-                <form class="horizontal-div input-form" id="nexus-api-form">
-                    <input class="input" id="nexus-api-input" type="text" placeholder="Enter your nexus api" />
-                    <button class="default-button" onclick="setNexusAPI()">Set</button>
-                </form>
-                <button class="default-button" onclick="resetNexusAPI()">Reset</button>
-            </div>
-        </template>
-
         <template id="style-template">
             <h1 class="title">Chose the theme of the app</h1>
             <div class="horizontal-div welcome-div">
@@ -82,9 +66,27 @@
             </div>
         </template>
 
-        <template id="tutorial-template">
-            <h1 class="title">Tutorial to download mod from nexus</h1>
-            <p>After clicking on "Download," a Nexus Mods window will pop up. Please log in, then click on "Download with Mod Manager."The Nexus window should close, and the mod will start downloading.</p>
+        <template id="nexus-template">
+            <h1 class="title">Additional set up for nexus mods</h1>
+            <h2>If you don't want to use nexus mods just click on next.</h2>
+            <br />
+            <br />
+            <p>
+                1. Please enter your nexus API key. To get your API key go to
+                <a href="https://www.nexusmods.com/settings/api-keys" class="link" id="external-link">https://www.nexusmods.com/settings/api-keys</a> and click on "new personnal API key".
+            </p>
+            <br />
+            <div class="horizontal-div">
+                <img class="nexus-check-image" id="nexus-check-image" src="assets/icons/cross.svg" />
+                <form class="horizontal-div input-form" id="nexus-api-form">
+                    <input class="input" id="nexus-api-input" type="text" placeholder="Enter your nexus api" />
+                    <button class="default-button" onclick="setNexusAPI()">Set</button>
+                </form>
+                <button class="default-button" onclick="resetNexusAPI()">Reset</button>
+            </div>
+            <br />
+            <br />
+            <p>2. To download a mod from Nexus Mods you need to log in to your Nexus Mods account and then click on "Download with Mod Manager".</p>
         </template>
 
         <script src="renderer.js"></script>

@@ -463,9 +463,10 @@ async function createNexus(api) {
     } catch (error) {
         if (error.mStatusCode == 401) {
             mainWindow.webContents.send("showToast", "Invalid Nexus API key", "error");
-        }
-        if (error.code == "ENOTFOUND") {
+        } else if (error.code == "ENOTFOUND") {
             mainWindow.webContents.send("showToast", "Unable to communicate with Nexus servers", "error");
+        } else {
+            mainWindow.webContents.send("showToast", "Unable to create Nexus API ", "error");
         }
         nexus = undefined;
     }
@@ -646,24 +647,15 @@ async function searchInstalledMods(keywords, offset = 0, count = 10, sortFilter 
         modsInfo.push(modInfo);
     }
 
-    const modsInfoFiltered = modsInfo.filter((mod) => mod.name.toLowerCase().includes(keywords.toLowerCase()));
-    const sortFactor = sortOrder == "ASC" ? 1 : -1;
-
-    let modsInfoSorted;
-    if (sortFilter == "name" || sortFilter == "createdAt" || sortFilter == "updatedAt") {
-        modsInfoSorted = modsInfoFiltered.sort((a, b) => sortFactor * a[sortFilter].localeCompare(b[sortFilter]));
-    } else if (sortFilter == "downloads" || sortFilter == "endorsements" || sortFilter == "size") {
-        if (sortFilter == "size") {
-            sortFilter = "fileSize";
-        }
-        modsInfoSorted = modsInfoFiltered.sort((a, b) => sortFactor * (a[sortFilter] - b[sortFilter]));
-    }
-
-    installedTotalModsCount = modsInfoSorted.length;
-    installedCachedModList = modsInfoSorted.slice(offset, offset + count);
+    const result = sortAndFilterModsList(modsInfo, keywords, offset, count, sortFilter, sortOrder);
+    installedCachedModList = result.list;
+    installedTotalModsCount = result.totalCount;
 }
 
 async function checkInstalledMods() {
+    if (!loadSilksongPath()) {
+        return;
+    }
     const bepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
 
     for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
@@ -729,6 +721,23 @@ ipcMain.handle("deactivate-mod", async (event, modId) => {
         }
     }
 });
+
+function sortAndFilterModsList(list, keywords, offset, count, sortFilter, sortOrder) {
+    const listFiltered = list.filter((element) => element.name.toLowerCase().includes(keywords.toLowerCase()));
+    const sortFactor = sortOrder == "ASC" ? 1 : -1;
+
+    let listSorted;
+    if (sortFilter == "name" || sortFilter == "createdAt" || sortFilter == "updatedAt") {
+        listSorted = listFiltered.sort((a, b) => sortFactor * a[sortFilter].localeCompare(b[sortFilter]));
+    } else if (sortFilter == "downloads" || sortFilter == "endorsements" || sortFilter == "size") {
+        if (sortFilter == "size") {
+            sortFilter = "fileSize";
+        }
+        listSorted = listFiltered.sort((a, b) => sortFactor * (a[sortFilter] - b[sortFilter]));
+    }
+
+    return { list: listSorted.slice(offset, offset + count), totalCount: listSorted.length };
+}
 
 //////////////////////////////////////////////////////
 //////////////////// UNCATEGORIZE ////////////////////

@@ -56,7 +56,6 @@ const welcomeTemplate = document.getElementById("welcome-template");
 const silksongPathTemplate = document.getElementById("path-template");
 const nexusTemplate = document.getElementById("nexus-template");
 const styleTemplate = document.getElementById("style-template");
-const tutorialTemplate = document.getElementById("tutorial-template");
 
 //////////////////////////////////////////////////////
 ////////////////////// STARTUP ///////////////////////
@@ -376,6 +375,11 @@ async function welcomeNavigate() {
             break;
 
         case 2:
+            pageDiv.appendChild(styleTemplate.content.cloneNode(true));
+            toggleSelectedListButton("themes-menu", actualTheme[0]);
+            break;
+
+        case 3:
             pageDiv.appendChild(nexusTemplate.content.cloneNode(true));
             const nexusLink = document.getElementById("external-link");
             const nexusAPIForm = document.getElementById("nexus-api-form");
@@ -392,16 +396,7 @@ async function welcomeNavigate() {
             setNexusAPI();
             break;
 
-        case 3:
-            pageDiv.appendChild(styleTemplate.content.cloneNode(true));
-            toggleSelectedListButton("themes-menu", actualTheme[0]);
-            break;
-
         case 4:
-            pageDiv.appendChild(tutorialTemplate.content.cloneNode(true));
-            break;
-
-        case 5:
             electronAPI.loadMainPage();
             break;
     }

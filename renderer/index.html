@@ -17,43 +17,44 @@
                     <h5 class="logo-title">Silk Fly Launcher</h5>
                 </div>
 
-                <nav class="nav">
-                    <div class="nav-section">
-                        <span class="nav-title">Execute Silksong</span>
-                        <button class="horizontal-div" onclick="launch('vanilla')">
-                            <img src="assets/icons/start-vanilla.svg" class="icons invert-color" />
-                            Run Vanilla
-                        </button>
-                        <button class="horizontal-div" onclick="launch('modded')">
-                            <img src="assets/icons/start-modded.svg" class="icons invert-color" />
-                            Run Modded
-                        </button>
-                    </div>
+                <div class="sidebar-content">
+                    <nav class="nav">
+                        <div class="nav-section">
+                            <span class="nav-title">Execute Silksong</span>
+                            <button class="horizontal-div" onclick="launch('vanilla')">
+                                <img src="assets/icons/start-vanilla.svg" class="icons" />
+                                Run Vanilla
+                            </button>
+                            <button class="horizontal-div" onclick="launch('modded')">
+                                <img src="assets/icons/start-modded.svg" class="icons" />
+                                Run Modded
+                            </button>
+                        </div>
 
-                    <div class="nav-section">
-                        <span class="nav-title">Mods</span>
-                        <button class="horizontal-div" onclick="navigate('mods-installed')">
-                            <img src="assets/icons/folder.svg" class="icons invert-color" />
-                            Installed
-                        </button>
-                        <button class="horizontal-div" onclick="navigate('mods-thunderstore')">
-                            <img src="assets/icons/thunderstore.svg" class="icons" />
-                            Thunderstore
-                        </button>
-                        <button class="horizontal-div" onclick="navigate('mods-online')">
-                            <img src="assets/icons/nexus-mods.svg" class="icons" />
-                            Nexus
-                        </button>
-                    </div>
+                        <div class="nav-section">
+                            <span class="nav-title">Mods</span>
+                            <button class="horizontal-div" onclick="navigate('mods-installed')">
+                                <img src="assets/icons/folder.svg" class="icons" />
+                                Installed
+                            </button>
+                            <button class="horizontal-div" onclick="navigate('mods-thunderstore')">
+                                <img src="assets/icons/thunderstore.svg" class="icons" />
+                                Thunderstore
+                            </button>
+                            <button class="horizontal-div" onclick="navigate('mods-online')">
+                                <img src="assets/icons/nexus-mods.svg" class="icons" />
+                                Nexus
+                            </button>
+                        </div>
+                    </nav>
 
-                    <div class="nav-section">
-                        <span class="nav-title">Settings</span>
+                    <nav class="nav">
                         <button class="horizontal-div" onclick="navigate('general-settings')">
-                            <img src="assets/icons/settings.svg" class="icons invert-color" />
-                            General
+                            <img src="assets/icons/settings.svg" class="icons" />
+                            Settings
                         </button>
-                    </div>
-                </nav>
+                    </nav>
+                </div>
             </aside>
 
             <!-- Main content -->
@@ -80,12 +81,12 @@
                     </div>
                 </div>
                 <div class="horizontal-div">
-                    <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="assets/icons/github.svg" alt="Github logo" class="logo-img invert-color" />
+                    <img onclick="electronAPI.openExternalLink('https://github.com/Gabi-Zar/Silk-Fly-Launcher')" src="assets/icons/github.svg" alt="Github logo" class="logo-img" />
                 </div>
             </div>
             <br />
             <ul>
-                <li>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus, built with Electron.</li>
+                <li>Silk Fly Launcher is a launcher and mod manager for Silksong mods from Nexus and Thunderstore, built with Electron.</li>
                 <li>This product is licensed under the <a href="" class="link" onclick="electronAPI.openWindow('LICENSE')">GNU General Public License Version 3</a>.</li>
                 <li>This product uses third-party modules or assets under <a href="" class="link" onclick="electronAPI.openWindow('THIRD-PARTY-LICENSES')">third-party licenses</a>.</li>
                 <li>
@@ -115,7 +116,7 @@
                         <li id="size" onclick="changeSort('size')">by size</li>
                     </div>
                 </div>
-                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
             <div class="separated-div">
@@ -148,7 +149,7 @@
                         <li id="size" onclick="changeSort('size')">by size</li>
                     </div>
                 </div>
-                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
             <div class="separated-div">
@@ -180,7 +181,7 @@
                         <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
                     </div>
                 </div>
-                <button class="default-button square-button" onclick="inverseSort()"><img class="icons invert-color" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+                <button class="default-button square-button" onclick="inverseSort()"><img class="icons" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
             <div class="separated-div">
