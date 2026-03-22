@@ -152,9 +152,16 @@ async function navigate(page) {
                     const modPicture = installedModTemplateCopy.getElementById("mod-icon");
                     modPicture.src = modInfo.pictureUrl;
                 }
-                if (modInfo.version && modInfo.updatedAt) {
+                if (modInfo.version || modInfo.updatedAt) {
+                    let text = "";
+                    if (modInfo.version) {
+                        text = text.concat(`V${modInfo.version} `);
+                    }
+                    if (modInfo.updatedAt) {
+                        text = text.concat(`last updated on ${modInfo.updatedAt.slice(0, 10)}`);
+                    }
                     const modVersionText = installedModTemplateCopy.getElementById("mod-version");
-                    modVersionText.innerText = `V${modInfo.version} last updated on ${modInfo.updatedAt.slice(0, 10)}`;
+                    modVersionText.innerText = text;
                 }
 
                 const isActivatedCheckbox = installedModTemplateCopy.getElementById("activated-mod");
@@ -172,15 +179,26 @@ async function navigate(page) {
                     }
                 });
 
-                const modUrl = `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.modId}`;
+                if (modInfo.source && modInfo.source != "local") {
+                    const modSource = installedModTemplateCopy.getElementById("mod-source");
+                    modSource.innerText = `From ${modInfo.source}`;
 
-                const modLinkButton = installedModTemplateCopy.getElementById("external-link");
-                modLinkButton.href = modUrl;
-                modLinkButton.addEventListener("click", function (event) {
-                    event.preventDefault();
-                    const modLink = modLinkButton.href;
-                    electronAPI.openExternalLink(modLink);
-                });
+                    const modUrls = {
+                        nexusmods: `https://www.nexusmods.com/hollowknightsilksong/mods/${modInfo.modId}`,
+                        thunderstore: `https://new.thunderstore.io/c/hollow-knight-silksong/p/${modInfo.author}/${modInfo.name}`,
+                    };
+
+                    const modLinkButton = installedModTemplateCopy.getElementById("external-link");
+                    modLinkButton.href = modUrls[modInfo.source];
+                    modLinkButton.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        const modLink = modLinkButton.href;
+                        electronAPI.openExternalLink(modLink);
+                    });
+                } else {
+                    const modLinkButton = installedModTemplateCopy.getElementById("external-link");
+                    modLinkButton.remove();
+                }
 
                 const uninstallModButton = installedModTemplateCopy.getElementById("uninstall-mod-button");
                 uninstallModButton.addEventListener("click", async function (event) {
@@ -553,6 +571,11 @@ async function searchThunderstoreMods() {
     await navigate("refresh");
     searchInput = document.getElementById("search-input");
     searchInput.value = searchValueThunderstore;
+}
+
+async function addOfflineMod() {
+    await mods.add();
+    searchInstalledMods();
 }
 
 //////////////////////////////////////////////////////

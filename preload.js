@@ -60,6 +60,7 @@ contextBridge.exposeInMainWorld("mods", {
     getMods: (type) => ipcRenderer.invoke("get-mods", type),
     activateMods: (modId) => ipcRenderer.invoke("activate-mod", modId),
     deactivateMods: (modId) => ipcRenderer.invoke("deactivate-mod", modId),
+    add: () => ipcRenderer.invoke("add-offline-mod"),
 });
 
 contextBridge.exposeInMainWorld("thunderstore", {

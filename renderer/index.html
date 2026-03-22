@@ -117,6 +117,7 @@
                     </div>
                 </div>
                 <button class="default-button square-button" onclick="inverseSort()"><img class="icons" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>
+                <button class="default-button square-button" onclick="addOfflineMod()"><img class="icons" src="assets/icons/plus.svg" /></button>
             </div>
             <div class="mods-container" id="mods-container"></div>
             <div class="separated-div">
@@ -202,15 +203,16 @@
                     <div class="horizontal-div">
                         <h3 id="mod-title">Unknown Title</h3>
                         <p id="mod-author">Unknown author</p>
-                        <p id="mod-endorsements-number">? likes</p>
-                        <p id="mod-downloads-number">? download</p>
+                        <p id="mod-endorsements-number"></p>
+                        <p id="mod-downloads-number"></p>
+                        <p id="mod-source"></p>
                     </div>
                     <p id="mod-description" class="long-text">No description provided</p>
-                    <p class="transparent-text" id="mod-version">V1.0.0 last update on 01/01/2026</p>
+                    <p class="transparent-text" id="mod-version"></p>
                     <br />
                     <div class="horizontal-div">
-                        <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="uninstall-mod-button">Uninstall</a>
-                        <a href="www.nexusmods.com/hollowknightsilksong/mods" class="default-button" id="external-link">Website</a>
+                        <a href="" class="default-button" id="uninstall-mod-button">Uninstall</a>
+                        <a href="" class="default-button" id="external-link">Website</a>
                         <p>Activated:</p>
                         <label class="checkbox-container">
                             <input type="checkbox" name="activated-mod" id="activated-mod" />

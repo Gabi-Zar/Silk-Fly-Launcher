@@ -12,6 +12,8 @@ import node7z from "node-7z";
 const { extractFull } = node7z;
 import packageJson from "./package.json" with { type: "json" };
 import semverGt from "semver/functions/gt.js";
+import { randomUUID } from "crypto";
+import { unzip } from "zlib";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -172,6 +174,7 @@ ipcMain.handle("save-path", (event, path) => {
 
 function saveSilksongPath(path) {
     store.set("silksong-path", path);
+    checkInstalledMods();
 }
 
 function loadSilksongPath() {
@@ -251,14 +254,29 @@ ipcMain.handle("load-theme", () => {
     return theme;
 });
 
-async function saveModInfo(modId, suppr = false) {
+async function saveModInfo(modId, suppr = false, optionalModInfo = {}) {
     if (suppr == true) {
         installedModsStore.delete(String(modId));
         return;
     }
 
-    const modInfo = onlineCachedModList.find((mod) => mod.modId == modId);
+    let modInfo;
+    if (onlineCachedModList) {
+        modInfo = onlineCachedModList.find((mod) => mod.modId == modId);
+    }
+
+    if (!modInfo) {
+        modInfo = optionalModInfo;
+    }
     modInfo.activated = true;
+
+    const modFiles = await fs.readdir(path.join(modSavePath, modId));
+    modInfo.fileSize = 0;
+    for (const file of modFiles) {
+        const fileStats = await fs.stat(path.join(modSavePath, modId, file));
+        modInfo.fileSize += fileStats.size;
+    }
+
     installedModsStore.set(String(modId), modInfo);
 }
 
@@ -618,6 +636,7 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
     onlineCachedModList = data.mods.nodes;
 
     for (let i = 0; i < onlineCachedModList.length; i++) {
+        onlineCachedModList[i].source = "nexusmods";
         if (onlineCachedModList[i].modId == 26) {
             onlineCachedModList.splice(i, 1);
         }
@@ -695,18 +714,26 @@ ipcMain.handle("uninstall-mod", async (event, modId) => {
 });
 
 ipcMain.handle("activate-mod", async (event, modId) => {
+    await activateMod(modId);
+});
+
+async function activateMod(modId) {
+    if (!loadSilksongPath()) {
+        return;
+    }
+
     const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
 
     if (!installedModsStore.get(`${modId}.activated`)) {
         installedModsStore.set(`${modId}.activated`, true);
+    }
 
-        if (bepinexVersion) {
-            if (!(await fileExists(path.join(BepinexPluginsPath, String(modId))))) {
-                await fs.cp(path.join(modSavePath, String(modId)), path.join(BepinexPluginsPath, String(modId)), { recursive: true });
-            }
+    if (bepinexVersion) {
+        if (!(await fileExists(path.join(BepinexPluginsPath, String(modId))))) {
+            await fs.cp(path.join(modSavePath, String(modId)), path.join(BepinexPluginsPath, String(modId)), { recursive: true });
         }
     }
-});
+}
 
 ipcMain.handle("deactivate-mod", async (event, modId) => {
     const BepinexPluginsPath = path.join(loadSilksongPath(), "BepInEx", "plugins");
@@ -738,6 +765,56 @@ function sortAndFilterModsList(list, keywords, offset, count, sortFilter, sortOr
 
     return { list: listSorted.slice(offset, offset + count), totalCount: listSorted.length };
 }
+
+ipcMain.handle("add-offline-mod", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: "Add mod",
+        properties: ["openFile"],
+        filters: [{ name: "mod", extensions: ["dll", "zip", "7z"] }],
+    });
+
+    if (canceled || !filePaths) return false;
+
+    const fileName = path.basename(filePaths[0]);
+    const extension = path.extname(fileName).toLowerCase();
+    let uuid;
+    do {
+        uuid = randomUUID();
+    } while (installedModsStore.get(uuid));
+
+    if (extension === ".dll") {
+        await fs.mkdir(path.join(modSavePath, uuid));
+        await fs.copyFile(filePaths[0], path.join(modSavePath, uuid, fileName));
+    } else if ([".zip", ".7z"].includes(extension)) {
+        await extractArchive(filePaths[0], path.join(modSavePath, uuid));
+    } else {
+        mainWindow.webContents.send("showToast", `Unsupported file type: ${extension}`, "error");
+        return false;
+    }
+
+    activateMod(uuid);
+
+    const time = new Date().toLocaleDateString();
+    const splitedTime = time.split("/");
+    let newTime = "";
+    for (let i = 2; i >= 0; i--) {
+        newTime = newTime.concat(splitedTime[i]);
+        if (i > 0) {
+            newTime = newTime.concat("-");
+        }
+    }
+
+    await saveModInfo(uuid, false, {
+        modId: uuid,
+        name: fileName.split(".").shift(),
+        summary: "Local mod",
+        updatedAt: newTime,
+        createdAt: newTime,
+        source: "local",
+    });
+
+    return true;
+});
 
 //////////////////////////////////////////////////////
 //////////////////// UNCATEGORIZE ////////////////////
