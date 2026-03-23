@@ -312,6 +312,73 @@ async function navigate(page) {
             view.appendChild(thunderstoreModsTemplateCopy);
             toggleSelectedListButton("sort-menu", thunderstoreSortFilter);
             setSortOrderButton();
+
+            const { thunderstoreModsInfo, thunderstoreTotalCount } = await mods.getMods(page);
+            thunderstoreModsTotalCount = thunderstoreTotalCount;
+            if (thunderstoreModsInfo == undefined) {
+                break;
+            }
+            for (const mod of thunderstoreModsInfo) {
+                if (mod.name == undefined) {
+                    continue;
+                }
+                const modTemplateCopy = modTemplate.content.cloneNode(true);
+                if (mod.name) {
+                    const modTitleText = modTemplateCopy.getElementById("mod-title");
+                    modTitleText.innerText = mod.name.replaceAll("_", " ");
+                }
+                if (mod.author) {
+                    const modAuthorText = modTemplateCopy.getElementById("mod-author");
+                    modAuthorText.innerText = `by ${mod.author}`;
+                }
+                if (mod.endorsements) {
+                    const modEndorsementsNumber = modTemplateCopy.getElementById("mod-endorsements-number");
+                    if (mod.endorsements > 1) {
+                        modEndorsementsNumber.innerText = `${mod.endorsements} likes`;
+                    } else {
+                        modEndorsementsNumber.innerText = `${mod.endorsements} like`;
+                    }
+                }
+                if (mod.downloads) {
+                    const modDownloadsNumber = modTemplateCopy.getElementById("mod-downloads-number");
+                    if (mod.downloads > 1) {
+                        modDownloadsNumber.innerText = `${mod.downloads} downloads`;
+                    } else {
+                        modDownloadsNumber.innerText = `${mod.downloads} download`;
+                    }
+                }
+                if (mod.summary) {
+                    const modDescriptionText = modTemplateCopy.getElementById("mod-description");
+                    modDescriptionText.innerText = mod.summary;
+                }
+                if (mod.pictureUrl) {
+                    const modPicture = modTemplateCopy.getElementById("mod-icon");
+                    modPicture.src = mod.pictureUrl;
+                }
+                if (mod.version && mod.updatedAt) {
+                    const modVersionText = modTemplateCopy.getElementById("mod-version");
+                    modVersionText.innerText = `V${mod.version} last updated on ${mod.updatedAt.slice(0, 10)}`;
+                }
+
+                const modUrl = `https://new.thunderstore.io/c/hollow-knight-silksong/p/${mod.author}/${mod.name}`;
+
+                const modLinkButton = modTemplateCopy.getElementById("external-link");
+                modLinkButton.href = modUrl;
+                modLinkButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modLink = modLinkButton.href;
+                    electronAPI.openExternalLink(modLink);
+                });
+
+                modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
+                modDownloadButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modDownloadLink = `https://thunderstore.io/package/download/${mod.author}/${mod.name}/${mod.version}`;
+                    thunderstore.download(modDownloadLink, mod.modId);
+                });
+
+                thunderstoreModsContainer.appendChild(modTemplateCopy);
+            }
             break;
         case "general-settings":
             title.innerText = "Settings";
@@ -815,7 +882,7 @@ function changeModsPage(offsetChange) {
         thunderstoreOffset = Math.floor(thunderstoreOffset / 10) * 10;
         if (lastThunderstoreOffset != thunderstoreOffset) {
             lastThunderstoreOffset = thunderstoreOffset;
-            searchNexusMods();
+            searchThunderstoreMods();
         }
     }
 }

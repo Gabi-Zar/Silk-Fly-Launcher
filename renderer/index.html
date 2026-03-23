@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>Silk Fly Launcher</title>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' https://*.nexusmods.com" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; img-src 'self' https://*.nexusmods.com https://*.thunderstore.io" />
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
@@ -180,6 +180,7 @@
                         <li id="endorsements" onclick="changeSort('endorsements')">by rating count</li>
                         <li id="createdAt" onclick="changeSort('createdAt')">by date of creation</li>
                         <li id="updatedAt" onclick="changeSort('updatedAt')">by date of updating</li>
+                        <li id="size" onclick="changeSort('size')">by size</li>
                     </div>
                 </div>
                 <button class="default-button square-button" onclick="inverseSort()"><img class="icons" id="sort-order-image" src="assets/icons/sort-order-1.svg" /></button>

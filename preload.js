@@ -65,4 +65,5 @@ contextBridge.exposeInMainWorld("mods", {
 
 contextBridge.exposeInMainWorld("thunderstore", {
     search: (keywords, offset, count, sortFilter, sortOrder) => ipcRenderer.invoke("search-thunderstore-mods", keywords, offset, count, sortFilter, sortOrder),
+    download: (url, modId) => ipcRenderer.invoke("download-thunderstore-mods", url, modId),
 });

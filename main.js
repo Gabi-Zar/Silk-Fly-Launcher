@@ -39,6 +39,8 @@ let installedCachedModList;
 let installedTotalModsCount;
 let onlineCachedModList;
 let onlineTotalModsCount;
+let thunderstoreCachedModList;
+let thunderstoreTotalModsCount;
 
 const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
 let bepinexVersion = bepinexStore.get("bepinex-version");
@@ -264,7 +266,11 @@ async function saveModInfo(modId, suppr = false, optionalModInfo = {}) {
     if (onlineCachedModList) {
         modInfo = onlineCachedModList.find((mod) => mod.modId == modId);
     }
-
+    if (!modInfo) {
+        if (thunderstoreCachedModList) {
+            modInfo = thunderstoreCachedModList.find((mod) => mod.modId == modId);
+        }
+    }
     if (!modInfo) {
         modInfo = optionalModInfo;
     }
@@ -514,6 +520,11 @@ ipcMain.handle("get-mods", async (event, type) => {
             await searchNexusMods("");
         }
         return { onlineModsInfo: onlineCachedModList, onlineTotalCount: onlineTotalModsCount };
+    } else if (type == "mods-thunderstore") {
+        if (!thunderstoreCachedModList) {
+            await searchThunderstoreMods("");
+        }
+        return { thunderstoreModsInfo: thunderstoreCachedModList, thunderstoreTotalCount: thunderstoreTotalModsCount };
     }
 });
 
@@ -646,12 +657,84 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
 }
 
 ipcMain.handle("search-thunderstore-mods", async (event, keywords, offset, count, sortFilter, sortOrder) => {
-    searchThunderstoreMods(keywords, offset, count, sortFilter, sortOrder);
+    await searchThunderstoreMods(keywords, offset, count, sortFilter, sortOrder);
 });
 
 async function searchThunderstoreMods(keywords, offset = 0, count = 10, sortFilter = "downloads", sortOrder = "DESC") {
-    console.log("WIP");
+    const res = await fetch("https://thunderstore.io/c/hollow-knight-silksong/api/v1/package/", {
+        headers: {
+            "User-Agent": userAgent,
+        },
+    });
+    let modsInfo = await res.json();
+
+    const modsToRemove = [
+        "f21c391c-0bc5-431d-a233-95323b95e01b",
+        "58c9e43a-549d-4d49-a576-4eed36775a84",
+        "0fc63a3b-3c69-4be5-85f8-bb127eec81b3",
+        "d5419c5d-c22a-4a47-b73d-ba4101f28635",
+        "d5b65a03-1217-4496-8af6-8dda4d763676",
+        "42f76853-d2a4-4520-949b-13a02fdbbbcb",
+        "34eac80c-5497-470e-b98c-f53421b828c0",
+    ];
+    let reMappedModsInfo = [];
+    for (let i = 0; i < modsInfo.length; i++) {
+        modsInfo[i].source = "thunderstore";
+        if (modsToRemove.includes(modsInfo[i].uuid4)) {
+            modsInfo.splice(i, 1);
+            i--;
+            continue;
+        }
+        reMappedModsInfo.push(reMapThunderstoreModsInfo(modsInfo[i]));
+    }
+
+    const result = sortAndFilterModsList(reMappedModsInfo, keywords, offset, count, sortFilter, sortOrder);
+    thunderstoreCachedModList = result.list;
+    thunderstoreTotalModsCount = result.totalCount;
 }
+
+function reMapThunderstoreModsInfo(modInfo) {
+    let totalDownloads = 0;
+    for (const version of modInfo.versions) {
+        totalDownloads += version.downloads;
+    }
+
+    return {
+        author: modInfo.owner,
+        endorsements: modInfo.rating_score,
+        modId: modInfo.uuid4,
+        name: modInfo.name,
+        pictureUrl: modInfo.versions[0].icon,
+        summary: modInfo.versions[0].description,
+        updatedAt: modInfo.date_updated,
+        createdAt: modInfo.date_created,
+        version: modInfo.versions[0].version_number,
+        downloads: totalDownloads,
+        fileSize: modInfo.versions[0].file_size,
+        source: modInfo.source,
+    };
+}
+
+ipcMain.handle("download-thunderstore-mods", async (event, url, modId) => {
+    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
+    if (!(await fileExists(loadSilksongPath()))) {
+        mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
+        return;
+    }
+
+    if (!(await fileExists(modSavePath))) {
+        await fs.mkdir(modSavePath);
+    }
+
+    await downloadAndUnzip(url, path.join(modSavePath, modId));
+    if (await fileExists(bepinexFolderPath)) {
+        await fs.cp(path.join(modSavePath, modId), path.join(bepinexFolderPath, "plugins", modId), { recursive: true });
+    }
+
+    saveModInfo(modId);
+    mainWindow.webContents.send("showToast", "Mod downloaded successfully.");
+    installedCachedModList = undefined;
+});
 
 //////////////////////////////////////////////////////
 //////////////////////// MODS ////////////////////////
@@ -863,6 +946,7 @@ ipcMain.handle("open-window", async (event, file) => {
 
 ipcMain.handle("launch-game", async (event, mode) => {
     const silksongExecutablePath = path.join(loadSilksongPath(), "Hollow Knight Silksong.exe");
+    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
     if (!fileExists(silksongExecutablePath)) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
         return;
