@@ -36,7 +36,8 @@ Silk Fly Launcher is an open-source mod manager for Hollow Knight: Silksong buil
 
 - Install / Uninstall / Backup BepInEx for Silksong.
 - Automatically detect Silksong installation path for Steam on Windows
-- Browse and download Nexus mods directly in the app
+- Browse and download Thunderstore and Nexus mods directly in the app
+- Activate and deactivate mods
 - Multiple themes inspired by Silksong
 - Launch Silksong in Vanilla or Modded without deleting the mods
 - Securely store your Nexus API key on your device using Electron's safeStorage, and then encrypt it with an AES key (provided at build time) via Electron Store.
@@ -75,11 +76,11 @@ Silk Fly Launcher is an open-source mod manager for Hollow Knight: Silksong buil
 
 - [x] BepInEx support
 - [x] Nexus support
-- [ ] Disable / Enable Individual mods
-- [ ] Automatic update
-- [ ] Support for Thunderstore
+- [x] Disable / Enable Individual mods
+- [x] Automatic update
+- [x] Support for Thunderstore
 - [ ] Linux support
-- [ ] Support for offline mods
+- [x] Support for offline mods
 - [ ] Auto Download Mods Dependencies
 
 #### For later

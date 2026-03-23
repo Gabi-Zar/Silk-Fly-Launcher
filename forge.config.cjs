@@ -12,6 +12,7 @@ if (buildTarget == "msi" || buildTarget == "all") {
         config: {
             icon: "./assets/icon.ico",
             ui: { enabled: true, chooseDirectory: true },
+            upgradeCode: "e3bb759f-c2b2-4545-bb7b-35bed5be4cd5",
         },
     });
 }
