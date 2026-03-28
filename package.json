@@ -11,7 +11,8 @@
         "make": "electron-forge make",
         "make:msi": "cross-env BUILD_TARGET=msi electron-forge make",
         "make:zip": "cross-env BUILD_TARGET=zip electron-forge make",
-        "make:deb": "cross-env BUILD_TARGET=deb electron-forge make"
+        "make:deb": "cross-env BUILD_TARGET=deb electron-forge make",
+        "make:appimage": "cross-env BUILD_TARGET=appimage electron-forge make"
     },
     "author": "GabiZar",
     "license": "GPL-3.0",
@@ -23,6 +24,7 @@
         "@electron-forge/plugin-auto-unpack-natives": "^7.11.1",
         "@electron-forge/plugin-fuses": "^7.11.1",
         "@electron/fuses": "^1.8.0",
+        "@reforged/maker-appimage": "^5.2.0",
         "cross-env": "^10.1.0",
         "electron": "^40.6.0"
     },

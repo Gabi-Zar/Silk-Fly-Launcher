@@ -40,6 +40,19 @@ if (buildTarget == "deb" || buildTarget == "all") {
     });
 }
 
+if (buildTarget == "appimage" || buildTarget == "all") {
+    makers.push({
+        name: "@reforged/maker-appimage",
+        config: {
+            options: {
+                bin: packageJson.productName,
+                name: packageJson.productName,
+                icon: "./assets/icon.png",
+            },
+        },
+    });
+}
+
 async function fileExists(filePath) {
     try {
         await fs.access(filePath);

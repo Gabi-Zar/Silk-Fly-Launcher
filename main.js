@@ -29,6 +29,7 @@ const installedModsStore = new Store({ name: "installed-mods-list" });
 const NexusAPIStore = new Store({ name: "nexus-api", encryptionKey: packageJson["AES-key-nexus-api"], fileExtension: "encrypted", clearInvalidConfig: true });
 
 const userSavePath = app.getPath("userData");
+const tempPath = app.getPath("temp");
 const modSavePath = path.join(userSavePath, "mods");
 const dataPath = path.join(userSavePath, "config.json");
 let sevenZipPath = path7za;
@@ -71,6 +72,7 @@ async function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
         },
+        backgroundColor: "#000",
         show: false,
     });
 
@@ -82,7 +84,7 @@ async function createWindow() {
 
     mainWindow.loadFile(path.join("renderer", htmlFile));
 
-    mainWindow.once("ready-to-show", () => {
+    mainWindow.webContents.once("did-finish-load", () => {
         mainWindow.show();
         if (!isDev) {
             verifyUpdate();
@@ -106,9 +108,6 @@ app.whenReady().then(async () => {
     }
 
     app.on("activate", async () => {
-        if (process.platform === "linux") {
-            await fs.chmod(sevenZipPath, 0o755);
-        }
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
         }
@@ -1023,7 +1022,10 @@ async function downloadAndUnzip(url, toPath) {
     await fs.unlink(tempPath);
 }
 
-function extractArchive(archivePath, destPath) {
+async function extractArchive(archivePath, destPath) {
+    if (process.platform === "linux") {
+        await prepareSevenZipLinux();
+    }
     return new Promise((resolve, reject) => {
         const stream = extractFull(archivePath, destPath, {
             $bin: sevenZipPath,
@@ -1037,3 +1039,16 @@ function extractArchive(archivePath, destPath) {
 ipcMain.handle("get-version", () => {
     return VERSION;
 });
+
+async function prepareSevenZipLinux() {
+    const targetPath = path.join(tempPath, "7za");
+    if (await fileExists(targetPath)) {
+        sevenZipPath = targetPath;
+        return;
+    }
+
+    await fs.copyFile(sevenZipPath, targetPath);
+    await fs.chmod(targetPath, 0o755);
+
+    sevenZipPath = targetPath;
+}
