@@ -13,7 +13,7 @@ const { extractFull } = node7z;
 import packageJson from "./package.json" with { type: "json" };
 import semverGt from "semver/functions/gt.js";
 import { randomUUID } from "crypto";
-import { unzip } from "zlib";
+import { spawn } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +42,7 @@ let onlineTotalModsCount;
 let thunderstoreCachedModList;
 let thunderstoreTotalModsCount;
 
-const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll"];
+const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll", "libdoorstop.so", "run_bepinex.sh"];
 let bepinexVersion = bepinexStore.get("bepinex-version");
 let bepinexBackupVersion;
 
@@ -90,12 +90,12 @@ async function createWindow() {
     });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     if (isDev) {
         app.setAsDefaultProtocolClient("nxm", process.execPath, [path.resolve(process.argv[1])]);
     } else {
         app.setAsDefaultProtocolClient("nxm");
-        sevenZipPath = path7za.replace("\\app.asar\\node_modules", "");
+        sevenZipPath = path7za.replace(path.join("app.asar", "node_modules"), "");
         Menu.setApplicationMenu(null);
     }
 
@@ -105,7 +105,10 @@ app.whenReady().then(() => {
         createWindow();
     }
 
-    app.on("activate", () => {
+    app.on("activate", async () => {
+        if (process.platform === "linux") {
+            await fs.chmod(sevenZipPath, 0o755);
+        }
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
         }
@@ -378,7 +381,12 @@ async function installBepinex() {
 
         const release = await res.json();
 
-        const asset = release.assets.find((a) => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64"));
+        let asset;
+        if (process.platform === "win32") {
+            asset = release.assets.find((a) => a.name.endsWith(".zip") && a.name.toLowerCase().includes("win_x64"));
+        } else if (process.platform === "linux") {
+            asset = release.assets.find((a) => a.name.endsWith(".zip") && a.name.toLowerCase().includes("linux_x64"));
+        }
 
         await downloadAndUnzip(asset.browser_download_url, silksongPath);
 
@@ -945,7 +953,15 @@ ipcMain.handle("open-window", async (event, file) => {
 });
 
 ipcMain.handle("launch-game", async (event, mode) => {
-    const silksongExecutablePath = path.join(loadSilksongPath(), "Hollow Knight Silksong.exe");
+    let silksongExecutable;
+    if (process.platform === "win32") {
+        silksongExecutable = "Hollow Knight Silksong.exe";
+    } else if (process.platform === "linux") {
+        silksongExecutable = "Hollow Knight Silksong";
+    }
+
+    const silksongExecutablePath = path.join(loadSilksongPath(), silksongExecutable);
+    const silksongScriptPath = path.join(loadSilksongPath(), "run_bepinex.sh");
     const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
     if (!fileExists(silksongExecutablePath)) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
@@ -954,21 +970,41 @@ ipcMain.handle("launch-game", async (event, mode) => {
 
     if (mode === "modded") {
         if (await fileExists(bepinexFolderPath)) {
-            await shell.openExternal(silksongExecutablePath);
+            if (process.platform === "win32") {
+                executeGame(silksongExecutablePath);
+            }
+            if (process.platform === "linux") {
+                executeGame(silksongScriptPath, [silksongExecutable]);
+            }
         } else {
             await installBepinex();
-            await shell.openExternal(silksongExecutablePath);
+            if (process.platform === "win32") {
+                executeGame(silksongExecutablePath);
+            }
+            if (process.platform === "linux") {
+                executeGame(silksongScriptPath, [silksongExecutable]);
+            }
         }
     }
     if (mode === "vanilla") {
         if (await fileExists(bepinexFolderPath)) {
             await backupBepinex();
-            await shell.openExternal(silksongExecutablePath);
+            executeGame(silksongExecutablePath);
         } else {
-            await shell.openExternal(silksongExecutablePath);
+            executeGame(silksongExecutablePath);
         }
     }
 });
+
+async function executeGame(path, args = []) {
+    await fs.chmod(path, 0o755);
+    const game = spawn(path, args, {
+        cwd: loadSilksongPath(),
+        detached: true,
+        stdio: "ignore",
+    });
+    game.unref();
+}
 
 async function downloadAndUnzip(url, toPath) {
     url = new URL(url);

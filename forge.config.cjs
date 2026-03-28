@@ -2,6 +2,7 @@ const { FusesPlugin } = require("@electron-forge/plugin-fuses");
 const { FuseV1Options, FuseVersion } = require("@electron/fuses");
 const fs = require("fs/promises");
 const path = require("path");
+const packageJson = require("./package.json");
 
 const buildTarget = process.env.BUILD_TARGET || "all";
 
@@ -20,8 +21,32 @@ if (buildTarget == "msi" || buildTarget == "all") {
 if (buildTarget == "zip" || buildTarget == "all") {
     makers.push({
         name: "@electron-forge/maker-zip",
-        platforms: ["win32"],
+        platforms: ["win32", "linux"],
     });
+}
+
+if (buildTarget == "deb" || buildTarget == "all") {
+    makers.push({
+        name: "@electron-forge/maker-deb",
+        config: {
+            options: {
+                bin: packageJson.productName,
+                name: packageJson.productName,
+                icon: "./assets/icon.png",
+                maintainer: "GabiZar",
+                homepage: "https://github.com/Gabi-Zar/Silk-Fly-Launcher",
+            },
+        },
+    });
+}
+
+async function fileExists(filePath) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 module.exports = {
@@ -67,6 +92,9 @@ module.exports = {
         postMake: async (forgeConfig, makeResults) => {
             if (buildTarget == "msi" || buildTarget == "all") {
                 const outDir = path.join(__dirname, "out", "make", "wix", "x64");
+                if (!(await fileExists(outDir))) {
+                    return;
+                }
                 const files = await fs.readdir(outDir, { recursive: true });
                 const msiFile = path.join(
                     outDir,
