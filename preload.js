@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld("files", {
     loadNexusAPI: () => ipcRenderer.invoke("load-nexus-api"),
     saveTheme: (theme, lacePinState) => ipcRenderer.invoke("save-theme", theme, lacePinState),
     loadTheme: () => ipcRenderer.invoke("load-theme"),
+    saveLinuxSteam: (state) => ipcRenderer.invoke("save-linux-steam", state),
+    loadLinuxSteam: () => ipcRenderer.invoke("load-linux-steam"),
 });
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -29,6 +31,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     launchGame: (mode) => ipcRenderer.invoke("launch-game", mode),
     loadMainPage: () => ipcRenderer.invoke("load-main-page"),
     getPage: () => ipcRenderer.invoke("get-page"),
+    getOS: () => process.platform,
     onShowToast: (callback) => {
         ipcRenderer.on("showToast", (event, message, type, duration) => {
             callback(message, type, duration);

@@ -14,6 +14,7 @@ import packageJson from "./package.json" with { type: "json" };
 import semverGt from "semver/functions/gt.js";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
+import vdf from "vdf-parser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -287,6 +288,18 @@ async function saveModInfo(modId, suppr = false, optionalModInfo = {}) {
 
     installedModsStore.set(String(modId), modInfo);
 }
+
+ipcMain.handle("save-linux-steam", (event, state) => {
+    store.set("linux.steam", state);
+});
+
+function loadLinuxSteam() {
+    return store.get("linux.steam");
+}
+
+ipcMain.handle("load-linux-steam", () => {
+    return loadLinuxSteam();
+});
 
 //////////////////////////////////////////////////////
 /////////////////// DATA HANDLING ////////////////////
@@ -973,6 +986,18 @@ ipcMain.handle("launch-game", async (event, mode) => {
                 executeGame(silksongExecutablePath);
             }
             if (process.platform === "linux") {
+                if (loadLinuxSteam()) {
+                    if (!(await getSteamLinuxState())) {
+                        mainWindow.webContents.send("showToast", "Preparing Steam");
+                        await prepareSteamLinux(true);
+                    }
+                    const game = spawn("steam", ["-applaunch", "1030300"], {
+                        detached: true,
+                        stdio: "ignore",
+                    });
+                    game.unref();
+                    return;
+                }
                 executeGame(silksongScriptPath, [silksongExecutable]);
             }
         } else {
@@ -981,6 +1006,18 @@ ipcMain.handle("launch-game", async (event, mode) => {
                 executeGame(silksongExecutablePath);
             }
             if (process.platform === "linux") {
+                if (loadLinuxSteam()) {
+                    if (!(await getSteamLinuxState())) {
+                        mainWindow.webContents.send("showToast", "Preparing Steam");
+                        await prepareSteamLinux(true);
+                    }
+                    const game = spawn("steam", ["-applaunch", "1030300"], {
+                        detached: true,
+                        stdio: "ignore",
+                    });
+                    game.unref();
+                    return;
+                }
                 executeGame(silksongScriptPath, [silksongExecutable]);
             }
         }
@@ -988,8 +1025,16 @@ ipcMain.handle("launch-game", async (event, mode) => {
     if (mode === "vanilla") {
         if (await fileExists(bepinexFolderPath)) {
             await backupBepinex();
+            if (process.platform === "linux" && loadLinuxSteam() && (await getSteamLinuxState())) {
+                mainWindow.webContents.send("showToast", "Preparing Steam");
+                await prepareSteamLinux(false);
+            }
             executeGame(silksongExecutablePath);
         } else {
+            if (process.platform === "linux" && loadLinuxSteam() && (await getSteamLinuxState())) {
+                mainWindow.webContents.send("showToast", "Preparing Steam");
+                await prepareSteamLinux(false);
+            }
             executeGame(silksongExecutablePath);
         }
     }
@@ -1051,4 +1096,66 @@ async function prepareSevenZipLinux() {
     await fs.chmod(targetPath, 0o755);
 
     sevenZipPath = targetPath;
+}
+
+async function prepareSteamLinux(isModded) {
+    const kill = spawn("killall", ["steam"]);
+    kill.unref();
+    await waitForSteamToClose();
+
+    const steamUserDataPath = path.join(process.env.HOME, ".local", "share", "Steam", "userdata");
+    const usersId = await fs.readdir(steamUserDataPath);
+
+    for (const userId of usersId) {
+        const steamConfigPath = path.join(steamUserDataPath, userId, "config", "localconfig.vdf");
+        const rawConfig = await fs.readFile(steamConfigPath, { encoding: "utf8" });
+        let parsedConfig = vdf.parse(rawConfig);
+        if (isModded) {
+            parsedConfig.UserLocalConfigStore.Software.Valve.Steam.apps[1030300].LaunchOptions = "./run_bepinex.sh %command%";
+        } else {
+            parsedConfig.UserLocalConfigStore.Software.Valve.Steam.apps[1030300].LaunchOptions = "";
+        }
+
+        const config = vdf.stringify(parsedConfig);
+        await fs.writeFile(steamConfigPath, config, { encoding: "utf8" });
+    }
+
+    const steam = spawn("steam", [], {
+        detached: true,
+        stdio: "ignore",
+    });
+    steam.unref();
+}
+
+async function getSteamLinuxState() {
+    const steamUserDataPath = path.join(process.env.HOME, ".local", "share", "Steam", "userdata");
+    const usersId = await fs.readdir(steamUserDataPath);
+
+    let result = [];
+    for (const userId of usersId) {
+        const steamConfigPath = path.join(steamUserDataPath, userId, "config", "localconfig.vdf");
+        const rawConfig = await fs.readFile(steamConfigPath, { encoding: "utf8" });
+        let parsedConfig = vdf.parse(rawConfig);
+
+        result.push(parsedConfig.UserLocalConfigStore.Software.Valve.Steam.apps[1030300].LaunchOptions === "./run_bepinex.sh %command%");
+    }
+    return result.every(Boolean);
+}
+
+function waitForSteamToClose() {
+    return new Promise((resolve) => {
+        function check() {
+            const pgrep = spawn("pgrep", ["-x", "steam"]);
+
+            pgrep.on("close", (code) => {
+                if (code == 1) {
+                    resolve();
+                } else {
+                    setTimeout(check, 500);
+                }
+            });
+        }
+
+        check();
+    });
 }

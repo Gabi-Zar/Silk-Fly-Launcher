@@ -35,7 +35,8 @@
         "graphql": "^16.12.0",
         "graphql-request": "^7.4.0",
         "node-7z": "^3.0.0",
-        "semver": "^7.7.4"
+        "semver": "^7.7.4",
+        "vdf-parser": "^1.2.1"
     },
     "AES-key-nexus-api": "__AES_KEY__"
 }

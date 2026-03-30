@@ -7,6 +7,7 @@ const installedModsTemplate = document.getElementById("installed-mods-template")
 const nexusModsTemplate = document.getElementById("nexus-mods-template");
 const thunderstoreModsTemplate = document.getElementById("thunderstore-mods-template");
 const settingsTemplate = document.getElementById("settings-template");
+const linuxSettingsTemplate = document.getElementById("settings-linux-template");
 const installedModTemplate = document.getElementById("installed-mod-template");
 const modTemplate = document.getElementById("mod-template");
 
@@ -56,6 +57,7 @@ const welcomeTemplate = document.getElementById("welcome-template");
 const silksongPathTemplate = document.getElementById("path-template");
 const nexusTemplate = document.getElementById("nexus-template");
 const styleTemplate = document.getElementById("style-template");
+const linuxSettingsWelcomeTemplate = document.getElementById("settings-linux-template");
 
 //////////////////////////////////////////////////////
 ////////////////////// STARTUP ///////////////////////
@@ -383,6 +385,7 @@ async function navigate(page) {
         case "general-settings":
             title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true);
+            const linuxSettingsTemplateCopy = linuxSettingsTemplate.content.cloneNode(true);
             const silksongPathInput = settingsTemplateCopy.getElementById("silksong-path-input");
             const nexusAPIForm = settingsTemplateCopy.getElementById("nexus-api-form");
             const versionsList = settingsTemplateCopy.getElementById("versions-list");
@@ -428,6 +431,16 @@ async function navigate(page) {
             setThemeButton();
             toggleSelectedListButton("themes-menu", actualTheme[0]);
             setNexusAPI();
+            if (electronAPI.getOS() == "linux") {
+                const linuxSteamCheckbox = linuxSettingsTemplateCopy.getElementById("linux-steam");
+
+                linuxSteamCheckbox.checked = await files.loadLinuxSteam();
+                linuxSteamCheckbox.addEventListener("change", async function () {
+                    files.saveLinuxSteam(this.checked);
+                });
+
+                view.appendChild(linuxSettingsTemplateCopy);
+            }
             break;
     }
 }
@@ -482,6 +495,21 @@ async function welcomeNavigate() {
             break;
 
         case 4:
+            if (electronAPI.getOS() == "linux") {
+                const linuxSettingsWelcomeTemplateCopy = linuxSettingsWelcomeTemplate.content.cloneNode(true);
+                const linuxSteamCheckbox = linuxSettingsWelcomeTemplateCopy.getElementById("linux-steam");
+
+                linuxSteamCheckbox.checked = await files.loadLinuxSteam();
+                linuxSteamCheckbox.addEventListener("change", async function () {
+                    files.saveLinuxSteam(this.checked);
+                });
+
+                pageDiv.appendChild(linuxSettingsWelcomeTemplateCopy);
+            } else {
+                electronAPI.loadMainPage();
+            }
+            break;
+        case 5:
             electronAPI.loadMainPage();
             break;
     }
@@ -827,8 +855,6 @@ electronAPI.onShowToast(showToast);
 function showBanner(message) {
     const bannerDiv = document.getElementById("banner-div");
     const bannerText = document.getElementById("banner-text");
-
-    console.log(bannerDiv);
 
     bannerText.innerHTML = message;
     bannerDiv.classList.add("show");
