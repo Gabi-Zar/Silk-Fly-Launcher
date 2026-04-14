@@ -288,7 +288,7 @@ async function navigate(page) {
                     electronAPI.openExternalLink(modLink);
                 });
 
-                modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
+                const modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
                 modDownloadButton.addEventListener("click", function (event) {
                     event.preventDefault();
                     const modDownloadLink = `${modUrl}?tab=files`;
@@ -372,7 +372,7 @@ async function navigate(page) {
                     electronAPI.openExternalLink(modLink);
                 });
 
-                modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
+                const modDownloadButton = modTemplateCopy.getElementById("download-mod-button");
                 modDownloadButton.addEventListener("click", function (event) {
                     event.preventDefault();
                     const modDownloadLink = `https://thunderstore.io/package/download/${mod.author}/${mod.name}/${mod.version}`;
@@ -610,7 +610,7 @@ async function searchInstalledMods() {
 //////////////// NEXUS / THUNDERSTORE ////////////////
 
 async function verifyNexusAPI() {
-    response = await nexus.verifyAPI();
+    const response = await nexus.verifyAPI();
 
     const nexusCheckImage = document.getElementById("nexus-check-image");
     if (nexusCheckImage == undefined) {

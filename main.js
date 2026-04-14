@@ -43,6 +43,8 @@ let onlineCachedModList;
 let onlineTotalModsCount;
 let thunderstoreCachedModList;
 let thunderstoreTotalModsCount;
+let allThunderstoreCachedModList;
+let allThunderstoreCachedModListNeedRefresh = true;
 
 const bepinexFiles = [".doorstop_version", "changelog.txt", "doorstop_config.ini", "winhttp.dll", "libdoorstop.so", "run_bepinex.sh"];
 let bepinexVersion = bepinexStore.get("bepinex-version");
@@ -104,7 +106,8 @@ app.whenReady().then(async () => {
 
     if (gotTheLock) {
         createNexus(loadNexusApi());
-        checkInstalledMods();
+        await checkInstalledMods();
+        await checkForCoreAndPatcherMods();
         createWindow();
     }
 
@@ -173,13 +176,14 @@ async function verifyUpdate() {
 
 //////////////////////////////////////////////////////
 ///////////////// SAVING AND LOADING /////////////////
-ipcMain.handle("save-path", (event, path) => {
-    saveSilksongPath(path);
+ipcMain.handle("save-path", async (event, path) => {
+    await saveSilksongPath(path);
 });
 
-function saveSilksongPath(path) {
+async function saveSilksongPath(path) {
     store.set("silksong-path", path);
-    checkInstalledMods();
+    await checkInstalledMods();
+    await checkForCoreAndPatcherMods();
 }
 
 function loadSilksongPath() {
@@ -405,7 +409,8 @@ async function installBepinex() {
         saveBepinexVersion(release.tag_name);
     }
 
-    checkInstalledMods();
+    await checkInstalledMods();
+    await checkForCoreAndPatcherMods();
 }
 
 ipcMain.handle("install-bepinex", async () => {
@@ -443,6 +448,8 @@ async function backupBepinex() {
     const bepinexFolderPath = path.join(silksongPath, "BepInEx");
     const bepinexBackupPath = path.join(silksongPath, "BepInEx-Backup");
     const BepinexPluginsPath = path.join(silksongPath, "BepInEx", "plugins");
+    const bepinexCorePath = path.join(silksongPath, "BepInEx", "core", "custom");
+    const bepinexPatcherPath = path.join(silksongPath, "BepInEx", "patchers", "custom");
 
     if (!(await fileExists(silksongPath))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
@@ -453,8 +460,14 @@ async function backupBepinex() {
         await fs.mkdir(bepinexBackupPath);
     }
 
-    if (fileExists(BepinexPluginsPath)) {
+    if (await fileExists(BepinexPluginsPath)) {
         await fs.rm(BepinexPluginsPath, { recursive: true });
+    }
+    if (await fileExists(bepinexCorePath)) {
+        await fs.rm(bepinexCorePath, { recursive: true });
+    }
+    if (await fileExists(bepinexPatcherPath)) {
+        await fs.rm(bepinexPatcherPath, { recursive: true });
     }
 
     if (await fileExists(bepinexFolderPath)) {
@@ -681,34 +694,36 @@ ipcMain.handle("search-thunderstore-mods", async (event, keywords, offset, count
 });
 
 async function searchThunderstoreMods(keywords, offset = 0, count = 10, sortFilter = "downloads", sortOrder = "DESC") {
-    const res = await fetch("https://thunderstore.io/c/hollow-knight-silksong/api/v1/package/", {
-        headers: {
-            "User-Agent": userAgent,
-        },
-    });
-    let modsInfo = await res.json();
+    if (allThunderstoreCachedModListNeedRefresh) {
+        const res = await fetch("https://thunderstore.io/c/hollow-knight-silksong/api/v1/package/", {
+            headers: {
+                "User-Agent": userAgent,
+            },
+        });
+        let modsInfo = await res.json();
 
-    const modsToRemove = [
-        "f21c391c-0bc5-431d-a233-95323b95e01b",
-        "58c9e43a-549d-4d49-a576-4eed36775a84",
-        "0fc63a3b-3c69-4be5-85f8-bb127eec81b3",
-        "d5419c5d-c22a-4a47-b73d-ba4101f28635",
-        "d5b65a03-1217-4496-8af6-8dda4d763676",
-        "42f76853-d2a4-4520-949b-13a02fdbbbcb",
-        "34eac80c-5497-470e-b98c-f53421b828c0",
-    ];
-    let reMappedModsInfo = [];
-    for (let i = 0; i < modsInfo.length; i++) {
-        modsInfo[i].source = "thunderstore";
-        if (modsToRemove.includes(modsInfo[i].uuid4)) {
-            modsInfo.splice(i, 1);
-            i--;
-            continue;
+        const modsToRemove = ["f21c391c-0bc5-431d-a233-95323b95e01b", "42f76853-d2a4-4520-949b-13a02fdbbbcb", "34eac80c-5497-470e-b98c-f53421b828c0"];
+        let reMappedModsInfo = [];
+        for (let i = 0; i < modsInfo.length; i++) {
+            modsInfo[i].source = "thunderstore";
+            if (modsToRemove.includes(modsInfo[i].uuid4)) {
+                modsInfo.splice(i, 1);
+                i--;
+                continue;
+            }
+            reMappedModsInfo.push(reMapThunderstoreModsInfo(modsInfo[i]));
         }
-        reMappedModsInfo.push(reMapThunderstoreModsInfo(modsInfo[i]));
+        allThunderstoreCachedModList = reMappedModsInfo;
+        allThunderstoreCachedModListNeedRefresh = false;
+        setTimeout(
+            () => {
+                allThunderstoreCachedModListNeedRefresh = true;
+            },
+            10 * 60 * 1000,
+        );
     }
 
-    const result = sortAndFilterModsList(reMappedModsInfo, keywords, offset, count, sortFilter, sortOrder);
+    const result = sortAndFilterModsList(allThunderstoreCachedModList, keywords, offset, count, sortFilter, sortOrder);
     thunderstoreCachedModList = result.list;
     thunderstoreTotalModsCount = result.totalCount;
 }
@@ -732,10 +747,15 @@ function reMapThunderstoreModsInfo(modInfo) {
         downloads: totalDownloads,
         fileSize: modInfo.versions[0].file_size,
         source: modInfo.source,
+        dependencies: modInfo.versions[0].dependencies,
     };
 }
 
 ipcMain.handle("download-thunderstore-mods", async (event, url, modId) => {
+    await downloadThunderstoreMods(url, modId);
+});
+
+async function downloadThunderstoreMods(url, modId) {
     const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
     if (!(await fileExists(loadSilksongPath()))) {
         mainWindow.webContents.send("showToast", "Path to the game invalid", "warning");
@@ -752,9 +772,29 @@ ipcMain.handle("download-thunderstore-mods", async (event, url, modId) => {
     }
 
     saveModInfo(modId);
+    await downloadThunderstoreModsDependencies(modId);
+    await checkForCoreAndPatcherMods();
     mainWindow.webContents.send("showToast", "Mod downloaded successfully.");
     installedCachedModList = undefined;
-});
+}
+
+async function downloadThunderstoreModsDependencies(modId) {
+    const dependencies = allThunderstoreCachedModList.find((mod) => mod.modId == modId).dependencies;
+    for (const dependency of dependencies) {
+        const dependencyArray = dependency.split("-");
+        const modInfo = allThunderstoreCachedModList.find((mod) => mod.author === dependencyArray[0] && mod.name === dependencyArray[1]);
+        if (modInfo) {
+            const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
+            const url = `https://thunderstore.io/package/download/${dependencyArray[0]}/${dependencyArray[1]}/${dependencyArray[2]}`;
+            await downloadAndUnzip(url, path.join(modSavePath, modInfo.modId));
+            if (await fileExists(bepinexFolderPath)) {
+                await fs.cp(path.join(modSavePath, modInfo.modId), path.join(bepinexFolderPath, "plugins", modInfo.modId), { recursive: true });
+            }
+            saveModInfo(modInfo.modId, undefined, modInfo);
+            await downloadThunderstoreModsDependencies(modInfo.modId);
+        }
+    }
+}
 
 //////////////////////////////////////////////////////
 //////////////////////// MODS ////////////////////////
@@ -814,6 +854,7 @@ ipcMain.handle("uninstall-mod", async (event, modId) => {
     }
 
     saveModInfo(modId, true);
+    checkForCoreAndPatcherMods();
 });
 
 ipcMain.handle("activate-mod", async (event, modId) => {
@@ -836,6 +877,7 @@ async function activateMod(modId) {
             await fs.cp(path.join(modSavePath, String(modId)), path.join(BepinexPluginsPath, String(modId)), { recursive: true });
         }
     }
+    checkForCoreAndPatcherMods();
 }
 
 ipcMain.handle("deactivate-mod", async (event, modId) => {
@@ -849,6 +891,7 @@ ipcMain.handle("deactivate-mod", async (event, modId) => {
                 await fs.rm(path.join(BepinexPluginsPath, String(modId)), { recursive: true });
             }
         }
+        checkForCoreAndPatcherMods();
     }
 });
 
@@ -918,6 +961,69 @@ ipcMain.handle("add-offline-mod", async () => {
 
     return true;
 });
+
+async function checkForCoreAndPatcherMods() {
+    const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
+    const bepinexPluginsPath = path.join(bepinexFolderPath, "Plugins");
+    const bepinexCorePath = path.join(bepinexFolderPath, "core", "custom");
+    const bepinexPatcherPath = path.join(bepinexFolderPath, "patchers", "custom");
+
+    if (await fileExists(bepinexCorePath)) {
+        await fs.rm(bepinexCorePath, { recursive: true });
+    }
+    if (await fileExists(bepinexPatcherPath)) {
+        await fs.rm(bepinexPatcherPath, { recursive: true });
+    }
+    await fs.mkdir(bepinexCorePath, { recursive: true });
+    await fs.mkdir(bepinexPatcherPath, { recursive: true });
+
+    async function scanDir(dirPath, relativePath = "") {
+        let entries;
+        try {
+            entries = await fs.readdir(dirPath, { withFileTypes: true });
+        } catch {
+            return;
+        }
+
+        for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+
+            const currentRelative = path.join(relativePath, entry.name);
+
+            if (entry.name === "core") {
+                await copyContents(path.join(dirPath, entry.name), bepinexCorePath);
+                if (await fileExists(path.join(bepinexPluginsPath, currentRelative))) {
+                    await fs.rm(path.join(bepinexPluginsPath, currentRelative), { recursive: true });
+                }
+            } else if (entry.name === "patchers") {
+                await copyContents(path.join(dirPath, entry.name), bepinexPatcherPath);
+                if (await fileExists(path.join(bepinexPluginsPath, currentRelative))) {
+                    await fs.rm(path.join(bepinexPluginsPath, currentRelative), { recursive: true });
+                }
+            } else {
+                if (!(await fileExists(path.join(bepinexPluginsPath, currentRelative)))) continue;
+                await scanDir(path.join(dirPath, entry.name), currentRelative);
+            }
+        }
+    }
+
+    async function copyContents(srcDir, destDir) {
+        let files;
+        try {
+            files = await fs.readdir(srcDir);
+        } catch {
+            return;
+        }
+
+        for (const file of files) {
+            const src = path.join(srcDir, file);
+            const dest = path.join(destDir, file);
+            await fs.copyFile(src, dest);
+        }
+    }
+
+    await scanDir(modSavePath);
+}
 
 //////////////////////////////////////////////////////
 //////////////////// UNCATEGORIZE ////////////////////
