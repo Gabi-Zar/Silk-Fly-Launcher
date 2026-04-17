@@ -589,6 +589,7 @@ async function deleteBepinexBackup() {
 
 async function setBepinexVersion() {
     const bepinexVersionText = document.getElementById("bepinex-version-text");
+    const bepinexInstallButton = document.getElementById("install-bepinex-button");
     if (bepinexVersionText == undefined) {
         return;
     }
@@ -601,8 +602,10 @@ async function setBepinexVersion() {
         } else {
             bepinexVersionText.innerText = `BepInEx ${bepinexBackupVersion} is backed up`;
         }
+        bepinexInstallButton.innerText = "Install";
     } else {
         bepinexVersionText.innerText = `BepInEx ${bepinexVersion} is installed`;
+        bepinexInstallButton.innerText = "Update";
     }
 }
 

@@ -208,9 +208,13 @@ function saveBepinexVersion(version) {
 }
 
 ipcMain.handle("load-bepinex-version", () => {
+    return loadBepinexVersion();
+});
+
+function loadBepinexVersion() {
     bepinexVersion = bepinexStore.get("bepinex-version");
     return bepinexVersion;
-});
+}
 
 function saveBepinexBackupVersion(version) {
     bepinexBackupVersion = version;
@@ -377,8 +381,6 @@ async function installBepinex() {
         saveBepinexVersion(bepinexBackupVersion);
         saveBepinexBackupVersion(undefined);
     } else {
-        mainWindow.webContents.send("showToast", "Installing Bepinex from Github");
-
         const GITHUB_URL = "https://api.github.com/repos/bepinex/bepinex/releases/latest";
 
         const res = await fetch(GITHUB_URL, {
@@ -396,6 +398,14 @@ async function installBepinex() {
         }
 
         const release = await res.json();
+
+        if (loadBepinexVersion() == release.tag_name) {
+            mainWindow.webContents.send("showToast", "No new BepInEx update.");
+            return;
+        }
+        mainWindow.webContents.send("showToast", "Installing Bepinex from Github");
+
+        await uninstallBepinex();
 
         let asset;
         if (process.platform === "win32") {
