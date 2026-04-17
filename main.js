@@ -662,7 +662,7 @@ async function searchNexusMods(keywords, offset = 0, count = 10, sortFilter = "d
         }
     `;
 
-    let variables = {
+    const variables = {
         filter: {
             op: "AND",
             gameDomainName: [{ value: "hollowknightsilksong" }],
@@ -700,10 +700,10 @@ async function searchThunderstoreMods(keywords, offset = 0, count = 10, sortFilt
                 "User-Agent": userAgent,
             },
         });
-        let modsInfo = await res.json();
+        const modsInfo = await res.json();
 
         const modsToRemove = ["f21c391c-0bc5-431d-a233-95323b95e01b", "42f76853-d2a4-4520-949b-13a02fdbbbcb", "34eac80c-5497-470e-b98c-f53421b828c0"];
-        let reMappedModsInfo = [];
+        const reMappedModsInfo = [];
         for (let i = 0; i < modsInfo.length; i++) {
             modsInfo[i].source = "thunderstore";
             if (modsToRemove.includes(modsInfo[i].uuid4)) {
@@ -804,7 +804,7 @@ ipcMain.handle("search-installed-mods", async (event, keywords, offset, count, s
 });
 
 async function searchInstalledMods(keywords, offset = 0, count = 10, sortFilter = "name", sortOrder = "ASC") {
-    let modsInfo = [];
+    const modsInfo = [];
     for (const [key, modInfo] of Object.entries(installedModsStore.store)) {
         modsInfo.push(modInfo);
     }
@@ -1215,7 +1215,7 @@ async function prepareSteamLinux(isModded) {
     for (const userId of usersId) {
         const steamConfigPath = path.join(steamUserDataPath, userId, "config", "localconfig.vdf");
         const rawConfig = await fs.readFile(steamConfigPath, { encoding: "utf8" });
-        let parsedConfig = vdf.parse(rawConfig);
+        const parsedConfig = vdf.parse(rawConfig);
         if (isModded) {
             parsedConfig.UserLocalConfigStore.Software.Valve.Steam.apps[1030300].LaunchOptions = "./run_bepinex.sh %command%";
         } else {
@@ -1237,11 +1237,11 @@ async function getSteamLinuxState() {
     const steamUserDataPath = path.join(process.env.HOME, ".local", "share", "Steam", "userdata");
     const usersId = await fs.readdir(steamUserDataPath);
 
-    let result = [];
+    const result = [];
     for (const userId of usersId) {
         const steamConfigPath = path.join(steamUserDataPath, userId, "config", "localconfig.vdf");
         const rawConfig = await fs.readFile(steamConfigPath, { encoding: "utf8" });
-        let parsedConfig = vdf.parse(rawConfig);
+        const parsedConfig = vdf.parse(rawConfig);
 
         result.push(parsedConfig.UserLocalConfigStore.Software.Valve.Steam.apps[1030300].LaunchOptions === "./run_bepinex.sh %command%");
     }

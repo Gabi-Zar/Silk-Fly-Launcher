@@ -34,9 +34,9 @@ let lastOnlineOffset = 0;
 let lastInstalledOffset = 0;
 let lastThunderstoreOffset = 0;
 
-let onlineModsCount = 10;
-let installedModsCount = 10;
-let thunderstoreModsCount = 10;
+const onlineModsCount = 10;
+const installedModsCount = 10;
+const thunderstoreModsCount = 10;
 
 let onlineModsTotalCount;
 let installedModsTotalCount;
@@ -89,15 +89,16 @@ async function navigate(page) {
 
     view.replaceChildren();
     switch (page) {
-        case "home":
+        case "home": {
             title.innerText = "Silk Fly Launcher";
             const HomeTemplateCopy = HomeTemplate.content.cloneNode(true);
-            versionText = HomeTemplateCopy.getElementById("version-text");
+            const versionText = HomeTemplateCopy.getElementById("version-text");
             versionText.innerText = await versions.silkFlyLauncher();
             view.appendChild(HomeTemplateCopy);
             break;
+        }
 
-        case "mods-installed":
+        case "mods-installed": {
             title.innerText = "Installed Mods";
             const installedModsTemplateCopy = installedModsTemplate.content.cloneNode(true);
             const installedModsContainer = installedModsTemplateCopy.getElementById("mods-container");
@@ -214,8 +215,9 @@ async function navigate(page) {
             }
 
             break;
+        }
 
-        case "mods-online":
+        case "mods-online": {
             title.innerText = "Nexus Mods";
             const onlineModsTemplateCopy = nexusModsTemplate.content.cloneNode(true);
             const ModsContainer = onlineModsTemplateCopy.getElementById("mods-container");
@@ -298,8 +300,9 @@ async function navigate(page) {
                 ModsContainer.appendChild(modTemplateCopy);
             }
             break;
+        }
 
-        case "mods-thunderstore":
+        case "mods-thunderstore": {
             title.innerText = "Thunderstore Mods";
             const thunderstoreModsTemplateCopy = thunderstoreModsTemplate.content.cloneNode(true);
             const thunderstoreModsContainer = thunderstoreModsTemplateCopy.getElementById("mods-container");
@@ -382,7 +385,8 @@ async function navigate(page) {
                 thunderstoreModsContainer.appendChild(modTemplateCopy);
             }
             break;
-        case "general-settings":
+        }
+        case "general-settings": {
             title.innerText = "Settings";
             const settingsTemplateCopy = settingsTemplate.content.cloneNode(true);
             const linuxSettingsTemplateCopy = linuxSettingsTemplate.content.cloneNode(true);
@@ -398,8 +402,8 @@ async function navigate(page) {
             const lacePinCheckbox = settingsTemplateCopy.getElementById("lace-pin");
 
             silksongPathInput.value = await files.loadSilksongPath();
-            silksongPathInput.addEventListener("input", async function (event) {
-                let silksongPath = silksongPathInput.value;
+            silksongPathInput.addEventListener("input", async function () {
+                const silksongPath = silksongPathInput.value;
                 files.saveSilksongPath(silksongPath);
             });
 
@@ -442,6 +446,7 @@ async function navigate(page) {
                 view.appendChild(linuxSettingsTemplateCopy);
             }
             break;
+        }
     }
 }
 
@@ -454,7 +459,7 @@ async function welcomeNavigate() {
             buttonDiv.appendChild(oneButtonTemplate.content.cloneNode(true));
             break;
 
-        case 1:
+        case 1: {
             pageDiv.appendChild(silksongPathTemplate.content.cloneNode(true));
             buttonDiv.replaceChildren();
             buttonDiv.appendChild(twoButtonTemplate.content.cloneNode(true));
@@ -466,18 +471,18 @@ async function welcomeNavigate() {
                 document.getElementById("silksong-path-input").value = await files.loadSilksongPath();
             }
 
-            silksongPathInput.addEventListener("input", async function (event) {
-                let silksongPath = silksongPathInput.value;
+            silksongPathInput.addEventListener("input", async function () {
+                const silksongPath = silksongPathInput.value;
                 await files.saveSilksongPath(silksongPath);
             });
             break;
-
-        case 2:
+        }
+        case 2: {
             pageDiv.appendChild(styleTemplate.content.cloneNode(true));
             toggleSelectedListButton("themes-menu", actualTheme[0]);
             break;
-
-        case 3:
+        }
+        case 3: {
             pageDiv.appendChild(nexusTemplate.content.cloneNode(true));
             const nexusLink = document.getElementById("external-link");
             const nexusAPIForm = document.getElementById("nexus-api-form");
@@ -493,8 +498,8 @@ async function welcomeNavigate() {
             });
             setNexusAPI();
             break;
-
-        case 4:
+        }
+        case 4: {
             if (electronAPI.getOS() == "linux") {
                 const linuxSettingsWelcomeTemplateCopy = linuxSettingsWelcomeTemplate.content.cloneNode(true);
                 const linuxSteamCheckbox = linuxSettingsWelcomeTemplateCopy.getElementById("linux-steam");
@@ -509,9 +514,11 @@ async function welcomeNavigate() {
                 electronAPI.loadMainPage();
             }
             break;
-        case 5:
+        }
+        case 5: {
             electronAPI.loadMainPage();
             break;
+        }
     }
 }
 
@@ -714,6 +721,7 @@ function changeTheme(theme, state) {
     setThemeButton();
 
     // prettier-ignore
+    /* eslint-disable */
     const themesColors = {
         "var":             ["--primary-color", "--secondary-color", "--background-color"],
         "Silksong":        ["rgba(255, 25,  0,   0.3)", "#ff6b6b", "rgba(255, 72,  0,   0.2)"],
@@ -723,7 +731,8 @@ function changeTheme(theme, state) {
         "Greyroot":        ["rgba(181, 255, 180, 0.3)", "#c1ffcd", "rgba(90,  165, 130, 0.2)"],
         "Surface":         ["rgba(75,  120, 255, 0.3)", "#87c3ff", "rgba(42,  107, 203, 0.2)"],
         "Steel":           ["rgba(164, 164, 164, 0.3)", "#c5b9b9", "rgba(255, 255, 255, 0.2)"]
-    }
+    };
+    /* eslint-enable */
 
     for (let i = 0; i < 3; i++) {
         document.documentElement.style.setProperty(themesColors.var[i], themesColors[theme][i]);
