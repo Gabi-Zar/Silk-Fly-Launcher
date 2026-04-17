@@ -12,7 +12,8 @@
         "make:msi": "cross-env BUILD_TARGET=msi electron-forge make",
         "make:zip": "cross-env BUILD_TARGET=zip electron-forge make",
         "make:deb": "cross-env BUILD_TARGET=deb electron-forge make",
-        "make:appimage": "cross-env BUILD_TARGET=appimage electron-forge make"
+        "make:appimage": "cross-env BUILD_TARGET=appimage electron-forge make",
+        "lint": "npx eslint"
     },
     "author": "GabiZar",
     "license": "GPL-3.0",
