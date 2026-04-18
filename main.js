@@ -710,6 +710,12 @@ async function searchThunderstoreMods(keywords, offset = 0, count = 10, sortFilt
                 "User-Agent": userAgent,
             },
         });
+        if (!res.ok) {
+            if (res.status == 403) {
+                mainWindow.webContents.send("showToast", "Thunderstore has blocked the application. Please try again later.", "error");
+            }
+            throw new Error(`Thunderstore API error: ${res.status}`);
+        }
         const modsInfo = await res.json();
 
         const modsToRemove = ["f21c391c-0bc5-431d-a233-95323b95e01b", "42f76853-d2a4-4520-949b-13a02fdbbbcb", "34eac80c-5497-470e-b98c-f53421b828c0"];
@@ -974,7 +980,7 @@ ipcMain.handle("add-offline-mod", async () => {
 
 async function checkForCoreAndPatcherMods() {
     const bepinexFolderPath = path.join(loadSilksongPath(), "BepInEx");
-    const bepinexPluginsPath = path.join(bepinexFolderPath, "Plugins");
+    const bepinexPluginsPath = path.join(bepinexFolderPath, "plugins");
     const bepinexCorePath = path.join(bepinexFolderPath, "core", "custom");
     const bepinexPatcherPath = path.join(bepinexFolderPath, "patchers", "custom");
 
